@@ -26,34 +26,76 @@ export default function Home() {
       <ReactLenis root>
         <main className="bg-black text-white min-h-screen font-sans selection:bg-white selection:text-black">
           
-          {/* ด่านที่ 2 (ย้ายวิดีโอมาเป็นหน้าแรก): Hero Showcase */}
-          <section className="h-screen flex flex-col items-center justify-center relative overflow-hidden bg-black">
-            <video 
-              autoPlay 
-              loop 
-              muted 
-              playsInline 
-              className="absolute inset-0 w-full h-full object-cover opacity-60"
-            >
-              <source src="/bg-video.mp4" type="video/mp4" />
-            </video>
-            
-            {/* ปุ่ม Shop Collection อยู่ตรงกลางหน้าจอตามบรีฟ */}
-            <div className="z-10 flex flex-col items-center">
-              <motion.a 
-                href="/product"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 3.5, duration: 1 }}
-                className="group relative px-16 py-5 border border-white overflow-hidden transition-all duration-500 hover:border-transparent"
-              >
-                <span className="relative z-10 text-sm font-black uppercase tracking-[0.6em] group-hover:text-black transition-colors duration-500">
-                  Shop Collection
-                </span>
-                <div className="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out"></div>
-              </motion.a>
-            </div>
-          </section>
+          {/* ด่านที่ 2: Hero Showcase (เวอร์ชันเน้นปุ่มกลางจอ แต่จัดสมดุลใหม่ให้เท่ขึ้น) */}
+<section className="h-screen flex items-center justify-center relative overflow-hidden bg-black">
+  <video 
+    autoPlay 
+    loop 
+    muted 
+    playsInline 
+    className="absolute inset-0 w-full h-full object-cover opacity-60"
+  >
+    <source src="/bg-video.mp4" type="video/mp4" />
+  </video>
+  
+  {/* Content Layer: จัดวางแบบแกนกลาง (Vertical Axis) */}
+  <div className="z-10 flex flex-col items-center gap-8 px-5">
+    
+    {/* 1. ข้อความขนาดเล็กด้านบนปุ่ม (ช่วยลดความโล่งในมือถือ) */}
+    <motion.p 
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 3, duration: 0.8 }}
+      className="text-[10px] tracking-[0.8em] text-white/50 uppercase font-light"
+    >
+      New Arrival 2026
+    </motion.p>
+
+    {/* 2. ปุ่ม Shop Collection อยู่ตรงกลางตามความชอบของคุณ */}
+    <motion.a 
+      href="/product"
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ delay: 3.5, duration: 1 }}
+      className="group relative px-14 py-4 border border-white overflow-hidden transition-all duration-500 hover:border-transparent"
+    >
+      <span className="relative z-10 text-xs sm:text-sm font-black uppercase tracking-[0.6em] group-hover:text-black transition-colors duration-500">
+        PRE ORDER NOW
+      </span>
+      {/* เอฟเฟกต์สีขาววิ่งขึ้นตอน Hover */}
+      <div className="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out"></div>
+    </motion.a>
+
+    {/* 3. สัญลักษณ์แบรนด์เล็กๆ ด้านล่างปุ่ม (เพิ่มความ Unique) */}
+    <motion.span 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay: 4, duration: 1 }}
+      className="text-[14px] font-bold text-white/30 italic"
+    >
+      #LUMOSQUAD
+    </motion.span>
+  </div>
+
+  {/* 🌟 4. ลูกศรชี้ลงที่ขยับได้ (Bouncing Arrow) อยู่ที่ขอบล่างจอ 🌟 */}
+  <motion.div 
+    initial={{ opacity: 0 }}
+    animate={{ 
+      opacity: [0, 1, 1, 0], 
+      y: [0, 12, 0] 
+    }}
+    transition={{ 
+      delay: 5, 
+      duration: 3, 
+      repeat: Infinity, 
+      ease: "easeInOut"
+    }}
+    className="absolute bottom-10 flex flex-col items-center gap-2"
+  >
+    <span className="text-[10px] tracking-[0.4em] uppercase text-white/40 mb-1">Scroll</span>
+    <span className="text-xl font-light text-white/60">↓</span>
+  </motion.div>
+</section>
 
           {/* ด่านที่ 3: Join our #lumosquad */}
           <section className="h-screen flex items-center justify-center relative overflow-hidden bg-black border-y border-white/5">
