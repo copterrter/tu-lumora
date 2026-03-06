@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -104,7 +105,7 @@ export default function CheckoutPage() {
         
         <div className="space-y-12">
           <header className="space-y-4">
-            <a href="/product" className="text-[10px] tracking-widest text-gray-500 uppercase hover:text-white transition-colors">[ BACK TO SHOP ]</a>
+            <Link href="/product" className="text-[10px] tracking-widest text-gray-500 uppercase hover:text-white transition-colors">[ BACK TO SHOP ]</Link>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase italic tracking-tighter">SHIPPING <br/> INFORMATION</h1>
           </header>
 
@@ -227,7 +228,7 @@ export default function CheckoutPage() {
               <span className="opacity-20">Total</span><span>฿{orderData.total}</span>
            </div>
            
-           <button onClick={handleConfirmOrder} disabled={isSubmitting} className="w-full bg-white text-black py-7 font-black uppercase tracking-[0.5em] text-sm hover:invert transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_10px_30px_rgba(255,255,255,0.1)] relative overflow-hidden">
+           <button onClick={handleConfirmOrder} disabled={isSubmitting} className="w-full bg-white text-black border border-transparent hover:bg-transparent hover:text-white hover:border-white py-7 font-black uppercase tracking-[0.5em] text-sm transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_10px_30px_rgba(255,255,255,0.1)] hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] relative overflow-hidden">
              {isSubmitting ? "PROCESSING..." : "CONFIRM & PAY"}
            </button>
         </div>

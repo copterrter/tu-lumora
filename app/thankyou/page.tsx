@@ -1,5 +1,6 @@
 "use client";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 export default function ThankYouPage() {
   return (
@@ -24,9 +25,9 @@ export default function ThankYouPage() {
       </div>
 
       <div className="mt-16 flex flex-col gap-4">
-        <a href="/" className="px-10 py-4 border border-white text-[10px] font-bold uppercase tracking-[0.5em] hover:bg-white hover:text-black transition-all">
+        <Link href="/" className="px-10 py-4 border border-white text-[10px] font-bold uppercase tracking-[0.5em] hover:bg-white hover:text-black transition-all">
           Back to Home
-        </a>
+        </Link>
         <p className="text-[9px] text-gray-700 uppercase">Track your order via IG: @TULUMORA</p>
       </div>
     </main>

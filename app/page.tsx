@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { ReactLenis } from "@studio-freight/react-lenis";
 import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion";
+import Link from "next/link";
 import Preloader from "../components/Preloader";
 
 export default function Home() {
@@ -63,19 +64,20 @@ export default function Home() {
     </motion.p>
 
     {/* 2. ปุ่ม Shop Collection อยู่ตรงกลางตามความชอบของคุณ */}
-    <motion.a 
-      href="/product"
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay: 3.5, duration: 1 }}
-      className="group relative px-14 py-4 border border-white overflow-hidden transition-all duration-500 hover:border-transparent"
-    >
-      <span className="relative z-10 text-xs sm:text-sm font-black uppercase tracking-[0.6em] group-hover:text-black transition-colors duration-500">
-        PRE ORDER NOW
-      </span>
-      {/* เอฟเฟกต์สีขาววิ่งขึ้นตอน Hover */}
-      <div className="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out"></div>
-    </motion.a>
+    <Link href="/product" passHref legacyBehavior>
+      <motion.a 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 3.5, duration: 1 }}
+        className="group relative px-14 py-4 border border-white overflow-hidden transition-all duration-500 hover:border-transparent inline-block"
+      >
+        <span className="relative z-10 text-xs sm:text-sm font-black uppercase tracking-[0.6em] group-hover:text-black transition-colors duration-500">
+          PRE ORDER NOW
+        </span>
+        {/* เอฟเฟกต์สีขาววิ่งขึ้นตอน Hover */}
+        <div className="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out"></div>
+      </motion.a>
+    </Link>
 
     {/* 3. สัญลักษณ์แบรนด์เล็กๆ ด้านล่างปุ่ม (เพิ่มความ Unique) */}
     <motion.span 
@@ -125,7 +127,7 @@ export default function Home() {
         
         {/* 🌟 The Fixed Container that follows the user using Framer Motion 🌟 */}
         <motion.div 
-          style={{ opacity: logoOpacity, y: logoY }}
+          style={{ opacity: logoOpacity, y: logoY, willChange: "transform, opacity" }}
           className="fixed top-1/2 left-0 w-full z-50 pointer-events-none mix-blend-difference overflow-hidden px-[7.5vw] md:px-[15vw] flex flex-col items-center gap-4"
         >
           <img src="/images/brand.png" alt="TU LUMORA Logo" className="w-[85vw] md:w-[70vw] h-auto object-contain brightness-200" />

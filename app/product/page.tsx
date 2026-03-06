@@ -1,6 +1,7 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export default function ProductPage() {
@@ -121,7 +122,7 @@ export default function ProductPage() {
       </AnimatePresence>
 
       <header className="fixed top-0 w-full z-50 px-6 py-8 flex items-center justify-between border-b border-white/5 bg-black/80 backdrop-blur-md">
-        <a href="/" className="text-[10px] font-bold uppercase tracking-[0.4em] hover:opacity-50 transition-opacity">[ Back ]</a>
+        <Link href="/" className="text-[10px] font-bold uppercase tracking-[0.4em] hover:opacity-50 transition-opacity">[ Back ]</Link>
         <div className="absolute left-1/2 -translate-x-1/2 w-32 md:w-44">
           <img src="/images/brand.png" alt="TU LUMORA" className="w-full h-auto brightness-125" />
         </div>
@@ -135,7 +136,7 @@ export default function ProductPage() {
             {productImages.map((img, idx) => (
               <div key={idx} className="min-w-full snap-center aspect-[3/4] cursor-zoom-in" onClick={() => setZoomedImg(img)}>
                 <motion.img 
-                  key={img} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                  key={img} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, ease: "easeInOut" }}
                   src={img} alt={`view-${idx}`} className="w-full h-full object-cover" 
                 />
               </div>
