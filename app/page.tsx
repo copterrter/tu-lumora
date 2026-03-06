@@ -112,8 +112,9 @@ export default function Home() {
 {/* 🌟 ด่านที่ 4: Brand Showcase (Editorial Lookbook - ใส่รูปครบ 7 รูป!) 🌟 */}
       <section className="min-h-[800vh] relative flex flex-col items-center py-32 bg-white overflow-hidden">
         
-        <div className="sticky top-1/2 -translate-y-1/2 z-50 pointer-events-none mix-blend-difference w-[85vw] md:w-[70vw]">
+        <div className="sticky top-1/2 -translate-y-1/2 z-50 pointer-events-none mix-blend-difference w-[85vw] md:w-[70vw] flex flex-col items-center gap-4">
           <img src="/images/brand.png" alt="TU LUMORA Logo" className="w-full h-auto object-contain brightness-200" />
+          <p className="text-white text-xs md:text-sm tracking-[0.5em] uppercase font-bold text-center">( all photo )</p>
         </div>
         
         <div className="z-10 flex flex-col w-full px-5 md:px-20 mt-[-10vh] pb-[20vh] items-center space-y-24 md:space-y-[60vh]">
