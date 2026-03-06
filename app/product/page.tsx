@@ -20,10 +20,22 @@ export default function ProductPage() {
   const PRICE_PER_UNIT = 329;
   const PROMO_PAIR_PRICE = 590;
 
+  // 🌟 Dynamic Sizes Data 🌟
+  const REGULAR_SIZES = ["S", "M", "L", "XL", "2XL", "3XL", "4XL"];
+  const CROP_SIZES = ["S", "M", "L", "XL"];
+  const currentSizes = selectedStyle === "T-SHIRT" ? REGULAR_SIZES : CROP_SIZES;
+
   useEffect(() => {
     const savedCart = localStorage.getItem('lumora_cart');
     if (savedCart) setCart(JSON.parse(savedCart));
   }, []);
+
+  // Reset selected size if switching styles and the current size is no longer available
+  useEffect(() => {
+    if (!currentSizes.includes(selectedSize)) {
+      setSelectedSize("L"); // default safe fallback
+    }
+  }, [selectedStyle, currentSizes, selectedSize]);
 
   const calculateCartTotal = (currentCart: any[]) => {
     const totalQty = currentCart.reduce((sum, item) => sum + item.quantity, 0);
@@ -91,9 +103,13 @@ export default function ProductPage() {
       <AnimatePresence>
         {showSizeChart && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-6">
-            <div className="bg-white p-2 w-full max-w-md relative">
-              <button onClick={() => setShowSizeChart(false)} className="absolute -top-4 -right-4 bg-black text-white w-8 h-8 rounded-full font-bold">X</button>
-              <img src="/images/size_tshirt.png" alt="Size Guide" className="w-full h-auto" /> 
+            <div className="bg-[#e7e7e7] p-2 w-full max-w-2xl relative shadow-2xl">
+              <button onClick={() => setShowSizeChart(false)} className="absolute -top-4 -right-4 bg-white text-black text-xl w-10 h-10 rounded-full font-black shadow-lg hover:scale-110 transition-transform">X</button>
+              <img 
+                src={selectedStyle === "T-SHIRT" ? "/images/size-guide-regular.png" : "/images/size-guide-crop.png"} 
+                alt={`${selectedStyle} Size Guide`} 
+                className="w-full h-auto object-contain" 
+              /> 
             </div>
           </motion.div>
         )}
@@ -166,7 +182,7 @@ export default function ProductPage() {
                   </button>
                </div>
                <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
-                 {["S", "M", "L", "XL", "2XL", "3XL", "4XL"].map((size) => (
+                 {currentSizes.map((size) => (
                    <button key={size} onClick={() => setSelectedSize(size)} className={`py-3 border text-xs font-bold ${selectedSize === size ? 'bg-white text-black border-white' : 'border-white/20'}`}>{size}</button>
                  ))}
                </div>
