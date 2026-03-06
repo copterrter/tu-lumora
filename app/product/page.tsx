@@ -11,8 +11,32 @@ export default function ProductPage() {
   const [cart, setCart] = useState<any[]>([]);
   const [showSizeChart, setShowSizeChart] = useState(false);
   const [zoomedImg, setZoomedImg] = useState<string | null>(null);
+  const [promoTimeLeft, setPromoTimeLeft] = useState<{d: number, h: number, m: number, s: number} | null>(null);
   
   const sliderRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // End date for the 7-day exclusive promotion
+    const targetDate = new Date("2026-03-20T23:59:59").getTime();
+
+    const interval = setInterval(() => {
+      const now = new Date().getTime();
+      const difference = targetDate - now;
+
+      if (difference <= 0) {
+        setPromoTimeLeft({ d: 0, h: 0, m: 0, s: 0 });
+        clearInterval(interval);
+      } else {
+        const d = Math.floor(difference / (1000 * 60 * 60 * 24));
+        const h = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const m = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+        const s = Math.floor((difference % (1000 * 60)) / 1000);
+        setPromoTimeLeft({ d, h, m, s });
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const TSHIRT_IMAGES = ["/images/product-1.jpg", "/images/couple.jpg"]; 
   const CROP_IMAGES = ["/images/product-2.jpg", "/images/couple.jpg"];   
@@ -156,10 +180,37 @@ export default function ProductPage() {
             <h1 className="text-3xl sm:text-4xl md:text-6xl font-black uppercase italic leading-tight tracking-tighter">TU LUMORA SERIES</h1>
           </div>
 
-          <div className="bg-white text-black p-4 text-center border-l-4 border-black border-y border-r flex flex-col gap-1 relative overflow-hidden">
+          <div className="bg-white text-black p-4 md:p-6 text-center border-l-4 border-black border-y border-r flex flex-col gap-3 relative overflow-hidden">
              <div className="absolute top-0 right-0 w-16 h-16 bg-red-600 blur-2xl opacity-20 animate-pulse"></div>
-             <p className="text-[10px] uppercase font-black tracking-[0.4em]">Pre-Order Period</p>
-             <p className="text-lg font-black italic tracking-widest">7 - 20 MAR 2026</p>
+             
+             <div className="flex justify-between items-center w-full max-w-sm mx-auto">
+               <span className="h-[1px] w-12 bg-black/20"></span>
+               <p className="text-[10px] uppercase font-black tracking-[0.4em]">Promotion Ends In</p>
+               <span className="h-[1px] w-12 bg-black/20"></span>
+             </div>
+             
+             {promoTimeLeft ? (
+               <div className="grid grid-cols-4 gap-2 md:gap-4 font-black italic">
+                 <div className="flex flex-col items-center">
+                   <span className="text-3xl md:text-5xl">{String(promoTimeLeft.d).padStart(2, '0')}</span>
+                   <span className="text-[8px] md:text-[10px] tracking-widest text-gray-500 uppercase not-italic">Days</span>
+                 </div>
+                 <div className="flex flex-col items-center">
+                   <span className="text-3xl md:text-5xl">{String(promoTimeLeft.h).padStart(2, '0')}</span>
+                   <span className="text-[8px] md:text-[10px] tracking-widest text-gray-500 uppercase not-italic">Hours</span>
+                 </div>
+                 <div className="flex flex-col items-center">
+                   <span className="text-3xl md:text-5xl">{String(promoTimeLeft.m).padStart(2, '0')}</span>
+                   <span className="text-[8px] md:text-[10px] tracking-widest text-gray-500 uppercase not-italic">Mins</span>
+                 </div>
+                 <div className="flex flex-col items-center">
+                   <span className="text-3xl md:text-5xl text-red-600">{String(promoTimeLeft.s).padStart(2, '0')}</span>
+                   <span className="text-[8px] md:text-[10px] tracking-widest text-gray-500 uppercase not-italic">Secs</span>
+                 </div>
+               </div>
+             ) : (
+                <p className="text-lg font-black italic tracking-widest">LOADING...</p>
+             )}
           </div>
 
           {/* 🌟 Premium Promotion Banner 🌟 */}

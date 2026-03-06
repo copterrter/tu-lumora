@@ -75,7 +75,7 @@ export default function Home() {
         className="group relative px-14 py-4 border border-white overflow-hidden transition-all duration-500 hover:border-transparent inline-block"
       >
         <span className="relative z-10 text-xs sm:text-sm font-black uppercase tracking-[0.6em] group-hover:text-black transition-colors duration-500">
-          PRE ORDER NOW
+          PRE-ORDER NOW
         </span>
         {/* เอฟเฟกต์สีขาววิ่งขึ้นตอน Hover */}
         <div className="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out"></div>
