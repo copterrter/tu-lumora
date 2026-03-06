@@ -38,8 +38,23 @@ export default function ProductPage() {
     return () => clearInterval(interval);
   }, []);
 
-  const TSHIRT_IMAGES = ["/images/product-1.jpg", "/images/couple.jpg"]; 
-  const CROP_IMAGES = ["/images/product-2.jpg", "/images/couple.jpg"];   
+  // Auto Swipe Slider
+  useEffect(() => {
+    const swipeInterval = setInterval(() => {
+      if (sliderRef.current) {
+        const { scrollLeft, clientWidth, scrollWidth } = sliderRef.current;
+        if (scrollLeft + clientWidth >= scrollWidth - 10) {
+          sliderRef.current.scrollTo({ left: 0, behavior: "smooth" });
+        } else {
+          sliderRef.current.scrollBy({ left: clientWidth, behavior: "smooth" });
+        }
+      }
+    }, 4000);
+    return () => clearInterval(swipeInterval);
+  }, []);
+
+  const TSHIRT_IMAGES = ["/images/front.png", "/images/back.png", "/images/product-1.jpg", "/images/couple.jpg"]; 
+  const CROP_IMAGES = ["/images/front crop.png", "/images/back crop.png", "/images/product-2.jpg", "/images/couple.jpg"];   
   const productImages = selectedStyle === "T-SHIRT" ? TSHIRT_IMAGES : CROP_IMAGES;
 
   const PRICE_PER_UNIT = 329;
@@ -315,7 +330,7 @@ export default function ProductPage() {
                   <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Grand Total</span>
                   <span className="text-4xl font-black italic text-white">฿{calculateCartTotal(cart)}</span>
                 </div>
-                <button onClick={proceedToCheckout} className="w-full bg-white text-black py-6 font-black uppercase tracking-[0.5em] text-sm hover:invert transition-all">Proceed to Checkout</button>
+                <button onClick={proceedToCheckout} className="w-full bg-white text-black border border-transparent hover:bg-transparent hover:text-white hover:border-white py-6 font-black uppercase tracking-[0.5em] text-sm transition-all active:scale-[0.98] shadow-[0_10px_30px_rgba(255,255,255,0.1)] hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] relative overflow-hidden">CONFIRM & PAY</button>
               </div>
             </div>
           )}
