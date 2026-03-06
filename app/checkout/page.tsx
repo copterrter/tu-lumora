@@ -32,6 +32,15 @@ export default function CheckoutPage() {
     return await response.json();
   };
 
+  const calculateExpectedTotal = (items: any[]) => {
+    const totalQty = items.reduce((sum: number, item: any) => sum + item.quantity, 0);
+    const promoQty = Math.min(totalQty, 6); 
+    const regularQty = totalQty - promoQty; 
+    const pairs = Math.floor(promoQty / 2);
+    const promoSingles = promoQty % 2;
+    return (pairs * 590) + ((promoSingles + regularQty) * 329);
+  };
+
   const handleConfirmOrder = async () => {
     if (!formData.firstName || !formData.address || !formData.zipCode || !formData.phone || !formData.socialContact || !slipFile) {
       return alert("กรุณากรอกข้อมูลให้ครบถ้วน รวมถึงช่อง IG / LINE ID ด้วยครับ");
@@ -40,8 +49,13 @@ export default function CheckoutPage() {
     try {
       const slipResult = await verifySlipWithRDCW(slipFile);
       if (!slipResult.success) throw new Error(slipResult.message || "สลิปไม่ถูกต้อง");
+      
       const slipAmount = slipResult.data.amount;
-      if (slipAmount !== orderData.total) throw new Error(`ยอดเงินไม่ตรง! สลิปมียอด ฿${slipAmount} แต่ยอดสั่งซื้อคือ ฿${orderData.total}`);
+      const expectedTotal = calculateExpectedTotal(orderData.items);
+      
+      if (Number(slipAmount) !== Number(expectedTotal)) {
+        throw new Error(`ยอดเงินไม่ตรง! สลิปมียอด ฿${slipAmount} แต่ยอดสั่งซื้อที่ถูกต้องคือ ฿${expectedTotal}`);
+      }
 
       const summaryItems = orderData.items.map((item: any) => `${item.quantity}x ${item.style} (${item.size})`).join(", ");
 
@@ -53,7 +67,7 @@ export default function CheckoutPage() {
         zipCode: formData.zipCode,
         social_contact: formData.socialContact, 
         product_name: summaryItems,
-        total_amount: orderData.total,
+        total_amount: expectedTotal,
         status: 'paid_and_verified'
       }]);
 
