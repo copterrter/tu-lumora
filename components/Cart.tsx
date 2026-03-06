@@ -64,9 +64,9 @@ export default function Cart() {
           <button 
             disabled={items.length === 0}
             onClick={() => { closeCart(); router.push("/checkout"); }}
-            className="w-full bg-white text-black border border-transparent hover:bg-black hover:text-white hover:border-white py-4 font-black uppercase tracking-[0.2em] transition-all disabled:opacity-50 cursor-pointer box-border"
+            className="w-full bg-white text-black border border-transparent hover:bg-transparent hover:text-white hover:border-white py-5 font-black uppercase tracking-[0.4em] transition-all disabled:opacity-50 active:scale-[0.98] shadow-[0_10px_30px_rgba(255,255,255,0.1)] hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] relative overflow-hidden cursor-pointer"
           >
-            Checkout
+            CONFIRM & PAY
           </button>
         </div>
       </div>

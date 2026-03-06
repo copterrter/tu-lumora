@@ -54,7 +54,7 @@ export default function ProductPage() {
   }, []);
 
   const TSHIRT_IMAGES = ["/images/front.png", "/images/back.png", "/images/product-1.jpg", "/images/couple.jpg"]; 
-  const CROP_IMAGES = ["/images/front crop.png", "/images/back crop.png", "/images/product-2.jpg", "/images/couple.jpg"];   
+  const CROP_IMAGES = ["/images/front-crop.png", "/images/back-crop.png", "/images/product-2.jpg", "/images/couple.jpg"];   
   const productImages = selectedStyle === "T-SHIRT" ? TSHIRT_IMAGES : CROP_IMAGES;
 
   const PRICE_PER_UNIT = 329;
@@ -173,7 +173,7 @@ export default function ProductPage() {
         <div className="lg:col-span-7 relative group">
           <div ref={sliderRef} className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide border border-white/10 relative bg-white">
             {productImages.map((img, idx) => (
-              <div key={idx} className="min-w-full snap-center aspect-[3/4] cursor-zoom-in bg-white" onClick={() => setZoomedImg(img)}>
+              <div key={idx} className="min-w-full snap-center aspect-square cursor-zoom-in bg-white flex items-center justify-center p-6 md:p-10" onClick={() => setZoomedImg(img)}>
                 <motion.img 
                   key={img} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.0, ease: [0.22, 1, 0.36, 1] }}
                   src={img} alt={`view-${idx}`} className="w-full h-full object-contain" 
