@@ -13,7 +13,7 @@ export default function ProductPage() {
   // 🌟 1. เปลี่ยนรูปตรงนี้เลยครับ! ใช้ชื่อไฟล์ที่คุณเตรียมไว้สำหรับหน้าโปรดักโดยเฉพาะ
   const productImages = ["/images/product-1.jpg", "/images/product-2.jpg", "/images/product-3.jpg", "/images/product-4.jpg"];
 
-  const PRICE_PER_UNIT = 329;
+  const PRICE_PER_UNIT = 1;
   const PROMO_PAIR_PRICE = 590;
 
   // โหลดข้อมูลตะกร้าจาก LocalStorage (ถ้ามี)
