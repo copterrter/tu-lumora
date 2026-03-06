@@ -140,73 +140,99 @@ export default function Home() {
               <img src="/images/work1.jpg" alt="Squad Track" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
               <p className="absolute bottom-4 left-4 text-[10px] uppercase tracking-widest text-white mix-blend-difference">01 // THE SQUAD</p>
             </div>
-            <div className="text-white/70 text-xs md:text-sm tracking-widest leading-relaxed uppercase">
-              [ MOCK DETAIL ] RUNNING TRACK CAMPAIGN. THE BEGINNING OF TU LUMORA JOURNEY.
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end w-full gap-4 mt-2">
+              <h3 className="text-xl md:text-3xl font-black uppercase tracking-widest text-black">STARTING LINE</h3>
+              <p className="text-black/60 text-xs md:text-sm tracking-widest leading-relaxed uppercase max-w-md text-left md:text-right">
+                Running track campaign. The beginning of the Tu Lumora journey where street meets athletic performance.
+              </p>
             </div>
           </div>
 
           {/* 2. นายแบบพื้นขาว */}
-          <div className="flex flex-col md:flex-row items-center md:items-start md:self-start gap-6 w-[90%] md:w-[60vw]">
+          <div className="flex flex-col md:flex-row items-center md:items-start md:self-start gap-8 md:gap-16 w-[90%] md:w-[65vw]">
             <div className="relative w-full md:w-[35vw] aspect-[3/4] group shadow-2xl overflow-hidden bg-zinc-100 shrink-0">
               <img src="/images/DSC08700.jpg" alt="Studio Boy" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 grayscale hover:grayscale-0" />
               <p className="absolute bottom-4 left-4 text-[10px] uppercase tracking-widest text-black/50">02 // SIGNATURE TEE</p>
             </div>
-            <div className="text-white/70 text-xs md:text-sm tracking-widest leading-relaxed pt-2 md:pt-10 uppercase">
-              [ MOCK DETAIL ] THE SIGNATURE WHITE COLLECTION. MINIMALIST APPAREL DESIGNED FOR EVERYDAY LIFESTYLE. FEATURING PREMIUM CONSTUCTION.
+            <div className="flex flex-col pt-4 md:pt-[15%] gap-4">
+              <h3 className="text-2xl md:text-4xl font-black uppercase tracking-tighter text-black italic">Pure Form</h3>
+              <p className="text-black/60 text-xs md:text-sm tracking-widest leading-relaxed uppercase border-l-2 border-black/20 pl-4 py-1">
+                The signature white collection. Minimalist apparel designed for everyday lifestyle, featuring premium construction and uncompromising comfort.
+              </p>
             </div>
           </div>
 
           {/* 3. นางแบบกำแพงอิฐ */}
-          <div className="flex flex-col md:flex-row-reverse items-center md:items-end md:self-end gap-6 w-[90%] md:w-[65vw]">
+          <div className="flex flex-col md:flex-row-reverse items-center md:items-end md:self-end gap-8 md:gap-16 w-[90%] md:w-[70vw]">
             <div className="relative w-full md:w-[40vw] aspect-[4/5] group shadow-2xl overflow-hidden bg-zinc-100 shrink-0">
               <img src="/images/DSC07437.JPG" alt="Brick Wall Girl" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
               <p className="absolute bottom-4 right-4 text-[10px] uppercase tracking-widest text-white drop-shadow-md">03 // CROP EDITION</p>
             </div>
-            <div className="text-white/70 text-xs md:text-sm tracking-widest leading-relaxed pt-2 md:pb-10 text-left md:text-right uppercase">
-              [ MOCK DETAIL ] URBAN STREETWEAR EXPLORATION. THE EXCLUSIVE CROP TOP SERIES CRAFTED FOR THE MODERN YOUTH.
+            <div className="flex flex-col pt-4 md:pb-[10%] gap-4 items-start md:items-end text-left md:text-right">
+              <h3 className="text-2xl md:text-4xl font-black uppercase tracking-widest text-black">Urban <br/> Texture</h3>
+              <p className="text-black/60 text-xs md:text-sm tracking-widest leading-relaxed uppercase border-r-0 md:border-r-2 md:border-black/20 md:pr-4 py-1 max-w-[300px]">
+                Urban streetwear exploration. The exclusive crop top series crafted for the modern youth seeking effortless edge.
+              </p>
             </div>
           </div>
 
           {/* 4. แก๊งสกู๊ตเตอร์ */}
-          <div className="flex flex-col md:flex-row items-center md:items-center gap-6 w-[100%] md:w-[70vw]">
+          <div className="flex flex-col md:flex-row items-center md:items-stretch gap-8 w-[100%] md:w-[75vw]">
             <div className="relative w-full md:w-[45vw] aspect-[2/3] md:aspect-[3/4] group shadow-2xl overflow-hidden bg-zinc-100 shrink-0">
               <img src="/images/DSC07681.jpg" alt="Scooter Gang" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
               <p className="absolute top-4 left-4 text-[10px] uppercase tracking-widest text-white mix-blend-difference">04 // STREET CULTURE</p>
             </div>
-            <div className="text-white/70 text-xs md:text-sm tracking-widest leading-relaxed pt-2 uppercase">
-              [ MOCK DETAIL ] YOUTH REBELLION & FREEDOM. CRUISING THROUGH THE STREETS WITH THE LATEST TU LUMORA SQUAD APPAREL.
+            <div className="flex flex-col justify-center items-center md:items-start text-center md:text-left gap-4 md:px-10">
+              <p className="text-[10px] tracking-[0.4em] uppercase text-black/40">Editorial 04</p>
+              <h3 className="text-3xl md:text-5xl font-black uppercase tracking-tighter text-black leading-none">Freedom <br/> Riders</h3>
+              <p className="text-black/60 text-xs md:text-sm tracking-widest leading-relaxed uppercase mt-4">
+                Youth rebellion & freedom. Cruising through the streets with the latest Tu Lumora Squad apparel, engineered for movement.
+              </p>
             </div>
           </div>
 
           {/* 5. นายแบบพื้นดำ */}
-          <div className="flex flex-col md:flex-row-reverse items-center md:items-start md:self-start gap-6 w-[95%] md:w-[75vw]">
+          <div className="flex flex-col md:flex-row-reverse items-center md:items-center gap-8 md:gap-12 w-[95%] md:w-[80vw]">
             <div className="relative w-full md:w-[50vw] aspect-video group shadow-2xl overflow-hidden bg-zinc-100 shrink-0">
               <img src="/images/DSC07193.JPG" alt="Dark Mood Boy" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
             </div>
-            <div className="text-white/70 text-xs md:text-sm tracking-widest leading-relaxed pt-2 md:pt-10 text-left md:text-right uppercase">
-              [ MOCK DETAIL ] MOVEMENT IN THE SHADOWS. A DARKER AESTHETIC HIGHLIGHTING DURABILITY AND ATHLETIC PERFORMANCE.
+            <div className="flex flex-col items-center md:items-end text-center md:text-right gap-3">
+              <h3 className="text-2xl md:text-4xl font-black uppercase tracking-widest text-black">Night <br className="hidden md:block"/> Shift</h3>
+              <div className="h-[1px] w-12 bg-black my-2"></div>
+              <p className="text-black/60 text-xs md:text-sm tracking-widest leading-relaxed uppercase">
+                Movement in the shadows. A darker aesthetic highlighting durability and athletic performance under city lights.
+              </p>
             </div>
           </div>
 
-          {/* 6. 🌟 นางแบบตึกสี (รูปที่หายไป กลับมาแล้ว!) 🌟 */}
-          <div className="flex flex-col md:flex-row items-center md:items-end md:self-end gap-6 w-[95%] md:w-[80vw]">
+          {/* 6. 🌟 นางแบบตึกสี */}
+          <div className="flex flex-col md:flex-row items-center md:items-stretch gap-8 w-[95%] md:w-[85vw]">
             <div className="relative w-full md:w-[55vw] aspect-[16/10] group shadow-2xl overflow-hidden bg-zinc-100 shrink-0">
               <img src="/images/work2.jpg" alt="Colorful Building Girl" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
               <p className="absolute bottom-4 right-4 text-[10px] uppercase tracking-widest text-white drop-shadow-md">05 // CITY VIBES</p>
             </div>
-            <div className="text-white/70 text-xs md:text-sm tracking-widest leading-relaxed pt-2 md:pb-10 uppercase">
-              [ MOCK DETAIL ] COLOR BLOCKING THE CONCRETE JUNGLE. BRINGING LIFE TO DOWNTOWN WITH BOLD SILHOUETTES.
+            <div className="flex flex-col justify-end pb-4 md:pb-10 gap-3">
+              <span className="text-[10px] font-bold tracking-[0.3em] text-black">T/L CAMPAIGN</span>
+              <h3 className="text-2xl md:text-3xl font-black uppercase tracking-tighter text-black">Concrete Life</h3>
+              <p className="text-black/60 text-xs tracking-widest leading-relaxed uppercase">
+                Color blocking the concrete jungle. Bringing life to downtown with bold, architectural silhouettes and vibrant energy.
+              </p>
             </div>
           </div>
 
           {/* 7. นางแบบกองขยะ Glam */}
-          <div className="flex flex-col w-[100%] md:w-[90vw] gap-4">
-            <div className="relative w-full aspect-video md:aspect-[21/9] group shadow-2xl overflow-hidden bg-zinc-100">
-              <img src="/images/DSC07728.jpg" alt="Glam Finale" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
-              <p className="absolute bottom-6 left-1/2 -translate-x-1/2 text-[12px] uppercase tracking-[0.5em] text-white mix-blend-difference">TU LUMORA 2026</p>
+          <div className="flex flex-col w-[100%] md:w-[90vw] gap-8 mt-12 bg-black text-white p-5 md:p-10 shadow-2xl">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+              <h3 className="text-3xl md:text-6xl font-black uppercase tracking-widest italic text-center md:text-left">
+                The New <br/> Standard
+              </h3>
+              <p className="text-white/70 text-xs md:text-sm tracking-widest leading-relaxed text-center md:text-right uppercase max-w-sm">
+                Redefining glamour and streetwear in perfect harmony. The highly anticipated 2026 collection arrives.
+              </p>
             </div>
-            <div className="text-white/70 text-xs md:text-sm tracking-widest leading-relaxed text-center uppercase">
-              [ MOCK DETAIL ] THE GRAND FINALE. REDEFINING GLAMOUR AND STREETWEAR IN PERFECT HARMONY. THE NEW COLLECTION ARRIVES.
+            <div className="relative w-full aspect-video md:aspect-[21/9] group overflow-hidden bg-zinc-900 mt-4">
+              <img src="/images/DSC07728.jpg" alt="Glam Finale" className="w-full h-full object-cover outline-none transition-transform duration-1000 group-hover:scale-105 opacity-80" />
+              <p className="absolute bottom-6 left-1/2 -translate-x-1/2 text-[12px] md:text-[18px] font-black uppercase tracking-[0.5em] text-white">TU LUMORA 2026</p>
             </div>
           </div>
 
