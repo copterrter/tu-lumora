@@ -126,6 +126,24 @@ export async function POST(request: Request) {
        }
     }
 
+    // 6. Send Email Receipt (fire-and-forget — don't block order success if email fails)
+    if (formData.email) {
+      const originalTotal = orderData.items.reduce((sum: number, item: any) => sum + (item.quantity * 329), 0);
+      const discount = originalTotal - expectedTotal;
+      fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/send-receipt`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          items: orderData.items,
+          total: expectedTotal,
+          discount: discount > 0 ? discount : 0,
+        }),
+      }).catch((e) => console.warn('Email send failed (non-blocking):', e));
+    }
+
     return NextResponse.json({ success: true, message: "สั่งซื้อสำเร็จ" });
     
   } catch (error: any) {
