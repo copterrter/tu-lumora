@@ -109,85 +109,91 @@ export default function Home() {
             </h1>
           </section>
 
- {/* ด่านที่ 4: Brand Showcase (Editorial Parallax Lookbook) */}
-<section className="min-h-[800vh] relative flex flex-col items-center py-32 bg-white overflow-hidden">
-  
-  {/* โลโก้แบรนด์ลอยนิ่งๆ (Gimmick หลัก) ใช้ mix-blend-difference เพื่อให้สีตัดกับรูปอัตโนมัติ */}
-  <div className="sticky top-1/2 -translate-y-1/2 z-50 pointer-events-none mix-blend-difference w-[85vw] md:w-[70vw]">
-    <img 
-      src="/images/brand.png" 
-      alt="TU LUMORA Logo" 
-      className="w-full h-auto object-contain brightness-200"
-    />
-  </div>
-  
-  {/* คลังรูปภาพ: จัดวางจังหวะ ซ้าย-ขวา-กลาง สลับแนวตั้ง-แนวนอน */}
-  <div className="z-10 flex flex-col w-full px-5 md:px-20 mt-[-10vh] pb-[20vh]">
-    
-    {/* 1. The Hook (ลู่วิ่ง) - กลางจอ กว้างๆ เปิดตัวอย่างยิ่งใหญ่ */}
-    <div className="flex justify-center mb-[50vh]">
-      <div className="relative w-[100%] md:w-[70vw] aspect-[16/9] group shadow-2xl overflow-hidden bg-zinc-100">
-        <img src="/images/work1.jpg" alt="Squad Track" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
-        <p className="absolute bottom-4 left-4 text-[10px] uppercase tracking-widest text-white mix-blend-difference">01 // THE SQUAD</p>
-      </div>
-    </div>
+{/* 🌟 1. ด่านที่ 4: Brand Showcase (Editorial Lookbook - เวอร์ชันปรับปรุงใหม่ให้ตึงทั้งคอมและมือถือ) 🌟 */}
+      <section className="min-h-[800vh] relative flex flex-col items-center py-32 bg-white overflow-hidden">
+        
+        {/* โลโก้แบรนด์ลอยนิ่งๆ (Gimmick หลัก) ใช้ mix-blend-difference */}
+        <div className="sticky top-1/2 -translate-y-1/2 z-50 pointer-events-none mix-blend-difference w-[85vw] md:w-[70vw]">
+          <img 
+            src="/images/brand.png" 
+            alt="TU LUMORA Logo" 
+            className="w-full h-auto object-contain brightness-200"
+          />
+        </div>
+        
+        {/* คลังรูปภาพ: จัดวางจังหวะใหม่ Mobile-First Full Width */}
+        <div className="z-10 flex flex-col w-full px-5 md:px-20 mt-[-10vh] pb-[20vh] items-center space-y-[40vh] md:space-y-[60vh]">
+          
+          {/* 1. The Hook (ลู่วิ่ง) - กว้างเต็มจอในมือถือ กว้างมากในคอม */}
+          <div className="relative w-[100%] md:w-[85vw] aspect-[16/9] md:aspect-[21/9] group shadow-2xl overflow-hidden bg-zinc-100">
+            <img src="/images/work1.jpg" alt="Squad Track" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
+            <p className="absolute bottom-4 left-4 text-[10px] uppercase tracking-widest text-white mix-blend-difference">01 // THE SQUAD</p>
+          </div>
 
-    {/* 2. The Detail (นายแบบพื้นขาว) - ชิดซ้าย แนวตั้ง เท่ๆ คลีนๆ */}
-    <div className="flex justify-start mb-[40vh] md:mb-[60vh]">
-      <div className="relative w-[85%] md:w-[35vw] aspect-[3/4] group shadow-2xl overflow-hidden bg-zinc-100">
-        <img src="/images/DSC08700.jpg" alt="Studio Boy" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 grayscale hover:grayscale-0" />
-        <p className="absolute bottom-4 left-4 text-[10px] uppercase tracking-widest text-black/50">02 // SIGNATURE TEE</p>
-      </div>
-    </div>
+          {/* 2. The Detail (นายแบบพื้นขาว) - กลางจอในมือถือ ชิดซ้ายในคอม */}
+          <div className="relative w-[90%] md:w-[35vw] md:self-start aspect-[3/4] group shadow-2xl overflow-hidden bg-zinc-100">
+            <img src="/images/DSC08700.jpg" alt="Studio Boy" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 grayscale hover:grayscale-0" />
+            <p className="absolute bottom-4 left-4 text-[10px] uppercase tracking-widest text-black/50">02 // SIGNATURE TEE</p>
+          </div>
 
-    {/* 3. The Street (นางแบบกำแพงอิฐ) - ชิดขวา ดึงสายตากลับมา */}
-    <div className="flex justify-end mb-[50vh]">
-      <div className="relative w-[90%] md:w-[40vw] aspect-[4/5] group shadow-2xl overflow-hidden bg-zinc-100">
-        <img src="/images/DSC07437.JPG" alt="Brick Wall Girl" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
-        <p className="absolute bottom-4 right-4 text-[10px] uppercase tracking-widest text-white drop-shadow-md">03 // CROP EDITION</p>
-      </div>
-    </div>
+          {/* 3. The Street (นางแบบกำแพงอิฐ) - กลางจอในมือถือ ชิดขวาในคอม */}
+          <div className="relative w-[90%] md:w-[40vw] md:self-end aspect-[4/5] group shadow-2xl overflow-hidden bg-zinc-100">
+            <img src="/images/DSC07437.JPG" alt="Brick Wall Girl" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
+            <p className="absolute bottom-4 right-4 text-[10px] uppercase tracking-widest text-white drop-shadow-md">03 // CROP EDITION</p>
+          </div>
 
-    {/* 4. The Lifestyle (แก๊งรถสกู๊ตเตอร์) - กลางจอ แนวตั้งยาวๆ สร้าง Impact ในมือถือ */}
-    <div className="flex justify-center mb-[60vh]">
-      <div className="relative w-[95%] md:w-[45vw] aspect-[2/3] group shadow-2xl overflow-hidden bg-zinc-100">
-        <img src="/images/DSC07681.jpg" alt="Scooter Gang" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
-        <p className="absolute top-4 left-4 text-[10px] uppercase tracking-widest text-white mix-blend-difference">04 // STREET CULTURE</p>
-      </div>
-    </div>
+          {/* 4. The Lifestyle (แก๊งรถสกู๊ตเตอร์) - กว้างเต็มจอในมือถือ กลางจอในคอม */}
+          <div className="relative w-[100%] md:w-[45vw] aspect-[2/3] md:aspect-[3/4] group shadow-2xl overflow-hidden bg-zinc-100">
+            <img src="/images/DSC07681.jpg" alt="Scooter Gang" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
+            <p className="absolute top-4 left-4 text-[10px] uppercase tracking-widest text-white mix-blend-difference">04 // STREET CULTURE</p>
+          </div>
 
-    {/* 5. The Dark Mood (นายแบบพื้นดำ) - ชิดซ้าย แนวนอน สร้างความลึกลับ */}
-    <div className="flex justify-start mb-[40vh]">
-      <div className="relative w-[90%] md:w-[50vw] aspect-video group shadow-2xl overflow-hidden bg-zinc-100">
-        <img src="/images/DSC07193.JPG" alt="Dark Mood Boy" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
-      </div>
-    </div>
+          {/* 5. The Grand Finale (นางแบบแนว Glam) - กว้างเต็มจอที่สุด จบแบบอลังการ */}
+          <div className="relative w-[100%] md:w-[90vw] aspect-video md:aspect-[21/9] group shadow-2xl overflow-hidden bg-zinc-100">
+            <img src="/images/DSC07728.jpg" alt="Glam Finale" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
+            <p className="absolute bottom-6 left-1/2 -translate-x-1/2 text-[12px] uppercase tracking-[0.5em] text-white mix-blend-difference">TU LUMORA 2026</p>
+          </div>
 
-    {/* 6. The Color Pop (นางแบบตึกสี) - ชิดขวา แนวนอน ตัดความมืด */}
-    <div className="flex justify-end mb-[60vh]">
-      <div className="relative w-[85%] md:w-[55vw] aspect-[16/10] group shadow-2xl overflow-hidden bg-zinc-100">
-        <img src="/images/work2.jpg" alt="Colorful Building Girl" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
-        <p className="absolute bottom-4 right-4 text-[10px] uppercase tracking-widest text-white drop-shadow-md">05 // CITY VIBES</p>
-      </div>
-    </div>
+        </div>
+      </section>
 
-    {/* 7. The Grand Finale (นางแบบแนว Glam) - กลางจอ กว้างสุด จบแบบอลังการ */}
-    <div className="flex justify-center mb-[10vh]">
-      <div className="relative w-[100%] md:w-[75vw] aspect-video group shadow-2xl overflow-hidden bg-zinc-100">
-        <img src="/images/DSC07728.jpg" alt="Glam Finale" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
-        <p className="absolute bottom-6 left-1/2 -translate-x-1/2 text-[12px] uppercase tracking-[0.5em] text-white mix-blend-difference">TU LUMORA 2026</p>
-      </div>
-    </div>
+      {/* 🌟 4. Footer (เพิ่มเครดิต TUSU.RANGSIT + ผู้พัฒนา) 🌟 */}
+      <footer className="h-[50vh] bg-black flex flex-col items-center justify-center border-t border-white/5 space-y-8 px-6">
+         <div className="text-center space-y-2">
+           <p className="text-gray-600 tracking-[1em] uppercase text-[10px]">Established 2026</p>
+           <h2 className="text-2xl md:text-4xl font-black tracking-tighter uppercase text-white italic">TU LUMORA®</h2>
+         </div>
+         
+         {/* ส่วนเครดิตองค์กรและคนทำ */}
+         <div className="pt-8 border-t border-white/10 w-full max-w-sm text-center flex flex-col gap-6">
+           
+           {/* เครดิตองค์กร (TUSU) */}
+           <div className="space-y-1">
+             <p className="text-[9px] text-gray-700 uppercase tracking-[0.4em] font-black">An Official Project By</p>
+             <a 
+               href="https://www.instagram.com/tusu.rangsit/" 
+               target="_blank"
+               className="text-[12px] font-bold text-white/70 hover:text-white transition-colors tracking-widest uppercase inline-block"
+             >
+               TUSU.RANGSIT
+             </a>
+           </div>
 
-  </div>
-</section>
+           {/* เครดิตผู้พัฒนา (ตัวคุณ) */}
+           <div className="space-y-1">
+             <p className="text-[8px] text-gray-800 uppercase tracking-[0.4em] font-black">Website Engineered By</p>
+             <a 
+               href="https://github.com/copterrter" 
+               target="_blank"
+               className="text-[10px] font-bold text-white/30 hover:text-white transition-colors tracking-[0.3em] uppercase inline-block"
+             >
+               VAROTE MAIDERATA
+             </a>
+           </div>
 
-          <footer className="h-[40vh] bg-black flex flex-col items-center justify-center">
-             <p className="text-gray-600 tracking-[1em] uppercase text-[10px] mb-4">Established 2026</p>
-             <h2 className="text-2xl font-bold tracking-tighter">TU LUMORA®</h2>
-          </footer>
-
-        </main>
+         </div>
+      </footer>
+    </main>
       </ReactLenis>
     </>
   );
