@@ -1,7 +1,7 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ReactLenis } from "@studio-freight/react-lenis";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion";
 import Preloader from "../components/Preloader";
 
 export default function Home() {
@@ -15,6 +15,17 @@ export default function Home() {
       document.body.style.overflow = "auto";
     }
   }, [isLoading]);
+
+  // Framer Motion Scroll Tracking for Lookbook
+  const lookbookRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: lookbookRef,
+    offset: ["start center", "end center"],
+  });
+
+  // Fade in at the start, stay 100% visible during, fade out at end
+  const logoOpacity = useTransform(scrollYProgress, [0, 0.05, 0.95, 1], [0, 1, 1, 0]);
+  const logoY = useTransform(scrollYProgress, [0, 1], ["-50%", "-50%"]); 
 
   return (
     <>
@@ -110,15 +121,16 @@ export default function Home() {
           </section>
 
 {/* 🌟 ด่านที่ 4: Brand Showcase (Editorial Lookbook - ใส่รูปครบ 7 รูป!) 🌟 */}
-      <section className="relative w-full bg-white overflow-hidden flex justify-center pb-32">
+      <section ref={lookbookRef} className="relative w-full bg-white overflow-hidden flex justify-center pb-32">
         
-        {/* 🌟 The Sticky Container that follows the user 🌟 */}
-        <div className="absolute inset-0 z-50 pointer-events-none mix-blend-difference overflow-hidden">
-          <div className="sticky top-[50vh] -translate-y-1/2 flex flex-col items-center gap-4 w-full px-[7.5vw] md:px-[15vw]">
-            <img src="/images/brand.png" alt="TU LUMORA Logo" className="w-[85vw] md:w-[70vw] h-auto object-contain brightness-200" />
-            <p className="text-white text-xs md:text-sm tracking-[0.5em] uppercase font-bold text-center">( all photo )</p>
-          </div>
-        </div>
+        {/* 🌟 The Fixed Container that follows the user using Framer Motion 🌟 */}
+        <motion.div 
+          style={{ opacity: logoOpacity, y: logoY }}
+          className="fixed top-1/2 left-0 w-full z-50 pointer-events-none mix-blend-difference overflow-hidden px-[7.5vw] md:px-[15vw] flex flex-col items-center gap-4"
+        >
+          <img src="/images/brand.png" alt="TU LUMORA Logo" className="w-[85vw] md:w-[70vw] h-auto object-contain brightness-200" />
+          <p className="text-white text-xs md:text-sm tracking-[0.5em] uppercase font-bold text-center">( all photo )</p>
+        </motion.div>
         
         {/* 🌟 The Content that scrolls past the sticky logo 🌟 */}
         <div className="z-10 flex flex-col w-full px-5 md:px-20 items-center space-y-24 md:space-y-[60vh] py-[30vh]">
