@@ -240,13 +240,18 @@ export default function ProductPage() {
 
           {cart.length > 0 && (
             <div className="pt-8 border-t border-white/10">
-              <h3 className="text-[10px] font-bold tracking-widest text-gray-500 mb-6 uppercase">Your Squad List</h3>
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-[10px] font-bold tracking-widest text-gray-500 uppercase">Your Squad List</h3>
+                <button onClick={() => { setCart([]); localStorage.removeItem('lumora_cart'); }} className="text-[10px] font-bold tracking-widest uppercase text-red-500 hover:text-white transition-colors underline decoration-red-500/30 underline-offset-4">
+                  Clear All
+                </button>
+              </div>
               <div className="space-y-4">
                 {cart.map((item, idx) => (
                   <div key={idx} className="flex justify-between items-center bg-[#0a0a0a] p-4 border border-white/5">
                     <div>
                       <p className="font-bold text-xs italic">{item.title} ({item.size})</p>
-                      <p className="text-[10px] text-gray-500">QTY: {item.quantity}</p>
+                      <p className="text-[11px] font-black tracking-widest text-white mt-1">x{item.quantity}</p>
                     </div>
                     <button onClick={() => removeFromCart(idx)} className="text-xs opacity-50 hover:opacity-100 uppercase tracking-widest text-red-500">[ Remove ]</button>
                   </div>
