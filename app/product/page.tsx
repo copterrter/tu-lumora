@@ -17,7 +17,7 @@ export default function ProductPage() {
 
   useEffect(() => {
     // End date for the 7-day exclusive promotion
-    const targetDate = new Date("2026-03-20T23:59:59").getTime();
+    const targetDate = new Date("2026-03-13T23:59:59").getTime();
 
     const interval = setInterval(() => {
       const now = new Date().getTime();
