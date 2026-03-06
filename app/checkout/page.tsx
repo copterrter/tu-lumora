@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -25,9 +24,11 @@ export default function CheckoutPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const verifySlipWithRDCW = async (file: File) => {
+  const verifySlipWithRDCW = async (file: File, orderData: any, formData: any) => {
     const body = new FormData();
     body.append("file", file);
+    body.append("orderData", JSON.stringify(orderData));
+    body.append("formData", JSON.stringify(formData));
     const response = await fetch("/api/verify", { method: "POST", body: body });
     return await response.json();
   };
@@ -47,32 +48,10 @@ export default function CheckoutPage() {
     }
     setIsSubmitting(true);
     try {
-      const slipResult = await verifySlipWithRDCW(slipFile);
-      if (!slipResult.success) throw new Error(slipResult.message || "สลิปไม่ถูกต้อง");
+      const slipResult = await verifySlipWithRDCW(slipFile, orderData, formData);
+      if (!slipResult.success) throw new Error(slipResult.message || "การสั่งซื้อไม่สำเร็จ โปรดลองอีกครั้ง");
       
-      const slipAmount = slipResult.data.amount;
-      const expectedTotal = calculateExpectedTotal(orderData.items);
-      
-      if (Number(slipAmount) !== Number(expectedTotal)) {
-        throw new Error(`ยอดเงินไม่ตรง! สลิปมียอด ฿${slipAmount} แต่ยอดสั่งซื้อที่ถูกต้องคือ ฿${expectedTotal}`);
-      }
-
-      const summaryItems = orderData.items.map((item: any) => `${item.quantity}x ${item.style} (${item.size})`).join(", ");
-
-      const { error } = await supabase.from('orders').insert([{
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        phone: formData.phone,
-        address: formData.address,
-        zipCode: formData.zipCode,
-        social_contact: formData.socialContact, 
-        product_name: summaryItems,
-        total_amount: expectedTotal,
-        status: 'paid_and_verified'
-      }]);
-
-      if (error) throw new Error("บันทึกไม่สำเร็จ: " + error.message); 
-      
+      // If success, the API has already inserted the order into Supabase
       localStorage.removeItem('lumora_cart'); 
       router.push("/thankyou"); 
     } catch (err: any) {
