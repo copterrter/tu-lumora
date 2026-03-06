@@ -168,7 +168,7 @@ export async function POST(request: Request) {
     `;
 
     const { data, error } = await resend.emails.send({
-      from: 'TU LUMORA <onboarding@resend.dev>',
+      from: 'TU LUMORA <orders@tulumora.com>',
       to: [email],
       subject: `✅ Order Confirmed — TU LUMORA PRE-ORDER`,
       html,
