@@ -129,7 +129,6 @@ export default function Home() {
           className="fixed top-1/2 left-0 w-full z-50 pointer-events-none mix-blend-difference overflow-hidden px-[7.5vw] md:px-[15vw] flex flex-col items-center gap-4"
         >
           <img src="/images/brand.png" alt="TU LUMORA Logo" className="w-[85vw] md:w-[70vw] h-auto object-contain brightness-200" />
-          <p className="text-white text-xs md:text-sm tracking-[0.5em] uppercase font-bold text-center">( all photo )</p>
         </motion.div>
         
         {/* 🌟 The Content that scrolls past the sticky logo 🌟 */}
