@@ -3,9 +3,9 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
 export default function Preloader({ onComplete }: { onComplete: () => void }) {
+  const [progress, setProgress] = useState(0);
   const [index, setIndex] = useState(0);
 
-  // ดึงรูปจากโฟลเดอร์ images
   const images = [
     "/images/1.jpg", 
     "/images/2.jpg", 
@@ -15,25 +15,35 @@ export default function Preloader({ onComplete }: { onComplete: () => void }) {
   ];
 
   useEffect(() => {
-    // คำสั่งรันรูป: ให้เปลี่ยนรูปทุกๆ 0.2 วินาที (200ms)
-    const interval = setInterval(() => {
-      setIndex((prev) => {
-        // ถ้ารันถึงรูปสุดท้ายแล้ว ให้วนกลับไปรูปแรก (0)
-        if (prev + 1 >= images.length) return 0;
-        return prev + 1;
-      });
+    // Smooth 0→100 progress over ~3 seconds
+    const duration = 3000;
+    const stepMs = 30;
+    const steps = duration / stepMs;
+    let current = 0;
+
+    const progressInterval = setInterval(() => {
+      current += 1;
+      setProgress(Math.min(Math.round((current / steps) * 100), 100));
+      if (current >= steps) clearInterval(progressInterval);
+    }, stepMs);
+
+    // Cycle background images
+    const imageInterval = setInterval(() => {
+      setIndex((prev) => (prev + 1 >= images.length ? 0 : prev + 1));
     }, 800);
 
-    // สั่งให้หน้าโหลดปิดตัวเองเมื่อผ่านไป 3.5 วินาที
+    // Dismiss after 3.5s
     const timeout = setTimeout(() => {
       onComplete();
     }, 3500);
 
     return () => {
-      clearInterval(interval);
+      clearInterval(progressInterval);
+      clearInterval(imageInterval);
       clearTimeout(timeout);
     };
-  }, []); // ปล่อยวงเล็บว่างไว้ เพื่อกันไม่ให้ระบบมันเรนเดอร์ซ้ำซ้อนจนรูปค้าง
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <motion.div
@@ -49,7 +59,6 @@ export default function Preloader({ onComplete }: { onComplete: () => void }) {
         <img src="/images/brand.png" alt="Brand Font" className="w-full object-contain" />
       </div>
 
-      {/* ตรงนี้ลบคำว่า grayscale ออกแล้ว รูปจะกลับมาเป็นสีปกติครับ! */}
       <div className="w-[60vw] md:w-[25vw] aspect-[3/4] overflow-hidden relative">
         <img 
           src={images[index]} 
@@ -58,10 +67,19 @@ export default function Preloader({ onComplete }: { onComplete: () => void }) {
         />
       </div>
       
-      <div className="absolute bottom-12 flex gap-4 text-gray-400 uppercase tracking-[0.4em] text-xs md:text-sm font-bold">
-        <span className="animate-pulse">Loading Culture</span>
-        {/* ตัวเลขเปร์เซ็นต์จะวิ่งตามรูปที่เปลี่ยน */}
-        <span>{Math.min((index * 20) + 20, 100)}%</span>
+      {/* Smooth progress bar */}
+      <div className="absolute bottom-12 w-[60vw] md:w-[25vw] flex flex-col gap-3">
+        <div className="w-full h-[1px] bg-white/10 relative overflow-hidden">
+          <motion.div
+            className="absolute left-0 top-0 h-full bg-white"
+            style={{ width: `${progress}%` }}
+            transition={{ ease: "linear" }}
+          />
+        </div>
+        <div className="flex justify-between items-center">
+          <span className="text-gray-400 uppercase tracking-[0.4em] text-[10px] font-bold">Loading Culture</span>
+          <span className="text-white text-[10px] font-black tabular-nums">{progress}%</span>
+        </div>
       </div>
     </motion.div>
   );

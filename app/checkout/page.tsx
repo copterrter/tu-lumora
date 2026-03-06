@@ -7,6 +7,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const [orderData, setOrderData] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [pdpaChecked, setPdpaChecked] = useState(false);
   const [slipFile, setSlipFile] = useState<File | null>(null);
   const [copied, setCopied] = useState(false);
   
@@ -228,7 +229,22 @@ export default function CheckoutPage() {
               <span className="opacity-20">Total</span><span>฿{orderData.total}</span>
            </div>
            
-           <button onClick={handleConfirmOrder} disabled={isSubmitting} className="w-full bg-white text-black border border-transparent hover:bg-transparent hover:text-white hover:border-white py-7 font-black uppercase tracking-[0.5em] text-sm transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_10px_30px_rgba(255,255,255,0.1)] hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] relative overflow-hidden">
+            {/* PDPA Checkbox */}
+            <label className="flex items-start gap-3 cursor-pointer group mt-2">
+              <input
+                type="checkbox"
+                checked={pdpaChecked}
+                onChange={(e) => setPdpaChecked(e.target.checked)}
+                className="w-4 h-4 mt-0.5 accent-white cursor-pointer shrink-0"
+              />
+              <span className="text-[10px] text-gray-400 group-hover:text-gray-200 transition-colors leading-relaxed">
+                ฉันได้อ่านและยอมรับ{" "}
+                <a href="#" className="underline underline-offset-2 text-white/60 hover:text-white">นโยบายความเป็นส่วนตัว (PDPA)</a>
+                {" "}และยินยอมให้เก็บข้อมูลเพื่อดำเนินการสั่งซื้อ
+              </span>
+            </label>
+
+           <button onClick={handleConfirmOrder} disabled={isSubmitting || !pdpaChecked} className="w-full bg-white text-black border border-transparent hover:bg-transparent hover:text-white hover:border-white py-7 font-black uppercase tracking-[0.5em] text-sm transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_10px_30px_rgba(255,255,255,0.1)] hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] relative overflow-hidden">
              {isSubmitting ? "PROCESSING..." : "CONFIRM & PAY"}
            </button>
         </div>
