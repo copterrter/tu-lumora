@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 export default function Preloader({ onComplete }: { onComplete: () => void }) {
   const [progress, setProgress] = useState(0);
@@ -50,16 +51,19 @@ export default function Preloader({ onComplete }: { onComplete: () => void }) {
     >
       {/* Centered product photo */}
       <div className="w-[60vw] md:w-[25vw] aspect-[3/4] overflow-hidden">
-        <img 
-          src={images[index]} 
-          alt="loading" 
+        <Image
+          src={images[index]}
+          alt="loading"
+          width={400}
+          height={533}
+          priority
           className="w-full h-full object-cover"
         />
       </div>
 
       {/* Mascot — right side */}
       <div className="absolute bottom-16 right-8 w-16 md:w-24 opacity-70">
-        <img src="/images/mascot.png" alt="Mascot" className="w-full object-contain" />
+        <Image src="/images/mascot.png" alt="Mascot" width={96} height={96} className="w-full object-contain" loading="lazy" />
       </div>
       
       {/* Progress bar — bottom */}

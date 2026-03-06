@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { ReactLenis } from "@studio-freight/react-lenis";
 import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import Preloader from "../components/Preloader";
 
 export default function Home() {
@@ -127,7 +128,7 @@ export default function Home() {
 
           {/* HERO */}
           <section className="h-[100dvh] flex items-center justify-center relative overflow-hidden bg-black">
-            <video autoPlay loop muted playsInline className="absolute inset-0 w-full h-[100dvh] object-cover opacity-50">
+            <video autoPlay loop muted playsInline preload="none" className="absolute inset-0 w-full h-[100dvh] object-cover opacity-50">
               <source src="/bg-video.mp4" type="video/mp4" />
             </video>
             <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 z-[1]" />
@@ -139,7 +140,7 @@ export default function Home() {
                 transition={{ delay: 2.5, duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
                 className="w-[75vw] sm:w-[55vw] md:w-[42vw]"
               >
-                <img src="/images/brand.png" alt="TU LUMORA" className="w-full h-auto object-contain" />
+                <Image src="/images/brand.png" alt="TU LUMORA" width={800} height={300} priority className="w-full h-auto object-contain" />
               </motion.div>
 
               <motion.p
@@ -190,10 +191,13 @@ export default function Home() {
 
           {/* EDITORIAL PHOTO — full bleed */}
           <section className="relative w-full h-[80dvh] overflow-hidden" id="lookbook">
-            <img
+            <Image
               src="/images/work3.jpg"
               alt="Editorial"
-              className="absolute inset-0 w-full h-full object-cover opacity-75"
+              fill
+              sizes="100vw"
+              className="object-cover opacity-75"
+              priority
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
             <div className="absolute bottom-10 left-6 md:left-16 max-w-xl">
@@ -206,7 +210,7 @@ export default function Home() {
 
           {/* #lumosquad — no LINE OA link */}
           <section className="h-[100dvh] flex items-center justify-center relative overflow-hidden bg-black border-y border-white/5">
-            <img src="/images/squad.jpg" alt="Lumosquad" className="absolute inset-0 w-full h-full object-cover opacity-40 grayscale" />
+            <Image src="/images/squad.jpg" alt="Lumosquad" fill sizes="100vw" className="object-cover opacity-40 grayscale" loading="lazy" />
             <div className="z-10 flex flex-col items-center gap-4 text-center px-4">
               <h1 className="text-4xl md:text-[6vw] font-black uppercase italic tracking-tighter [text-shadow:0_2px_10px_rgba(0,0,0,0.5)]">
                 join our <span className="border-text">#lumosquad</span>
@@ -221,7 +225,7 @@ export default function Home() {
               style={{ opacity: logoOpacity, willChange: "transform, opacity" }}
               className="fixed top-1/2 -translate-y-1/2 left-0 w-full z-50 pointer-events-none mix-blend-difference px-[5vw] md:px-[10vw] flex justify-center"
             >
-              <img src="/images/brand.png" alt="TU LUMORA Logo" className="w-[80vw] md:w-[65vw] h-auto object-contain brightness-200" />
+              <Image src="/images/brand.png" alt="TU LUMORA Logo" width={1200} height={400} className="w-[80vw] md:w-[65vw] h-auto object-contain brightness-200" loading="lazy" />
             </motion.div>
 
             <div className="z-10 flex flex-col w-full px-5 md:px-20 items-center space-y-24 md:space-y-[60vh] py-[30vh]">
@@ -229,7 +233,7 @@ export default function Home() {
               {/* 1 */}
               <div className="flex flex-col w-[100%] md:w-[85vw] gap-8">
                 <div className="relative w-full aspect-[16/9] md:aspect-[21/9] group shadow-2xl overflow-hidden bg-zinc-100">
-                  <img src="/images/work1.jpg" alt="Squad Track" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
+                  <Image src="/images/work1.jpg" alt="Squad Track" fill sizes="(max-width:768px) 100vw, 85vw" className="object-cover transition-transform duration-1000 group-hover:scale-105" loading="lazy" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
                   <p className="absolute bottom-5 left-5 text-[9px] uppercase tracking-[0.4em] text-white/60 font-bold">01</p>
                 </div>
@@ -243,7 +247,7 @@ export default function Home() {
               {/* 2 — Pure Form: permanently grayscale */}
               <div className="flex flex-col md:flex-row items-center md:items-start md:self-start gap-8 md:gap-16 w-[90%] md:w-[70vw]">
                 <div className="relative w-full md:w-[38vw] aspect-[3/4] group shadow-2xl overflow-hidden bg-zinc-100 shrink-0">
-                  <img src="/images/DSC08700.jpg" alt="Studio Boy" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 grayscale" />
+                  <Image src="/images/DSC08700.jpg" alt="Studio Boy" fill sizes="(max-width:768px) 100vw, 38vw" className="object-cover transition-transform duration-1000 group-hover:scale-105 grayscale" loading="lazy" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                   <p className="absolute bottom-5 left-5 text-[9px] uppercase tracking-[0.4em] text-white/60 font-bold">02</p>
                 </div>
@@ -261,7 +265,7 @@ export default function Home() {
               {/* 3 */}
               <div className="flex flex-col md:flex-row-reverse items-center md:items-end md:self-end gap-8 md:gap-16 w-[90%] md:w-[75vw]">
                 <div className="relative w-full md:w-[42vw] aspect-[4/5] group shadow-2xl overflow-hidden bg-zinc-100 shrink-0">
-                  <img src="/images/DSC07437.JPG" alt="Brick Wall Girl" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
+                  <Image src="/images/DSC07437.JPG" alt="Brick Wall Girl" fill sizes="(max-width:768px) 100vw, 42vw" className="object-cover transition-transform duration-1000 group-hover:scale-105" loading="lazy" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                   <p className="absolute bottom-5 right-5 text-[9px] uppercase tracking-[0.4em] text-white/60 font-bold">03</p>
                 </div>
@@ -278,7 +282,7 @@ export default function Home() {
                     {/* 4 */}
               <div className="flex flex-col md:flex-row items-center md:items-stretch gap-8 w-[100%] md:w-[80vw]">
                 <div className="relative w-full md:w-[48vw] aspect-[2/3] md:aspect-[3/4] group shadow-2xl overflow-hidden bg-zinc-100 shrink-0">
-                  <img src="/images/DSC07681.jpg" alt="Scooter Gang" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
+                  <Image src="/images/DSC07681.jpg" alt="Scooter Gang" fill sizes="(max-width:768px) 100vw, 48vw" className="object-cover transition-transform duration-1000 group-hover:scale-105" loading="lazy" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                   <p className="absolute bottom-5 left-5 text-[9px] uppercase tracking-[0.4em] text-white/60 font-bold">04</p>
                 </div>
@@ -295,7 +299,7 @@ export default function Home() {
               {/* 5 */}
               <div className="flex flex-col md:flex-row-reverse items-center md:items-center gap-8 md:gap-12 w-[95%] md:w-[85vw]">
                 <div className="relative w-full md:w-[52vw] aspect-video md:aspect-[4/3] group shadow-2xl overflow-hidden bg-zinc-100 shrink-0">
-                  <img src="/images/DSC07193.JPG" alt="Dark Mood Boy" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
+                  <Image src="/images/DSC07193.JPG" alt="Dark Mood Boy" fill sizes="(max-width:768px) 100vw, 52vw" className="object-cover transition-transform duration-1000 group-hover:scale-105" loading="lazy" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                   <p className="absolute bottom-5 left-5 text-[9px] uppercase tracking-[0.4em] text-white/60 font-bold">05</p>
                 </div>
@@ -312,7 +316,7 @@ export default function Home() {
               {/* 6 */}
               <div className="flex flex-col md:flex-row items-center md:items-stretch gap-8 w-[95%] md:w-[88vw]">
                 <div className="relative w-full md:w-[58vw] aspect-[16/10] group shadow-2xl overflow-hidden bg-zinc-100 shrink-0">
-                  <img src="/images/work2.jpg" alt="Colorful Building Girl" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
+                  <Image src="/images/work2.jpg" alt="Colorful Building Girl" fill sizes="(max-width:768px) 100vw, 58vw" className="object-cover transition-transform duration-1000 group-hover:scale-105" loading="lazy" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                   <p className="absolute bottom-5 right-5 text-[9px] uppercase tracking-[0.4em] text-white/60 font-bold">06</p>
                 </div>
@@ -335,7 +339,7 @@ export default function Home() {
                   </h3>
                 </div>
                 <div className="relative w-full aspect-video md:aspect-[21/9] group overflow-hidden bg-zinc-900">
-                  <img src="/images/DSC07728.jpg" alt="Glam Finale" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 opacity-75" />
+                  <Image src="/images/DSC07728.jpg" alt="Glam Finale" fill sizes="100vw" className="object-cover transition-transform duration-1000 group-hover:scale-105 opacity-75" loading="lazy" />
                   <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent" />
                   <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12 flex justify-between items-end">
                     <div>
