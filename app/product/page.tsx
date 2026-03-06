@@ -171,12 +171,12 @@ export default function ProductPage() {
       <div className="pt-24 md:pt-32 px-6 md:px-12 max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
         
         <div className="lg:col-span-7 relative group">
-          <div ref={sliderRef} className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide border border-white/10 relative">
+          <div ref={sliderRef} className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide border border-white/10 relative bg-white">
             {productImages.map((img, idx) => (
-              <div key={idx} className="min-w-full snap-center aspect-[3/4] cursor-zoom-in" onClick={() => setZoomedImg(img)}>
+              <div key={idx} className="min-w-full snap-center aspect-[3/4] cursor-zoom-in bg-white" onClick={() => setZoomedImg(img)}>
                 <motion.img 
-                  key={img} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, ease: "easeInOut" }}
-                  src={img} alt={`view-${idx}`} className="w-full h-full object-cover" 
+                  key={img} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.0, ease: [0.22, 1, 0.36, 1] }}
+                  src={img} alt={`view-${idx}`} className="w-full h-full object-contain" 
                 />
               </div>
             ))}
