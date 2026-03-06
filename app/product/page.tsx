@@ -103,12 +103,17 @@ export default function ProductPage() {
       <AnimatePresence>
         {showSizeChart && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-6">
-            <div className="bg-[#e7e7e7] p-2 w-full max-w-2xl relative shadow-2xl">
-              <button onClick={() => setShowSizeChart(false)} className="absolute -top-4 -right-4 bg-white text-black text-xl w-10 h-10 rounded-full font-black shadow-lg hover:scale-110 transition-transform">X</button>
+            <div className="bg-[#e7e7e7] p-2 w-full max-w-xl relative shadow-2xl">
+              <button 
+                onClick={() => setShowSizeChart(false)} 
+                className="absolute -top-3 -right-3 md:-top-4 md:-right-4 bg-red-600 text-white text-lg md:text-xl w-8 h-8 md:w-10 md:h-10 rounded-full font-black shadow-[0_0_15px_rgba(220,38,38,0.5)] hover:scale-110 hover:bg-red-500 transition-all z-10 flex items-center justify-center"
+              >
+                X
+              </button>
               <img 
                 src={selectedStyle === "T-SHIRT" ? "/images/size-guide-regular.png" : "/images/size-guide-crop.png"} 
                 alt={`${selectedStyle} Size Guide`} 
-                className="w-full h-auto object-contain" 
+                className="w-full h-auto object-contain max-h-[85vh] md:max-h-none" 
               /> 
             </div>
           </motion.div>
@@ -288,8 +293,7 @@ export default function ProductPage() {
 
          <div className="pt-12 text-center flex flex-col items-center gap-4">
             <p className="text-[10px] text-gray-500 uppercase tracking-widest">Need more help?</p>
-            {/* 🚨 อย่าลืมแก้ลิงก์ LINE OA บรรทัดนี้ให้เป็นของแบรนด์คุณนะครับ 🚨 */}
-            <a href="https://lin.ee/your_line_oa_link" target="_blank" className="border border-green-500 text-green-500 hover:bg-green-500 hover:text-black font-bold uppercase tracking-widest text-xs px-8 py-4 transition-all inline-block">
+             <a href="https://lin.ee/19k0kWS" target="_blank" className="border border-green-500 text-green-500 hover:bg-green-500 hover:text-black font-bold uppercase tracking-widest text-xs px-8 py-4 transition-all inline-block">
                Contact via LINE OA
             </a>
          </div>
