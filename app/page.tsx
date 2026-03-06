@@ -109,11 +109,11 @@ export default function Home() {
             </h1>
           </section>
 
-{/* ด่านที่ 4: Brand Showcase (Street Lookbook Edition) */}
-<section className="min-h-[600vh] relative flex flex-col items-center py-32 bg-white">
+ {/* ด่านที่ 4: Brand Showcase (แบบเดิมที่รูปเลื่อนซ้าย-ขวา) */}
+<section className="min-h-[300vh] relative flex flex-col items-center py-32 bg-white">
   
-  {/* โลโก้แบรนด์: ใช้ mix-blend-difference เพื่อให้เล่นกับสีของรูปที่เลื่อนผ่าน */}
-  <div className="sticky top-1/2 -translate-y-1/2 z-50 pointer-events-none mix-blend-difference w-[85vw] md:w-[70vw]">
+  {/* โลโก้แบรนด์ลอยนิ่งๆ */}
+  <div className="sticky top-1/2 -translate-y-1/2 z-50 pointer-events-none mix-blend-difference w-[85vw] md:w-[75vw]">
     <img 
       src="/images/brand.png" 
       alt="TU LUMORA Logo" 
@@ -121,39 +121,11 @@ export default function Home() {
     />
   </div>
   
-  {/* Grid Layout: ในคอมจะนิ่งและเท่ ในมือถือจะซ้อนกันอย่างมีสไตล์ */}
-  <div className="z-10 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 mt-[-10vh] w-full px-5 md:px-24 auto-rows-[250px] md:auto-rows-[350px]">
-    
-    {/* รูป 1: พระเอกของงาน (ใหญ่พิเศษ) */}
-    <div className="col-span-2 row-span-2 overflow-hidden bg-zinc-100 group shadow-xl">
-      <img src="/images/work1.jpg" alt="Work 1" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 grayscale hover:grayscale-0" />
-    </div>
-
-    {/* รูป 2: แนวตั้งสไตล์นิตยสาร (ในคอมจะไปอยู่ขวาสุด) */}
-    <div className="row-span-2 md:col-start-4 overflow-hidden bg-zinc-100 group shadow-xl">
-      <img src="/images/work2.jpg" alt="Work 2" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
-    </div>
-
-    {/* รูป 3: ดีเทลเล็กๆ */}
-    <div className="overflow-hidden bg-zinc-100 group shadow-xl">
-      <img src="/images/work3.jpg" alt="Work 3" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
-    </div>
-
-    {/* รูป 4: ดีเทลเล็กๆ */}
-    <div className="overflow-hidden bg-zinc-100 group shadow-xl">
-      <img src="/images/work4.jpg" alt="Work 4" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
-    </div>
-
-    {/* รูป 5: แนวนอนยาวๆ (ตัดจังหวะสายตา) */}
-    <div className="col-span-2 md:col-start-2 overflow-hidden bg-zinc-100 group shadow-xl">
-      <img src="/images/work5.jpg" alt="Work 5" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
-    </div>
-
-    {/* รูป 6: ปิดท้ายด้วยรูปทรงสูงทางซ้าย */}
-    <div className="row-span-2 overflow-hidden bg-zinc-100 group shadow-xl">
-      <img src="/images/work6.jpg" alt="Work 6" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
-    </div>
-
+  {/* รายการรูปผลงานที่เลื่อนผ่านด้านหลังโลโก้ */}
+  <div className="z-10 flex flex-col gap-[40vh] mt-[-10vh] w-full px-5 md:px-20 items-center">
+    <img src="/images/work1.jpg" alt="Work 1" className="w-full md:w-[65vw] aspect-video object-cover shadow-2xl" />
+    <img src="/images/work2.jpg" alt="Work 2" className="w-full md:w-[65vw] aspect-video object-cover ml-auto shadow-2xl" />
+    <img src="/images/work3.jpg" alt="Work 3" className="w-full md:w-[65vw] aspect-video object-cover mr-auto shadow-2xl" />
   </div>
 </section>
 
