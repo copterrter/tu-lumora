@@ -110,16 +110,18 @@ export default function Home() {
           </section>
 
 {/* 🌟 ด่านที่ 4: Brand Showcase (Editorial Lookbook - ใส่รูปครบ 7 รูป!) 🌟 */}
-      <section className="relative flex flex-col items-center py-32 bg-white overflow-hidden pb-[40vh]">
+      <section className="min-h-[800vh] relative bg-white overflow-hidden py-32 flex justify-center">
         
-        <div className="absolute top-0 bottom-0 left-0 right-0 pointer-events-none flex justify-center z-50 mix-blend-difference">
-          <div className="sticky top-1/2 -translate-y-1/2 h-fit flex flex-col items-center gap-4 w-[85vw] md:w-[70vw]">
-            <img src="/images/brand.png" alt="TU LUMORA Logo" className="w-full h-auto object-contain brightness-200" />
+        {/* 🌟 The Sticky Container that follows the user 🌟 */}
+        <div className="absolute inset-0 pointer-events-none mix-blend-difference z-50">
+          <div className="sticky top-1/2 -translate-y-1/2 flex flex-col items-center gap-4 w-full px-[7.5vw] md:px-[15vw]">
+            <img src="/images/brand.png" alt="TU LUMORA Logo" className="w-[85vw] md:w-[70vw] h-auto object-contain brightness-200" />
             <p className="text-white text-xs md:text-sm tracking-[0.5em] uppercase font-bold text-center">( all photo )</p>
           </div>
         </div>
         
-        <div className="z-10 flex flex-col w-full px-5 md:px-20 items-center space-y-24 md:space-y-[40vh] mt-32">
+        {/* 🌟 The Content that scrolls past the sticky logo 🌟 */}
+        <div className="z-10 flex flex-col w-full px-5 md:px-20 items-center space-y-24 md:space-y-[60vh] pb-[30vh]">
           
           {/* 1. รูปกลุ่มลู่วิ่ง */}
           <div className="flex flex-col w-[100%] md:w-[85vw] gap-4">
