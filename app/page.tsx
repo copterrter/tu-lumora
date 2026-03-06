@@ -64,11 +64,14 @@ export default function Home() {
     </motion.p>
 
     {/* 2. ปุ่ม Shop Collection อยู่ตรงกลางตามความชอบของคุณ */}
-    <Link href="/product" passHref legacyBehavior>
-      <motion.a 
+    <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 3.5, duration: 1 }}
+        className="inline-block"
+    >
+      <Link 
+        href="/product"
         className="group relative px-14 py-4 border border-white overflow-hidden transition-all duration-500 hover:border-transparent inline-block"
       >
         <span className="relative z-10 text-xs sm:text-sm font-black uppercase tracking-[0.6em] group-hover:text-black transition-colors duration-500">
@@ -76,8 +79,8 @@ export default function Home() {
         </span>
         {/* เอฟเฟกต์สีขาววิ่งขึ้นตอน Hover */}
         <div className="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out"></div>
-      </motion.a>
-    </Link>
+      </Link>
+    </motion.div>
 
     {/* 3. สัญลักษณ์แบรนด์เล็กๆ ด้านล่างปุ่ม (เพิ่มความ Unique) */}
     <motion.span 

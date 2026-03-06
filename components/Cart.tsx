@@ -64,7 +64,7 @@ export default function Cart() {
           <button 
             disabled={items.length === 0}
             onClick={() => { closeCart(); router.push("/checkout"); }}
-            className="w-full bg-white text-black border border-transparent hover:bg-black hover:text-white hover:border-white py-4 font-black uppercase tracking-[0.2em] transition-all disabled:opacity-50 cursor-pointer"
+            className="w-full bg-white text-black border border-transparent hover:bg-transparent hover:text-white hover:border-white py-4 font-black uppercase tracking-[0.2em] transition-all disabled:opacity-50 cursor-pointer"
           >
             Checkout
           </button>
