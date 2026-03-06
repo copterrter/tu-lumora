@@ -27,13 +27,13 @@ export default function Home() {
         <main className="bg-black text-white min-h-screen font-sans selection:bg-white selection:text-black">
           
           {/* ด่านที่ 2: Hero Showcase (เวอร์ชันเน้นปุ่มกลางจอ แต่จัดสมดุลใหม่ให้เท่ขึ้น) */}
-<section className="h-screen flex items-center justify-center relative overflow-hidden bg-black">
+<section className="h-[100dvh] flex items-center justify-center relative overflow-hidden bg-black">
   <video 
     autoPlay 
     loop 
     muted 
     playsInline 
-    className="absolute inset-0 w-full h-full object-cover opacity-60"
+    className="absolute inset-0 w-full h-[100dvh] object-cover opacity-60"
   >
     <source src="/bg-video.mp4" type="video/mp4" />
   </video>
@@ -98,7 +98,7 @@ export default function Home() {
 </section>
 
           {/* ด่านที่ 3: Join our #lumosquad */}
-          <section className="h-screen flex items-center justify-center relative overflow-hidden bg-black border-y border-white/5">
+          <section className="h-[100dvh] flex items-center justify-center relative overflow-hidden bg-black border-y border-white/5">
             <img 
               src="/images/squad.jpg" 
               alt="Lumosquad" 
@@ -116,7 +116,7 @@ export default function Home() {
           <img src="/images/brand.png" alt="TU LUMORA Logo" className="w-full h-auto object-contain brightness-200" />
         </div>
         
-        <div className="z-10 flex flex-col w-full px-5 md:px-20 mt-[-10vh] pb-[20vh] items-center space-y-[40vh] md:space-y-[60vh]">
+        <div className="z-10 flex flex-col w-full px-5 md:px-20 mt-[-10vh] pb-[20vh] items-center space-y-24 md:space-y-[60vh]">
           
           {/* 1. รูปกลุ่มลู่วิ่ง */}
           <div className="relative w-[100%] md:w-[85vw] aspect-[16/9] md:aspect-[21/9] group shadow-2xl overflow-hidden bg-zinc-100">
@@ -163,10 +163,10 @@ export default function Home() {
       </section>
 
       {/* 🌟 5. Footer (เพิ่มเครดิต TUSU.RANGSIT + ผู้พัฒนา) 🌟 */}
-      <footer className="h-[50vh] bg-black flex flex-col items-center justify-center border-t border-white/5 space-y-8 px-6">
+       <footer className="h-[50dvh] min-h-[400px] bg-black flex flex-col items-center justify-center border-t border-white/5 space-y-8 px-6">
          <div className="text-center space-y-2">
            <p className="text-gray-600 tracking-[1em] uppercase text-[10px]">Established 2026</p>
-           <h2 className="text-2xl md:text-4xl font-black tracking-tighter uppercase text-white italic">TU LUMORA®</h2>
+           <h2 className="text-xl sm:text-2xl md:text-4xl font-black tracking-tighter uppercase text-white italic">TU LUMORA®</h2>
          </div>
          
          <div className="pt-8 border-t border-white/10 w-full max-w-sm text-center flex flex-col gap-6">

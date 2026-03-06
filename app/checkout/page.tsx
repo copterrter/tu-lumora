@@ -74,17 +74,17 @@ export default function CheckoutPage() {
   const discount = originalTotal - orderData.total;
 
   return (
-    <main className="min-h-screen bg-black text-white p-6 md:p-20 font-sans selection:bg-white selection:text-black">
+    <main className="min-h-screen bg-black text-white p-4 sm:p-6 md:p-20 font-sans selection:bg-white selection:text-black">
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20">
         
         <div className="space-y-12">
           <header className="space-y-4">
             <a href="/product" className="text-[10px] tracking-widest text-gray-500 uppercase hover:text-white transition-colors">[ BACK TO SHOP ]</a>
-            <h1 className="text-5xl font-black uppercase italic tracking-tighter">SHIPPING <br/> INFORMATION</h1>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase italic tracking-tighter">SHIPPING <br/> INFORMATION</h1>
           </header>
 
           <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <input onChange={(e) => setFormData({...formData, firstName: e.target.value})} type="text" placeholder="FIRST NAME" className="bg-transparent border border-white/20 p-4 text-xs tracking-widest focus:border-white outline-none w-full" />
               <input onChange={(e) => setFormData({...formData, lastName: e.target.value})} type="text" placeholder="LAST NAME" className="bg-transparent border border-white/20 p-4 text-xs tracking-widest focus:border-white outline-none w-full" />
             </div>
@@ -92,7 +92,7 @@ export default function CheckoutPage() {
             <input onChange={(e) => setFormData({...formData, socialContact: e.target.value})} type="text" placeholder="IG / LINE ID (CONTACT)" className="bg-[#111] border border-white/20 p-4 text-xs tracking-widest focus:border-white outline-none w-full" />
 
             <textarea onChange={(e) => setFormData({...formData, address: e.target.value})} placeholder="FULL ADDRESS (HOUSE NO. / STREET / DISTRICT)" rows={3} className="bg-transparent border border-white/20 p-4 text-xs tracking-widest focus:border-white outline-none w-full" />
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <input onChange={(e) => setFormData({...formData, zipCode: e.target.value})} type="text" placeholder="POSTAL CODE" className="bg-transparent border border-white/20 p-4 text-xs tracking-widest focus:border-white outline-none w-full" />
               <input onChange={(e) => setFormData({...formData, phone: e.target.value})} type="text" placeholder="PHONE NUMBER" className="bg-transparent border border-white/20 p-4 text-xs tracking-widest focus:border-white outline-none w-full" />
             </div>

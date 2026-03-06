@@ -107,7 +107,7 @@ export default function ProductPage() {
         <div className="w-10"></div>
       </header>
 
-      <div className="pt-32 px-6 md:px-12 max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12">
+      <div className="pt-24 md:pt-32 px-6 md:px-12 max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
         
         <div className="lg:col-span-7 relative group">
           <div ref={sliderRef} className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide border border-white/10 relative">
@@ -131,7 +131,7 @@ export default function ProductPage() {
                <p className="text-[10px] tracking-[0.5em] text-gray-500 uppercase">Signature Collection</p>
                <button onClick={scrollToFAQ} className="text-[10px] tracking-[0.2em] border-b border-gray-500 text-gray-400 pb-1">Q&A / FAQ</button>
             </div>
-            <h1 className="text-4xl md:text-6xl font-black uppercase italic leading-tight tracking-tighter">TU LUMORA SERIES</h1>
+            <h1 className="text-3xl sm:text-4xl md:text-6xl font-black uppercase italic leading-tight tracking-tighter">TU LUMORA SERIES</h1>
           </div>
 
           <div className="bg-white text-black p-4 text-center border-l-4 border-black border-y border-r flex flex-col gap-1 relative overflow-hidden">
@@ -165,7 +165,7 @@ export default function ProductPage() {
                      📏 Size Guide
                   </button>
                </div>
-               <div className="grid grid-cols-4 gap-2">
+               <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
                  {["S", "M", "L", "XL", "2XL", "3XL", "4XL"].map((size) => (
                    <button key={size} onClick={() => setSelectedSize(size)} className={`py-3 border text-xs font-bold ${selectedSize === size ? 'bg-white text-black border-white' : 'border-white/20'}`}>{size}</button>
                  ))}
