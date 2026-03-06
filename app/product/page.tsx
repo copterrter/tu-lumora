@@ -156,15 +156,57 @@ export default function ProductPage() {
              <p className="text-lg font-black italic tracking-widest">7 - 20 MAR 2026</p>
           </div>
 
-          <div className="bg-[#111] border-l-4 border-red-500 p-6 space-y-2">
-            <p className="text-sm font-bold uppercase tracking-wider text-red-500">🔥 7 วันแรกเท่านั้น! ยิ่งซื้อคู่ ยิ่งคุ้ม!</p>
-            <p className="text-xs text-gray-400 tracking-wide">(จำกัดสูงสุด 6 ตัวต่อสิทธิ์ โปรโมชั่นคละแบบได้)</p>
-            <ul className="text-[11px] text-gray-300 space-y-1 font-mono mt-4">
-               <li>1 ตัว: 329.-</li>
-               <li>2 ตัว: 590.- <span className="text-green-400">(SAVE 68.-)</span></li>
-               <li>4 ตัว: 1,180.- <span className="text-green-400">(SAVE 136.-)</span></li>
-               <li>6 ตัว: 1,770.- <span className="text-green-400">(SAVE 204.-)</span></li>
-            </ul>
+          {/* 🌟 Premium Promotion Banner 🌟 */}
+          <div className="relative overflow-hidden bg-gradient-to-br from-red-950 to-black border border-red-500/30 p-1">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-red-600 blur-[80px] opacity-30 animate-pulse"></div>
+            
+            <div className="bg-black/40 backdrop-blur-md p-5 sm:p-6 relative z-10">
+              <div className="flex items-center gap-3 mb-4">
+                <span className="flex h-3 w-3 relative">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                </span>
+                <h3 className="text-sm sm:text-base font-black uppercase tracking-widest text-white italic">
+                  7 Days Exclusive
+                </h3>
+              </div>
+              
+              <p className="text-[10px] sm:text-xs text-red-400/80 tracking-[0.2em] uppercase font-bold mb-4">
+                ( Max 6 items per order • Mix & Match allowed )
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+                {/* Tier 1 */}
+                <div className="flex justify-between items-center border border-white/10 p-3 hover:border-red-500/50 transition-colors">
+                  <span className="text-xs font-bold text-gray-300">1 ITEM</span>
+                  <span className="text-sm font-black text-white">329.-</span>
+                </div>
+                {/* Tier 2 */}
+                <div className="flex justify-between items-center border border-white/10 p-3 bg-red-500/5 hover:border-red-500/50 transition-colors relative overflow-hidden">
+                  <div className="flex flex-col">
+                    <span className="text-xs font-bold text-gray-300">2 ITEMS</span>
+                    <span className="text-[9px] text-green-400 font-bold uppercase tracking-wider">Save 68.-</span>
+                  </div>
+                  <span className="text-sm font-black text-white">590.-</span>
+                </div>
+                {/* Tier 3 */}
+                <div className="flex justify-between items-center border border-white/10 p-3 bg-red-500/10 hover:border-red-500/50 transition-colors">
+                  <div className="flex flex-col">
+                    <span className="text-xs font-bold text-gray-300">4 ITEMS</span>
+                    <span className="text-[9px] text-green-400 font-bold uppercase tracking-wider">Save 136.-</span>
+                  </div>
+                  <span className="text-sm font-black text-white">1,180.-</span>
+                </div>
+                {/* Tier 4 */}
+                <div className="flex justify-between items-center border border-red-500/30 p-3 bg-red-500/20 hover:border-red-500 transition-colors shadow-[0_0_15px_rgba(239,68,68,0.2)]">
+                  <div className="flex flex-col">
+                    <span className="text-xs font-bold text-red-200">6 ITEMS <span className="text-[9px] text-red-500 ml-1">(MAX)</span></span>
+                    <span className="text-[9px] text-green-400 font-black uppercase tracking-wider">Save 204.-</span>
+                  </div>
+                  <span className="text-base font-black text-white drop-shadow-md">1,770.-</span>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="space-y-6">
