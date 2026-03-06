@@ -12,6 +12,19 @@ export default function CheckoutPage() {
   const [formData, setFormData] = useState({
     firstName: "", lastName: "", phone: "", address: "", zipCode: "", socialContact: "" 
   });
+  const [timeLeft, setTimeLeft] = useState(600); // 10 minutes
+
+  useEffect(() => {
+    if (timeLeft <= 0) return;
+    const timer = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
+    return () => clearInterval(timer);
+  }, [timeLeft]);
+
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const s = (seconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  };
 
   useEffect(() => {
     const data = localStorage.getItem('lumora_order');
@@ -22,6 +35,25 @@ export default function CheckoutPage() {
     navigator.clipboard.writeText("0910792886"); 
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      setSlipFile(null);
+      return;
+    }
+    if (!file.type.startsWith('image/')) {
+      alert("กรุณาอัปโหลดไฟล์รูปภาพเท่านั้นครับ (JPG, PNG)");
+      e.target.value = '';
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert("ขนาดไฟล์ใหญ่เกินไปครับ (จำกัดไม่เกิน 5MB)");
+      e.target.value = '';
+      return;
+    }
+    setSlipFile(file);
   };
 
   const verifySlipWithRDCW = async (file: File, orderData: any, formData: any) => {
@@ -92,26 +124,66 @@ export default function CheckoutPage() {
           </div>
 
           <div className="pt-10 border-t border-white/10 space-y-6">
-             <div className="bg-[#111] p-8 flex flex-col items-center gap-6 border border-white/5 relative overflow-hidden">
-                <div className="absolute top-0 w-full bg-white/10 text-center py-1">
-                   <p className="text-[8px] tracking-[0.4em] uppercase text-white animate-pulse">Inventory Reserved for 10:00</p>
+             <div className="bg-[#111] p-8 flex flex-col items-center gap-6 border border-white/5 relative overflow-hidden group">
+                {/* Real Countdown Banner */}
+                <div className="absolute top-0 w-full bg-white/10 text-center py-1.5 flex justify-center items-center gap-2">
+                   {timeLeft > 0 && <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-ping"></div>}
+                   <p className="text-[9px] tracking-[0.3em] uppercase font-bold text-white">
+                      Inventory Reserved For <span className={`${timeLeft <= 60 ? 'text-red-500 font-black scale-110 inline-block' : 'text-red-400 font-bold'} tracking-widest ml-1 transition-all`}>{formatTime(timeLeft)}</span>
+                   </p>
                 </div>
-                <div className="text-center space-y-2 mt-4">
-                  <p className="text-white text-[10px] font-bold uppercase tracking-[0.4em]">Transfer Amount</p>
-                  <p className="text-4xl font-black italic text-white">฿{orderData.total}</p>
+                
+                <div className="text-center space-y-2 mt-4 z-10 w-full">
+                  <p className="text-gray-400 text-[10px] uppercase tracking-[0.4em]">Transfer Amount</p>
+                  <p className="text-4xl sm:text-5xl font-black italic text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">฿{orderData.total}</p>
                 </div>
-                <div className="w-full border-t border-white/10 pt-6 space-y-4">
-                  <div className="flex flex-col text-xs tracking-widest gap-1"><span className="text-gray-500">BANK</span><span className="font-bold">BANGKOK BANK (ธนาคารกรุงเทพ)</span></div>
-                  <div className="flex flex-col text-xs tracking-widest gap-1"><span className="text-gray-500">ACCOUNT NAME</span><span className="font-bold text-[11px] sm:text-xs leading-relaxed">องค์การนักศึกษามหาวิทยาลัยธรรมศาสตร์ ศูนย์รังสิต ประจำปีการศึกษา 2568</span></div>
-                  <div className="flex justify-between items-center bg-black border border-white/20 p-4 mt-4">
-                    <span className="font-black text-lg tracking-widest">091-0-79288-6</span>
-                    <button onClick={copyToClipboard} className="bg-white text-black px-5 py-2 text-[10px] font-bold uppercase tracking-widest hover:bg-gray-300 transition-colors shrink-0">{copied ? "COPIED!" : "COPY"}</button>
+                
+                {/* Redesigned Bank Account Block */}
+                <div className="w-full bg-gradient-to-br from-white/10 to-transparent border border-white/20 p-6 rounded-sm relative overflow-hidden z-10 box-border mt-2">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/20 blur-[60px] pointer-events-none"></div>
+                  
+                  <div className="flex flex-col gap-4">
+                    <div className="flex justify-between items-start gap-4">
+                      <div className="space-y-1">
+                        <p className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Bank</p>
+                        <p className="text-sm font-black text-white tracking-wider">BANGKOK BANK <span className="text-xs font-medium text-gray-300 ml-1">(ธ.กรุงเทพ)</span></p>
+                      </div>
+                      <div className="w-8 h-8 bg-blue-800 rounded-full flex items-center justify-center shrink-0 shadow-[0_0_10px_rgba(30,64,175,0.5)]">
+                        <span className="text-white font-black text-xs">BBL</span>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <p className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Account Name</p>
+                      <p className="text-[11px] sm:text-xs font-bold text-gray-200 leading-relaxed uppercase">
+                        องค์การนักศึกษามหาวิทยาลัยธรรมศาสตร์ ศูนย์รังสิต ประจำปีการศึกษา 2568
+                      </p>
+                    </div>
+
+                    <div className="mt-4 flex flex-col sm:flex-row justify-between items-center sm:bg-black/50 sm:border border-white/10 p-1 pl-4 gap-4 box-border">
+                      <span className="font-black text-xl sm:text-2xl tracking-[0.2em] text-white">091-0-79288-6</span>
+                      <button 
+                        onClick={copyToClipboard} 
+                        className={`w-full sm:w-auto px-6 py-3 text-[10px] font-black uppercase tracking-widest transition-all ${copied ? 'bg-green-500 text-black' : 'bg-white text-black hover:bg-gray-200'}`}
+                      >
+                        {copied ? "COPIED ✅" : "COPY NUMBER"}
+                      </button>
+                    </div>
                   </div>
                 </div>
              </div>
+             
              <div className="space-y-3">
-               <label className="text-[10px] text-gray-500 uppercase font-black tracking-widest">Upload Payment Slip</label>
-               <input type="file" accept="image/*" onChange={(e) => setSlipFile(e.target.files?.[0] || null)} className="w-full text-xs text-gray-400 file:bg-white file:text-black file:px-6 file:py-3 file:border-0 file:font-black file:uppercase file:tracking-widest file:mr-4 file:cursor-pointer hover:file:bg-gray-200 transition-all" />
+               <label className="text-[10px] text-gray-500 uppercase font-black tracking-widest flex justify-between">
+                 <span>Upload Payment Slip</span>
+                 <span className="text-gray-600 font-normal normal-case tracking-normal">Max 5MB (JPG, PNG)</span>
+               </label>
+               <input 
+                 type="file" 
+                 accept="image/png, image/jpeg, image/jpg" 
+                 onChange={handleFileChange} 
+                 className="w-full text-xs text-gray-400 file:bg-white file:text-black file:px-6 file:py-3 file:border-0 file:font-black file:uppercase file:tracking-widest file:mr-4 file:cursor-pointer hover:file:bg-gray-200 transition-all border border-white/10 p-1" 
+               />
              </div>
           </div>
         </div>
