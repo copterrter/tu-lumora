@@ -15,6 +15,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "TU LUMORA",
   description: "TU LUMORA — An Official Project by TUSU.RANGSIT",
+  icons: {
+    icon: "/images/LUMOWEB-CR.png",
+  },
 };
 
 export const viewport = {
