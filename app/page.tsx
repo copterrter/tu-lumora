@@ -115,7 +115,7 @@ export default function Home() {
           >
             <Link
               href="/product"
-              className="flex items-center gap-3 bg-white text-black px-10 py-4 font-black uppercase tracking-[0.4em] text-xs shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:shadow-[0_0_40px_rgba(255,255,255,0.4)] transition-all hover:scale-105 active:scale-95"
+              className="flex items-center justify-center gap-2 md:gap-3 bg-white/90 backdrop-blur-md md:bg-white text-black px-6 py-3 md:px-10 md:py-4 font-black uppercase tracking-[0.3em] md:tracking-[0.4em] text-[10px] md:text-xs shadow-[0_0_20px_rgba(255,255,255,0.15)] md:shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:shadow-[0_0_40px_rgba(255,255,255,0.4)] transition-all hover:scale-105 active:scale-95 rounded-sm mx-auto max-w-[260px] md:max-w-none whitespace-nowrap"
             >
               PRE-ORDER NOW
             </Link>
@@ -235,10 +235,9 @@ export default function Home() {
                 <div className="relative w-full aspect-[16/9] md:aspect-[21/9] group shadow-2xl overflow-hidden bg-zinc-100">
                   <Image src="/images/work1.jpg" alt="Squad Track" fill sizes="(max-width:768px) 100vw, 85vw" className="object-cover transition-transform duration-1000 group-hover:scale-105" loading="lazy" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                  <p className="absolute bottom-5 left-5 text-[9px] uppercase tracking-[0.4em] text-white/60 font-bold">01</p>
+                  <p className="absolute bottom-4 left-4 md:bottom-5 md:left-5 text-[9px] md:text-[10px] uppercase tracking-[0.4em] text-white/90 font-bold drop-shadow-md">01 — THE START</p>
                 </div>
                 <div className="flex flex-col gap-4">
-                  <p className="text-[10px] md:text-xs text-black/30 uppercase tracking-[0.5em] font-bold">01 — THE START</p>
                   <h3 className="text-3xl md:text-5xl lg:text-7xl font-black italic tracking-[-0.03em] text-black leading-[1.1]">&ldquo;Maybe the world just<br className="hidden md:block"/> needed a little more noise&rdquo;</h3>
                   <div className="w-16 h-[2px] bg-black/20 mt-2" />
                 </div>
@@ -249,10 +248,9 @@ export default function Home() {
                 <div className="relative w-full md:w-[38vw] aspect-[3/4] group shadow-2xl overflow-hidden bg-zinc-100 shrink-0">
                   <Image src="/images/DSC08700.jpg" alt="Studio Boy" fill sizes="(max-width:768px) 100vw, 38vw" className="object-cover transition-transform duration-1000 group-hover:scale-105 grayscale" loading="lazy" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-                  <p className="absolute bottom-5 left-5 text-[9px] uppercase tracking-[0.4em] text-white/60 font-bold">02</p>
+                  <p className="absolute bottom-4 left-4 md:bottom-5 md:left-5 text-[9px] md:text-[10px] uppercase tracking-[0.4em] text-white/90 font-bold drop-shadow-md">02 — THE MOVEMENT</p>
                 </div>
                 <div className="flex flex-col pt-4 md:pt-[20%] gap-4 md:gap-5">
-                  <p className="text-[10px] md:text-xs text-black/30 uppercase tracking-[0.5em] font-bold">02 — THE MOVEMENT</p>
                   <h3 className="text-2xl md:text-4xl lg:text-6xl font-black uppercase tracking-[-0.03em] text-black italic leading-[1.1]">AGAINST<br/>THE TIDE.</h3>
                   <div className="border-l-2 md:border-l-4 border-black/10 pl-4 md:pl-5 py-1">
                     <p className="text-black/50 text-xs md:text-base leading-relaxed tracking-wide max-w-sm">
@@ -267,10 +265,9 @@ export default function Home() {
                 <div className="relative w-full md:w-[42vw] aspect-[4/5] group shadow-2xl overflow-hidden bg-zinc-100 shrink-0">
                   <Image src="/images/DSC07437.JPG" alt="Brick Wall Girl" fill sizes="(max-width:768px) 100vw, 42vw" className="object-cover transition-transform duration-1000 group-hover:scale-105" loading="lazy" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                  <p className="absolute bottom-5 right-5 text-[9px] uppercase tracking-[0.4em] text-white/60 font-bold">03</p>
+                  <p className="absolute bottom-4 right-4 md:bottom-5 md:right-5 text-[9px] md:text-[10px] uppercase tracking-[0.4em] text-white/90 font-bold drop-shadow-md">03 — THE PRESENCE</p>
                 </div>
                 <div className="flex flex-col pt-4 md:pb-[12%] gap-4 md:gap-5 items-start md:items-end text-left md:text-right">
-                  <p className="text-[10px] md:text-xs text-black/30 uppercase tracking-[0.5em] font-bold">03 — THE PRESENCE</p>
                   <h3 className="text-2xl md:text-4xl lg:text-6xl font-black uppercase tracking-[-0.03em] text-black leading-[1.1]">OWN THE<br/>STREET.</h3>
                   <div className="border-l-2 md:border-r-4 md:border-l-0 border-black/10 pl-4 md:pl-0 md:pr-5 py-1">
                     <p className="text-black/50 text-xs md:text-base leading-relaxed tracking-wide max-w-sm">
@@ -284,10 +281,9 @@ export default function Home() {
                 <div className="relative w-full md:w-[48vw] aspect-[2/3] md:aspect-[3/4] group shadow-2xl overflow-hidden bg-zinc-100 shrink-0">
                   <Image src="/images/DSC07681.jpg" alt="Scooter Gang" fill sizes="(max-width:768px) 100vw, 48vw" className="object-cover transition-transform duration-1000 group-hover:scale-105" loading="lazy" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                  <p className="absolute bottom-5 left-5 text-[9px] uppercase tracking-[0.4em] text-white/60 font-bold">04</p>
+                  <p className="absolute bottom-4 left-4 md:bottom-5 md:left-5 text-[9px] md:text-[10px] uppercase tracking-[0.4em] text-white/90 font-bold drop-shadow-md">04 — THE VOICE</p>
                 </div>
                 <div className="flex flex-col items-start md:items-start text-left gap-4 md:gap-5 md:px-12">
-                  <p className="text-[10px] md:text-xs text-black/30 uppercase tracking-[0.5em] font-bold">04 — THE VOICE</p>
                   <h3 className="text-2xl md:text-4xl lg:text-6xl font-black uppercase tracking-[-0.03em] text-black leading-[1.1] italic">UN-SILENCED.</h3>
                   <div className="w-12 h-[2px] bg-black/15" />
                   <p className="text-black/50 text-xs md:text-base leading-relaxed tracking-wide max-w-sm">
@@ -301,10 +297,9 @@ export default function Home() {
                 <div className="relative w-full md:w-[52vw] aspect-video md:aspect-[4/3] group shadow-2xl overflow-hidden bg-zinc-100 shrink-0">
                   <Image src="/images/DSC07193.JPG" alt="Dark Mood Boy" fill sizes="(max-width:768px) 100vw, 52vw" className="object-cover transition-transform duration-1000 group-hover:scale-105" loading="lazy" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-                  <p className="absolute bottom-5 left-5 text-[9px] uppercase tracking-[0.4em] text-white/60 font-bold">05</p>
+                  <p className="absolute bottom-4 left-4 md:bottom-5 md:left-5 text-[9px] md:text-[10px] uppercase tracking-[0.4em] text-white/90 font-bold drop-shadow-md">05 — THE EXPRESSION</p>
                 </div>
                 <div className="flex flex-col items-start md:items-end text-left md:text-right gap-4 md:gap-5">
-                  <p className="text-[10px] md:text-xs text-black/30 uppercase tracking-[0.5em] font-bold">05 — THE EXPRESSION</p>
                   <h3 className="text-2xl md:text-4xl lg:text-6xl font-black uppercase tracking-[-0.03em] text-black leading-[1.1]">SPEAK THROUGH<br/>STYLE.</h3>
                   <div className="w-12 h-[2px] bg-black/15 self-start md:self-end" />
                   <p className="text-black/50 text-xs md:text-base leading-relaxed tracking-wide max-w-sm">
@@ -318,10 +313,9 @@ export default function Home() {
                 <div className="relative w-full md:w-[58vw] aspect-[16/10] group shadow-2xl overflow-hidden bg-zinc-100 shrink-0">
                   <Image src="/images/work2.jpg" alt="Colorful Building Girl" fill sizes="(max-width:768px) 100vw, 58vw" className="object-cover transition-transform duration-1000 group-hover:scale-105" loading="lazy" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-                  <p className="absolute bottom-5 right-5 text-[9px] uppercase tracking-[0.4em] text-white/60 font-bold">06</p>
+                  <p className="absolute bottom-4 right-4 md:bottom-5 md:right-5 text-[9px] md:text-[10px] uppercase tracking-[0.4em] text-white/90 font-bold drop-shadow-md">06 — THE FORM</p>
                 </div>
                 <div className="flex flex-col justify-end pb-4 md:pb-14 gap-4 md:gap-5">
-                  <p className="text-[10px] md:text-xs text-black/30 uppercase tracking-[0.5em] font-bold">06 — THE FORM</p>
                   <h3 className="text-2xl md:text-4xl lg:text-6xl font-black uppercase tracking-[-0.03em] text-black leading-[1.1] italic">EFFORTLESS.</h3>
                   <div className="w-12 h-[2px] bg-black/15" />
                   <p className="text-black/50 text-xs md:text-base leading-relaxed tracking-wide max-w-md">
@@ -330,14 +324,17 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="flex flex-col w-[100%] md:w-[92vw] gap-0 mt-12 bg-black text-white shadow-2xl overflow-hidden">
-                <div className="px-6 md:px-16 py-12 md:py-16 border-b border-white/5">
-                  <p className="text-xs md:text-sm text-white/20 uppercase tracking-[0.6em] font-bold mb-6">07 — FINAL STATEMENT</p>
-                  <h3 className="text-4xl md:text-6xl lg:text-[8rem] font-black italic tracking-[-0.04em] text-white leading-none">
+              <div className="flex flex-col w-[100%] md:w-[92vw] gap-0 mt-12 bg-black text-white shadow-2xl overflow-hidden relative">
+                <div className="px-6 md:px-16 py-12 md:py-16 border-b border-white/5 absolute -top-[1000px]">
+                  {/* Hid this block physically but kept structure for backward comp if needed, actually let's just remove the text and move it */}
+                </div>
+                <div className="px-6 md:px-16 pt-16 pb-6 md:py-16">
+                  <h3 className="text-4xl md:text-6xl lg:text-[8rem] font-black italic tracking-[-0.04em] text-white leading-[1] md:leading-none">
                     &ldquo;Let the city speak&rdquo;
                   </h3>
                 </div>
                 <div className="relative w-full aspect-[4/3] md:aspect-[21/9] group overflow-hidden bg-zinc-900">
+                  <p className="absolute top-4 left-4 md:top-8 md:left-8 text-[9px] md:text-[10px] uppercase tracking-[0.4em] text-white/50 font-bold drop-shadow-md z-10 hidden md:block">07 — FINAL STATEMENT</p>
                   <Image src="/images/DSC07728.jpg" alt="Glam Finale" fill sizes="100vw" className="object-cover transition-transform duration-1000 group-hover:scale-105" loading="lazy" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent md:bg-gradient-to-r md:from-black/60 md:via-transparent md:to-transparent" />
                   <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 md:gap-0">
