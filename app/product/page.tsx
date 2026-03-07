@@ -58,7 +58,7 @@ export default function ProductPage() {
   const sliderRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const targetDate = new Date("2026-03-13T23:59:59").getTime();
+    const targetDate = new Date("2026-03-14T18:00:00+07:00").getTime();
     const interval = setInterval(() => {
       const now = new Date().getTime();
       const difference = targetDate - now;
@@ -91,8 +91,8 @@ export default function ProductPage() {
     return () => clearInterval(swipeInterval);
   }, []);
 
-  const TSHIRT_IMAGES = ["/images/front.png", "/images/back.png", "/images/regular_actor1.jpg", "/images/regular_actor2.jpg", "/images/product-1.jpg", "/images/couple.jpg"]; 
-  const CROP_IMAGES = ["/images/front-crop.png", "/images/back-crop.png", "/images/crop_actor.jpg", "/images/crop_actor2.jpg", "/images/product-2.jpg", "/images/couple.jpg"];   
+  const TSHIRT_IMAGES = ["/images/front.png", "/images/back.png", "/images/product-1.jpg", "/images/regular_actor1.jpg", "/images/regular_actor2.jpg"]; 
+  const CROP_IMAGES = ["/images/front-crop.png", "/images/back-crop.png", "/images/product-2.jpg", "/images/crop_actor2.jpg", "/images/crop_actor.jpg"];   
   const productImages = selectedStyle === "T-SHIRT" ? TSHIRT_IMAGES : CROP_IMAGES;
 
   const PRICE_PER_UNIT = 329;
@@ -222,65 +222,69 @@ export default function ProductPage() {
           </div>
 
           {/* 🌟 7 Days Promo + Countdown Combined 🌟 */}
-          <div className="relative overflow-hidden bg-gradient-to-br from-red-950 to-black border border-red-500/30 p-1">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-red-600 blur-[80px] opacity-30 animate-pulse" />
-            <div className="bg-black/40 backdrop-blur-md p-5 sm:p-6 relative z-10 space-y-5">
+          <div className="relative overflow-hidden bg-[#050505] border border-white/10 rounded-sm">
+            <div className="absolute -top-10 -right-10 w-40 h-40 bg-red-600/20 blur-[60px] animate-pulse pointer-events-none" />
+            <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-red-800/20 blur-[60px] pointer-events-none" />
+            
+            <div className="p-5 sm:p-7 relative z-10 flex flex-col gap-6">
               
               {/* Header + Countdown */}
-              <div className="flex items-start justify-between gap-3 flex-wrap">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-5">
                 <div className="flex items-center gap-3">
-                  <span className="flex h-3 w-3 relative">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500" />
-                  </span>
-                  <h3 className="text-sm sm:text-base font-black uppercase tracking-widest text-white italic">7 Days Exclusive</h3>
+                  <div className="relative flex items-center justify-center w-4 h-4">
+                    <span className="animate-ping absolute w-full h-full rounded-full bg-red-500 opacity-60"></span>
+                    <div className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,1)]" />
+                  </div>
+                  <div>
+                    <h3 className="text-base sm:text-lg font-black uppercase tracking-[0.2em] text-white italic leading-none">7 DAYS EXCLUSIVE</h3>
+                    <p className="text-[9px] text-gray-500 tracking-[0.3em] uppercase mt-1">Limited Time Offer</p>
+                  </div>
                 </div>
 
-                {/* Compact Countdown inline */}
+                {/* Cyberpunk/Sleek Countdown */}
                 {promoTimeLeft && (
-                  <div className="flex items-center gap-2 text-white font-black italic">
-                    <span className="text-xl text-red-400">{String(promoTimeLeft.d).padStart(2,'0')}</span>
-                    <span className="text-red-500/50 text-sm">d</span>
-                    <span className="text-xl">{String(promoTimeLeft.h).padStart(2,'0')}</span>
-                    <span className="text-white/30 text-sm">h</span>
-                    <span className="text-xl">{String(promoTimeLeft.m).padStart(2,'0')}</span>
-                    <span className="text-white/30 text-sm">m</span>
-                    <span className="text-xl text-red-400">{String(promoTimeLeft.s).padStart(2,'0')}</span>
-                    <span className="text-red-500/50 text-sm">s</span>
+                  <div className="flex items-baseline justify-center sm:justify-end gap-2 bg-black/40 border border-white/10 px-4 py-2 self-start sm:self-auto">
+                    <div className="text-center"><span className="text-lg md:text-xl font-black text-red-500 italic">{String(promoTimeLeft.d).padStart(2,'0')}</span><span className="text-[8px] text-gray-500 uppercase block -mt-1">Days</span></div><span className="text-white/20">:</span>
+                    <div className="text-center"><span className="text-lg md:text-xl font-black text-white italic">{String(promoTimeLeft.h).padStart(2,'0')}</span><span className="text-[8px] text-gray-500 uppercase block -mt-1">Hrs</span></div><span className="text-white/20">:</span>
+                    <div className="text-center"><span className="text-lg md:text-xl font-black text-white italic">{String(promoTimeLeft.m).padStart(2,'0')}</span><span className="text-[8px] text-gray-500 uppercase block -mt-1">Min</span></div><span className="text-white/20">:</span>
+                    <div className="text-center"><span className="text-lg md:text-xl font-black text-red-500 italic">{String(promoTimeLeft.s).padStart(2,'0')}</span><span className="text-[8px] text-gray-500 uppercase block -mt-1">Sec</span></div>
                   </div>
                 )}
               </div>
 
-              <p className="text-[10px] sm:text-xs text-red-400/80 tracking-[0.2em] uppercase font-bold">
-                ( Max 6 items per order • Mix & Match allowed )
-              </p>
+              {/* Tiers */}
+              <div className="flex flex-col gap-3">
+                <p className="text-[10px] text-gray-400 tracking-[0.2em] uppercase font-bold px-1">
+                   Buy More, Save More (Max 6)
+                </p>
 
-              <div className="grid grid-cols-2 gap-2">
-                <div className="flex justify-between items-center border border-white/10 p-3">
-                  <span className="text-xs font-bold text-gray-300">1 ITEM</span>
-                  <span className="text-sm font-black text-white">329.-</span>
-                </div>
-                <div className="flex justify-between items-center border border-white/10 p-3 bg-red-500/5">
-                  <div className="flex flex-col">
-                    <span className="text-xs font-bold text-gray-300">2 ITEMS</span>
-                    <span className="text-[9px] text-green-400 font-bold">Save 68.-</span>
+                <div className="grid grid-cols-2 xl:grid-cols-4 gap-2">
+                  <div className="flex flex-col justify-center items-center text-center border border-white/5 bg-white/[0.02] p-4 hover:border-white/20 transition-colors">
+                    <span className="text-[10px] font-bold tracking-widest text-gray-400 uppercase">1 ITEM</span>
+                    <span className="text-lg font-black text-white italic mt-1">329.-</span>
                   </div>
-                  <span className="text-sm font-black text-white">590.-</span>
-                </div>
-                <div className="flex justify-between items-center border border-white/10 p-3 bg-red-500/10">
-                  <div className="flex flex-col">
-                    <span className="text-xs font-bold text-gray-300">4 ITEMS</span>
-                    <span className="text-[9px] text-green-400 font-bold">Save 136.-</span>
+                  <div className="flex flex-col justify-center items-center text-center border border-red-500/10 bg-red-500/[0.02] p-4 hover:border-red-500/30 transition-colors">
+                    <span className="text-[10px] font-bold tracking-widest text-gray-400 uppercase">2 ITEMS</span>
+                    <span className="text-lg font-black text-white italic mt-1 bg-gradient-to-r from-red-400 to-white bg-clip-text text-transparent">590.-</span>
+                    <span className="text-[9px] text-red-500 font-bold uppercase tracking-widest mt-1">Save 68.-</span>
                   </div>
-                  <span className="text-sm font-black text-white">1,180.-</span>
-                </div>
-                <div className="flex justify-between items-center border border-red-500/30 p-3 bg-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.2)]">
-                  <div className="flex flex-col">
-                    <span className="text-xs font-bold text-red-200">6 ITEMS <span className="text-[9px] text-red-500">(MAX)</span></span>
-                    <span className="text-[9px] text-green-400 font-black">Save 204.-</span>
+                  <div className="flex flex-col justify-center items-center text-center border border-red-500/20 bg-red-500/[0.04] p-4 hover:border-red-500/40 transition-colors">
+                    <span className="text-[10px] font-bold tracking-widest text-gray-400 uppercase">4 ITEMS</span>
+                    <span className="text-lg font-black text-white italic mt-1 bg-gradient-to-r from-red-500 to-white bg-clip-text text-transparent">1,180.-</span>
+                    <span className="text-[9px] text-red-500 font-bold uppercase tracking-widest mt-1">Save 136.-</span>
                   </div>
-                  <span className="text-base font-black text-white">1,770.-</span>
+                  <div className="flex flex-col justify-center items-center text-center border border-red-500/40 bg-red-500/[0.08] p-4 relative overflow-hidden group hover:border-red-500 transition-colors cursor-default">
+                    <div className="absolute inset-0 bg-gradient-to-tr from-red-600/10 to-transparent group-hover:from-red-600/20 transition-all"></div>
+                    <span className="text-[10px] items-center gap-1 font-bold tracking-widest text-red-300 uppercase relative z-10 flex">
+                      6 ITEMS <span className="text-[8px] bg-red-600/80 text-white px-1 py-0.5 rounded-sm">MAX</span>
+                    </span>
+                    <span className="text-xl font-black text-white italic mt-1 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)] relative z-10">1,770.-</span>
+                    <span className="text-[10px] text-white font-black bg-red-600 px-2 mt-1 relative z-10 shadow-[0_0_10px_rgba(239,68,68,0.5)]">SAVE 204.-</span>
+                  </div>
                 </div>
+                <p className="text-[9px] text-red-500/60 font-bold tracking-[0.1em] uppercase text-right pt-1 opacity-70">
+                  *Mix & Match T-Shirt and Crop Allowed
+                </p>
               </div>
             </div>
           </div>
@@ -355,7 +359,7 @@ export default function ProductPage() {
             <p className="text-white uppercase tracking-widest font-bold mb-4 text-[10px]">Product Detail</p>
             <p>— Fabric: 100% Premium Cotton Comb 20</p>
             <p>— Print: High-Quality Silk Screen</p>
-            <p>— Fit: Boxy Oversized (T-Shirt) / Fitted Crop</p>
+            <p>— Fit: T-Shirt / Crop</p>
             <p>— Tag: Custom TU LUMORA Woven Label</p>
             <p className="text-gray-600 pt-2 border-t border-white/5">— Fabric Care: Hand wash or machine wash cold / Do not bleach / Hang dry / Do not tumble dry / Iron on low heat, avoid print area</p>
           </div>
@@ -382,10 +386,6 @@ export default function ProductPage() {
         </div>
       </div>
 
-      {/* Fixed LINE OA badge */}
-      <a href="https://lin.ee/19k0kWS" target="_blank" className="fixed bottom-6 right-6 z-50 bg-[#06C755] text-white text-[10px] font-black uppercase tracking-widest px-4 py-3 shadow-[0_0_20px_rgba(6,199,85,0.4)] hover:opacity-90 transition-all flex items-center gap-2">
-        💬 LINE OA
-      </a>
     </main>
   );
 }

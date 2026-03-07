@@ -111,6 +111,7 @@ export default function Home() {
               >
                 LOOKBOOK
               </button>
+              <a href="https://lumo.mightbad.com" onClick={() => setMenuOpen(false)} target="_blank" className="text-3xl md:text-5xl font-black uppercase tracking-[0.2em] text-white/80 hover:text-white transition-colors italic">MAGAZINE</a>
               <a href="https://lin.ee/19k0kWS" onClick={() => setMenuOpen(false)} target="_blank" className="text-3xl md:text-5xl font-black uppercase tracking-[0.2em] text-white/80 hover:text-white transition-colors italic">CONTACT</a>
             </nav>
           </motion.div>
