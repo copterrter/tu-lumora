@@ -22,7 +22,21 @@ export default function Home() {
 
   useEffect(() => {
     const handleScroll = () => {
-      setShowFloatingBtn(window.scrollY > window.innerHeight * 0.8);
+      const scrollPosition = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const scrolledPastHero = scrollPosition > windowHeight * 0.8;
+      
+      let hideAtFinale = false;
+      const finaleElement = document.getElementById("finale-section");
+      if (finaleElement) {
+        const finaleRect = finaleElement.getBoundingClientRect();
+        // Hide button when the finale section reaches the bottom 20% of the screen
+        if (finaleRect.top < windowHeight * 0.8) {
+          hideAtFinale = true;
+        }
+      }
+      
+      setShowFloatingBtn(scrolledPastHero && !hideAtFinale);
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
@@ -324,7 +338,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="flex flex-col w-[100%] md:w-[92vw] gap-0 mt-12 bg-black text-white shadow-2xl overflow-hidden relative">
+              <div id="finale-section" className="flex flex-col w-[100%] md:w-[92vw] gap-0 mt-12 bg-black text-white shadow-2xl overflow-hidden relative">
                 <div className="px-6 md:px-16 py-12 md:py-16 border-b border-white/5 absolute -top-[1000px]">
                   {/* Hid this block physically but kept structure for backward comp if needed, actually let's just remove the text and move it */}
                 </div>
