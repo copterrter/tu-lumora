@@ -163,8 +163,8 @@ export default function CheckoutPage() {
                         <p className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Bank</p>
                         <p className="text-sm font-black text-white tracking-wider">BANGKOK BANK <span className="text-xs font-medium text-gray-300 ml-1">(ธ.กรุงเทพ)</span></p>
                       </div>
-                      <div className="w-8 h-8 bg-blue-800 rounded-full flex items-center justify-center shrink-0 shadow-[0_0_10px_rgba(30,64,175,0.5)]">
-                        <span className="text-white font-black text-xs">BBL</span>
+                      <div className="w-12 h-12 shrink-0 flex items-center justify-center rounded-xl overflow-hidden shadow-[0_0_15px_rgba(30,64,175,0.3)]">
+                        <img src="/images/BB.png" alt="Bangkok Bank Logo" className="w-full h-full object-cover" />
                       </div>
                     </div>
                     
