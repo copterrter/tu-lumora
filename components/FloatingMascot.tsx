@@ -26,7 +26,7 @@ export default function FloatingMascot() {
         repeat: Infinity,
         ease: "easeInOut",
       }}
-      className="fixed bottom-[15%] right-[10%] z-[9999] cursor-grab active:cursor-grabbing w-24 md:w-32 hidden md:block"
+      className="fixed bottom-[12%] right-[5%] md:bottom-[15%] md:right-[10%] z-[9999] cursor-grab active:cursor-grabbing w-20 md:w-32"
       title="Drag me!"
     >
       <img
