@@ -31,10 +31,10 @@ export default function Showcase() {
 
         {/* โลโก้ Mascot ตรงกลาง กดแล้วกลับหน้าแรกได้ */}
         <img 
-          src="/images/mascot.png" 
-          alt="TU LUMORA Mascot" 
+          src="/images/BB.png" 
+          alt="TU LUMORA Logo" 
           onClick={() => router.push("/")}
-          className="h-12 md:h-16 w-auto object-contain cursor-pointer hover:scale-110 transition-transform duration-300"
+          className="h-12 md:h-16 w-auto object-contain cursor-pointer transition-transform duration-300 drop-shadow-lg"
         />
 
         <button 

@@ -159,7 +159,7 @@ export default function Home() {
               >
                 <Link
                   href="/product"
-                  className="group relative px-10 py-4 border border-white overflow-hidden transition-all duration-500 hover:border-transparent inline-block"
+                  className="group relative px-10 py-4 border border-white overflow-hidden transition-all duration-500 hover:border-transparent inline-block shadow-[0_0_15px_rgba(255,255,255,0.2)] hover:shadow-[0_0_30px_rgba(255,255,255,0.6)]"
                 >
                   <span className="relative z-10 text-[11px] font-black uppercase tracking-[0.5em] group-hover:text-black transition-colors duration-500 [text-shadow:2px_2px_0px_rgba(0,0,0,0.3)]">
                     PRE-ORDER NOW

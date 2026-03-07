@@ -91,8 +91,8 @@ export default function ProductPage() {
     return () => clearInterval(swipeInterval);
   }, []);
 
-  const TSHIRT_IMAGES = ["/images/front.png", "/images/back.png", "/images/product-1.jpg", "/images/couple.jpg"]; 
-  const CROP_IMAGES = ["/images/front-crop.png", "/images/back-crop.png", "/images/product-2.jpg", "/images/couple.jpg"];   
+  const TSHIRT_IMAGES = ["/images/front.png", "/images/back.png", "/images/regular_actor1.jpg", "/images/regular_actor2.jpg", "/images/product-1.jpg", "/images/couple.jpg"]; 
+  const CROP_IMAGES = ["/images/front-crop.png", "/images/back-crop.png", "/images/crop_actor.jpg", "/images/crop_actor2.jpg", "/images/product-2.jpg", "/images/couple.jpg"];   
   const productImages = selectedStyle === "T-SHIRT" ? TSHIRT_IMAGES : CROP_IMAGES;
 
   const PRICE_PER_UNIT = 329;

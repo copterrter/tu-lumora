@@ -63,7 +63,7 @@ export default function Preloader({ onComplete }: { onComplete: () => void }) {
 
       {/* Mascot — right side */}
       <div className="absolute bottom-16 right-8 w-16 md:w-24 opacity-70">
-        <Image src="/images/mascot.png" alt="Mascot" width={96} height={96} className="w-full object-contain" loading="lazy" />
+        <Image src="/images/BB.png" alt="Logo" width={96} height={96} className="w-full object-contain drop-shadow-lg" loading="lazy" />
       </div>
       
       {/* Progress bar — bottom */}
