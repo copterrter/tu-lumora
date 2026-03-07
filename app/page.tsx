@@ -328,8 +328,8 @@ export default function Home() {
                 <div className="px-6 md:px-16 py-12 md:py-16 border-b border-white/5 absolute -top-[1000px]">
                   {/* Hid this block physically but kept structure for backward comp if needed, actually let's just remove the text and move it */}
                 </div>
-                <div className="px-6 md:px-16 pt-16 pb-6 md:py-16">
-                  <h3 className="text-4xl md:text-6xl lg:text-[8rem] font-black italic tracking-[-0.04em] text-white leading-[1] md:leading-none">
+                <div className="px-4 md:px-16 pt-8 pb-4 md:pt-12 md:pb-8 flex justify-center w-full">
+                  <h3 className="text-[9vw] sm:text-4xl md:text-6xl lg:text-[7rem] font-black italic tracking-[-0.04em] text-white leading-none whitespace-nowrap">
                     &ldquo;Let the city speak&rdquo;
                   </h3>
                 </div>
@@ -368,11 +368,19 @@ export default function Home() {
                   TUSU.RANGSIT
                 </a>
               </div>
-              <div className="space-y-1">
+              <div className="space-y-4 pt-4">
                 <p className="text-[8px] text-gray-800 uppercase tracking-[0.4em] font-black">Website Engineered By</p>
-                <a href="https://github.com/copterrter" target="_blank" className="text-[10px] font-bold text-white/30 hover:text-white transition-colors tracking-[0.3em] uppercase inline-block">
-                  VAROTE MAIDERATA
-                </a>
+                <div className="flex flex-col gap-3">
+                  <a href="https://www.instagram.com/copterrter/?hl=en" target="_blank" className="text-[10px] font-bold text-white/30 hover:text-white transition-colors tracking-[0.3em] uppercase inline-block">
+                    copterrter
+                  </a>
+                  <a href="https://www.instagram.com/in33dm0respace/?hl=en" target="_blank" className="text-[10px] font-bold text-white/30 hover:text-white transition-colors tracking-[0.3em] uppercase inline-block">
+                    in33dm0respace
+                  </a>
+                  <a href="https://www.instagram.com/korkwai/?hl=en" target="_blank" className="text-[10px] font-bold text-white/30 hover:text-white transition-colors tracking-[0.3em] uppercase inline-block">
+                    korkwai
+                  </a>
+                </div>
               </div>
             </div>
           </footer>
