@@ -225,7 +225,7 @@ export default function CheckoutPage() {
               {orderData.items.map((item: any, idx: number) => (
                 <div key={idx} className="flex justify-between items-start">
                   <div>
-                    <p className="font-black italic text-base uppercase leading-tight">PRE-ORDER — {item.title}</p>
+                    <p className="font-black italic text-base uppercase leading-tight">[PRE-ORDER] TU LUMORA {item.style}</p>
                     <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold mt-1">Size: {item.size} | Qty: {item.quantity}</p>
                   </div>
                   <span className="font-bold text-sm text-gray-400 shrink-0 ml-4">฿{item.quantity * 329}</span>

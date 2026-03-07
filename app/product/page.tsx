@@ -334,7 +334,7 @@ export default function ProductPage() {
                 {cart.map((item, idx) => (
                   <div key={idx} className="flex justify-between items-center bg-[#0a0a0a] p-4 border border-white/5">
                     <div>
-                      <p className="font-bold text-xs italic">{item.title} ({item.size})</p>
+                      <p className="font-bold text-xs italic">[PRE-ORDER] TU LUMORA {item.style} ({item.size})</p>
                       <p className="text-[11px] font-black tracking-widest text-white mt-1">x{item.quantity}</p>
                     </div>
                     <button onClick={() => removeFromCart(idx)} className="text-xs opacity-40 hover:opacity-100 uppercase tracking-widest text-red-500">[ Remove ]</button>
