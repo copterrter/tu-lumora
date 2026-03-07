@@ -159,9 +159,9 @@ export default function Home() {
               >
                 <Link
                   href="/product"
-                  className="group relative px-10 py-4 border border-white overflow-hidden transition-all duration-500 hover:border-transparent inline-block shadow-[0_0_15px_rgba(255,255,255,0.2)] hover:shadow-[0_0_30px_rgba(255,255,255,0.6)]"
+                  className="group relative px-6 py-3 md:px-10 md:py-4 border border-white/50 hover:border-white overflow-hidden transition-all duration-500 inline-block shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.5)] backdrop-blur-sm"
                 >
-                  <span className="relative z-10 text-[11px] font-black uppercase tracking-[0.5em] group-hover:text-black transition-colors duration-500 [text-shadow:2px_2px_0px_rgba(0,0,0,0.3)]">
+                  <span className="relative z-10 text-[9px] md:text-[11px] font-black uppercase tracking-[0.5em] group-hover:text-black transition-colors duration-500 [text-shadow:2px_2px_4px_rgba(0,0,0,0.5)] group-hover:[text-shadow:none]">
                     PRE-ORDER NOW
                   </span>
                   <div className="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out"></div>
@@ -238,9 +238,9 @@ export default function Home() {
                   <p className="absolute bottom-5 left-5 text-[9px] uppercase tracking-[0.4em] text-white/60 font-bold">01</p>
                 </div>
                 <div className="flex flex-col gap-4">
-                  <h3 className="text-[clamp(2rem,6vw,5rem)] font-black italic tracking-[-0.03em] text-black leading-none">&ldquo;Maybe the world just<br className="hidden md:block"/> needed a little more noise&rdquo;</h3>
-                  <div className="w-16 h-[2px] bg-black/20" />
-                  <p className="text-black/40 text-sm md:text-base tracking-[0.15em] leading-relaxed max-w-2xl uppercase font-light">TU LUMORA — The start of something that was never meant to stay quiet.</p>
+                  <p className="text-[10px] md:text-xs text-black/30 uppercase tracking-[0.5em] font-bold">01 — THE START</p>
+                  <h3 className="text-3xl md:text-5xl lg:text-7xl font-black italic tracking-[-0.03em] text-black leading-[1.1]">&ldquo;Maybe the world just<br className="hidden md:block"/> needed a little more noise&rdquo;</h3>
+                  <div className="w-16 h-[2px] bg-black/20 mt-2" />
                 </div>
               </div>
 
@@ -251,12 +251,12 @@ export default function Home() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                   <p className="absolute bottom-5 left-5 text-[9px] uppercase tracking-[0.4em] text-white/60 font-bold">02</p>
                 </div>
-                <div className="flex flex-col pt-4 md:pt-[20%] gap-5">
-                  <p className="text-xs text-black/25 uppercase tracking-[0.5em] font-bold">AGAINST THE TIDE.</p>
-                  <h3 className="text-[clamp(2.5rem,5vw,4.5rem)] font-black uppercase tracking-[-0.03em] text-black italic leading-none">True style<br/>dares to<br/>swim upstream.</h3>
-                  <div className="border-l-4 border-black/10 pl-5 py-1">
-                    <p className="text-black/50 text-sm md:text-base leading-relaxed tracking-wide max-w-sm">
-                      Timeless in its defiance, this collection is crafted to ignite a new cultural movement. Redefining the campus aesthetic by championing absolute fluidity in wear. Stand apart, effortlessly.
+                <div className="flex flex-col pt-4 md:pt-[20%] gap-4 md:gap-5">
+                  <p className="text-[10px] md:text-xs text-black/30 uppercase tracking-[0.5em] font-bold">02 — THE MOVEMENT</p>
+                  <h3 className="text-2xl md:text-4xl lg:text-6xl font-black uppercase tracking-[-0.03em] text-black italic leading-[1.1]">AGAINST<br/>THE TIDE.</h3>
+                  <div className="border-l-2 md:border-l-4 border-black/10 pl-4 md:pl-5 py-1">
+                    <p className="text-black/50 text-xs md:text-base leading-relaxed tracking-wide max-w-sm">
+                      True style dares to swim upstream. Timeless in its defiance, this collection is crafted to ignite a new cultural movement. We are redefining the campus aesthetic by championing absolute fluidity in wear, an uncommon simplicity that speaks for itself. Stand apart, effortlessly.
                     </p>
                   </div>
                 </div>
@@ -269,12 +269,12 @@ export default function Home() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                   <p className="absolute bottom-5 right-5 text-[9px] uppercase tracking-[0.4em] text-white/60 font-bold">03</p>
                 </div>
-                <div className="flex flex-col pt-4 md:pb-[12%] gap-5 items-start md:items-end text-left md:text-right">
-                  <p className="text-xs text-black/25 uppercase tracking-[0.5em] font-bold">OWN THE STREET</p>
-                  <h3 className="text-[clamp(2.5rem,5vw,4.5rem)] font-black uppercase tracking-[-0.03em] text-black leading-none">Confidence<br/>is something<br/>you carry.</h3>
-                  <div className="border-r-0 md:border-r-4 md:border-black/10 text-left md:text-right md:pr-5 py-1">
-                    <p className="text-black/50 text-sm md:text-base leading-relaxed tracking-wide max-w-sm">
-                      A fit that moves with you, made for the street and everything that happens on it. Walk your way, take your space, and let your presence speak before you do. Own your voice. Own the street.
+                <div className="flex flex-col pt-4 md:pb-[12%] gap-4 md:gap-5 items-start md:items-end text-left md:text-right">
+                  <p className="text-[10px] md:text-xs text-black/30 uppercase tracking-[0.5em] font-bold">03 — THE PRESENCE</p>
+                  <h3 className="text-2xl md:text-4xl lg:text-6xl font-black uppercase tracking-[-0.03em] text-black leading-[1.1]">OWN THE<br/>STREET.</h3>
+                  <div className="border-l-2 md:border-r-4 md:border-l-0 border-black/10 pl-4 md:pl-0 md:pr-5 py-1">
+                    <p className="text-black/50 text-xs md:text-base leading-relaxed tracking-wide max-w-sm">
+                      Confidence isn&apos;t something you ask for, it&apos;s something you carry. A fit that moves with you, made for the street and everything that happens on it. Walk your way, take your space, and let your presence speak before you do. Own your voice. Own the street.
                     </p>
                   </div>
                 </div>
@@ -286,12 +286,12 @@ export default function Home() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                   <p className="absolute bottom-5 left-5 text-[9px] uppercase tracking-[0.4em] text-white/60 font-bold">04</p>
                 </div>
-                <div className="flex flex-col justify-center items-center md:items-start text-center md:text-left gap-5 md:px-12">
-                  <p className="text-xs text-black/25 uppercase tracking-[0.5em] font-bold">UN-SILENCED.</p>
-                  <h3 className="text-[clamp(2.5rem,5vw,4.5rem)] font-black uppercase tracking-[-0.03em] text-black leading-none italic">You don&apos;t<br/>need to be<br/>loud to be heard.</h3>
+                <div className="flex flex-col items-start md:items-start text-left gap-4 md:gap-5 md:px-12">
+                  <p className="text-[10px] md:text-xs text-black/30 uppercase tracking-[0.5em] font-bold">04 — THE VOICE</p>
+                  <h3 className="text-2xl md:text-4xl lg:text-6xl font-black uppercase tracking-[-0.03em] text-black leading-[1.1] italic">UN-SILENCED.</h3>
                   <div className="w-12 h-[2px] bg-black/15" />
-                  <p className="text-black/50 text-sm md:text-base leading-relaxed tracking-wide max-w-sm">
-                    Simply a quiet nod to those who are tired of being told to stay silent. Inspired by Lumo and his friends who just decided to speak up. The real strength is knowing the value of your own voice, and being brave enough to use it.
+                  <p className="text-black/50 text-xs md:text-base leading-relaxed tracking-wide max-w-sm">
+                    Simply as a quiet nod to those who are tired of being told to stay silent. Inspired by Lumo and his friends who just decided to speak up, this tee is a small reminder, you don&apos;t need to be loud to be heard. The real strength is just knowing the value of your own voice, and being brave enough to use it.
                   </p>
                 </div>
               </div>
@@ -303,12 +303,12 @@ export default function Home() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                   <p className="absolute bottom-5 left-5 text-[9px] uppercase tracking-[0.4em] text-white/60 font-bold">05</p>
                 </div>
-                <div className="flex flex-col items-start md:items-end text-left md:text-right gap-5">
-                  <p className="text-xs text-black/25 uppercase tracking-[0.5em] font-bold">SPEAK THROUGH STYLE</p>
-                  <h3 className="text-[clamp(2.5rem,5vw,4.5rem)] font-black uppercase tracking-[-0.03em] text-black leading-none">Style is<br/>the language<br/>they can&apos;t silence.</h3>
+                <div className="flex flex-col items-start md:items-end text-left md:text-right gap-4 md:gap-5">
+                  <p className="text-[10px] md:text-xs text-black/30 uppercase tracking-[0.5em] font-bold">05 — THE EXPRESSION</p>
+                  <h3 className="text-2xl md:text-4xl lg:text-6xl font-black uppercase tracking-[-0.03em] text-black leading-[1.1]">SPEAK THROUGH<br/>STYLE.</h3>
                   <div className="w-12 h-[2px] bg-black/15 self-start md:self-end" />
-                  <p className="text-black/50 text-sm md:text-base leading-relaxed tracking-wide max-w-sm">
-                    In a city that tells you to stay quiet, style becomes a language. More than fabric, more than a fit — it&apos;s a voice you wear. Because sometimes the loudest thing you can do is simply show up as yourself.
+                  <p className="text-black/50 text-xs md:text-base leading-relaxed tracking-wide max-w-sm">
+                    In a city that tells you to stay quiet, style becomes a language. More than fabric, more than a fit, it&apos;s a voice you wear. Every line, every silhouette is a signal that you refuse to disappear. Because sometimes the loudest thing you can do is simply show up as yourself.
                   </p>
                 </div>
               </div>
@@ -320,35 +320,34 @@ export default function Home() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                   <p className="absolute bottom-5 right-5 text-[9px] uppercase tracking-[0.4em] text-white/60 font-bold">06</p>
                 </div>
-                <div className="flex flex-col justify-end pb-4 md:pb-14 gap-5">
-                  <p className="text-xs text-black/25 uppercase tracking-[0.5em] font-bold">EFFORTLESS.</p>
-                  <h3 className="text-[clamp(2.5rem,4.5vw,4rem)] font-black uppercase tracking-[-0.03em] text-black leading-none italic">Effortless<br/>in form.<br/>Defiant<br/>in spirit.</h3>
+                <div className="flex flex-col justify-end pb-4 md:pb-14 gap-4 md:gap-5">
+                  <p className="text-[10px] md:text-xs text-black/30 uppercase tracking-[0.5em] font-bold">06 — THE FORM</p>
+                  <h3 className="text-2xl md:text-4xl lg:text-6xl font-black uppercase tracking-[-0.03em] text-black leading-[1.1] italic">EFFORTLESS.</h3>
                   <div className="w-12 h-[2px] bg-black/15" />
-                  <p className="text-black/50 text-sm md:text-base leading-relaxed tracking-wide max-w-xs">
-                    Fashion should liberate, not complicate. Woven into every thread is the unyielding soul of those who stand tall and refuse to be consumed by the shadows.
+                  <p className="text-black/50 text-xs md:text-base leading-relaxed tracking-wide max-w-md">
+                    Fashion should liberate, not complicate. We designed this silhouette to be a universal canvas, adapting flawlessly to whoever you are. There is no need to force a look, the confidence is built-in. Woven into every thread is the unyielding soul of those who stand tall and refuse to be consumed by the shadows. Effortless in form. Defiant in spirit.
                   </p>
                 </div>
               </div>
 
-              {/* 7 — Finale */}
               <div className="flex flex-col w-[100%] md:w-[92vw] gap-0 mt-12 bg-black text-white shadow-2xl overflow-hidden">
                 <div className="px-6 md:px-16 py-12 md:py-16 border-b border-white/5">
                   <p className="text-xs md:text-sm text-white/20 uppercase tracking-[0.6em] font-bold mb-6">07 — FINAL STATEMENT</p>
-                  <h3 className="text-[clamp(3rem,8vw,8rem)] font-black italic tracking-[-0.04em] text-white leading-none">
-                    &ldquo;Let the<br/>city speak&rdquo;
+                  <h3 className="text-4xl md:text-6xl lg:text-[8rem] font-black italic tracking-[-0.04em] text-white leading-none">
+                    &ldquo;Let the city speak&rdquo;
                   </h3>
                 </div>
-                <div className="relative w-full aspect-video md:aspect-[21/9] group overflow-hidden bg-zinc-900">
-                  <Image src="/images/DSC07728.jpg" alt="Glam Finale" fill sizes="100vw" className="object-cover transition-transform duration-1000 group-hover:scale-105 opacity-75" loading="lazy" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12 flex justify-between items-end">
+                <div className="relative w-full aspect-[4/3] md:aspect-[21/9] group overflow-hidden bg-zinc-900">
+                  <Image src="/images/DSC07728.jpg" alt="Glam Finale" fill sizes="100vw" className="object-cover transition-transform duration-1000 group-hover:scale-105" loading="lazy" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent md:bg-gradient-to-r md:from-black/60 md:via-transparent md:to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 md:gap-0">
                     <div>
-                      <p className="text-[10px] md:text-xs uppercase tracking-[0.5em] text-white/40 mb-2">TU LUMORA — 2026</p>
-                      <p className="text-white text-sm md:text-xl font-black uppercase tracking-[0.2em] italic [text-shadow:0_2px_10px_rgba(0,0,0,0.8)] max-w-md leading-relaxed">
-                        Redefining campus culture.<br className="hidden md:block"/> Championing absolute fluidity in wear.
+                      <p className="text-[10px] md:text-xs uppercase tracking-[0.5em] text-white/60 mb-2">TU LUMORA — 2026</p>
+                      <p className="text-white/80 text-[9px] md:text-sm lg:text-xl font-black uppercase tracking-[0.1em] md:tracking-[0.2em] italic max-w-xs md:max-w-md leading-relaxed hidden md:block">
+                        Redefining campus culture.<br/>Championing absolute fluidity in wear.
                       </p>
                     </div>
-                    <Link href="/product" className="hidden md:flex items-center gap-3 border border-white/30 px-8 py-4 text-[11px] tracking-[0.4em] uppercase font-black text-white hover:bg-white hover:text-black transition-all shrink-0">
+                    <Link href="/product" className="border border-white/30 px-6 py-3 md:px-8 md:py-4 text-[9px] md:text-[11px] tracking-[0.4em] uppercase font-black text-white hover:bg-white hover:text-black transition-all shrink-0">
                       PRE-ORDER NOW
                     </Link>
                   </div>
