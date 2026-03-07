@@ -14,16 +14,16 @@ export async function POST(request: Request) {
 
     const itemsHtml = items.map((item: any) => `
       <tr>
-        <td style="padding:12px 0;border-bottom:1px solid #1a1a1a;font-family:monospace;font-size:13px;color:#aaa;">
-          PRE-ORDER — ${item.title}
+        <td style="padding:12px 0;border-bottom:1px solid #222;font-family:'Courier New',monospace;font-size:12px;color:#ddd;font-weight:bold;">
+          [PRE-ORDER] ${item.style || item.title}
         </td>
-        <td style="padding:12px 0;border-bottom:1px solid #1a1a1a;text-align:center;font-size:12px;color:#666;">
+        <td style="padding:12px 0;border-bottom:1px solid #222;text-align:center;font-size:12px;color:#888;">
           ${item.size}
         </td>
-        <td style="padding:12px 0;border-bottom:1px solid #1a1a1a;text-align:center;font-size:12px;color:#666;">
+        <td style="padding:12px 0;border-bottom:1px solid #222;text-align:center;font-size:12px;color:#888;">
           x${item.quantity}
         </td>
-        <td style="padding:12px 0;border-bottom:1px solid #1a1a1a;text-align:right;font-family:monospace;font-size:13px;color:#fff;">
+        <td style="padding:12px 0;border-bottom:1px solid #222;text-align:right;font-family:'Courier New',monospace;font-size:13px;color:#fff;">
           ฿${item.quantity * 329}
         </td>
       </tr>
@@ -31,8 +31,8 @@ export async function POST(request: Request) {
 
     const discountHtml = discount > 0 ? `
       <tr>
-        <td colspan="3" style="padding:10px 0;font-size:11px;color:#4ade80;font-weight:bold;letter-spacing:0.1em;text-transform:uppercase;">Squad Promo Saved 🎉</td>
-        <td style="padding:10px 0;text-align:right;font-family:monospace;color:#4ade80;">-฿${discount}</td>
+        <td colspan="3" style="padding:15px 0 5px;font-size:10px;color:#4ade80;font-weight:bold;letter-spacing:0.1em;text-transform:uppercase;">Squad Promo Saved 🎉</td>
+        <td style="padding:15px 0 5px;text-align:right;font-family:'Courier New',monospace;color:#4ade80;">-฿${discount}</td>
       </tr>` : '';
 
     const html = `
@@ -41,125 +41,96 @@ export async function POST(request: Request) {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TU LUMORA — Order Confirmed</title>
+  <title>TU LUMORA — E-Receipt</title>
 </head>
-<body style="margin:0;padding:0;background:#0a0a0a;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#fff;">
-  
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0a0a;">
+<body style="margin:0;padding:0;background:#050505;font-family:'Courier New', Courier, monospace;color:#fff;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#050505;">
     <tr>
-      <td align="center" style="padding:40px 20px;">
+      <td align="center" style="padding:40px 15px;">
         
-        <table width="100%" style="max-width:560px;background:#0d0d0d;border:1px solid #1f1f1f;">
+        <!-- Main Receipt Container -->
+        <table width="100%" style="max-width:480px;background:#111;border:2px dashed #333;border-radius:12px;overflow:hidden;">
           
-          <!-- Header -->
+          <!-- Image/Brand Header -->
           <tr>
-            <td style="background:#000;padding:40px 40px 32px;border-bottom:1px solid #1f1f1f;text-align:center;">
-              <p style="margin:0 0 16px;font-size:10px;letter-spacing:0.5em;text-transform:uppercase;color:#444;">Established 2026</p>
-              <h1 style="margin:0;font-size:28px;font-weight:900;font-style:italic;letter-spacing:-0.04em;text-transform:uppercase;color:#fff;">TU LUMORA</h1>
+            <td style="padding:40px 0 10px;text-align:center;">
+              <img src="https://www.tulumora.com/images/brand.png" alt="TU LUMORA" style="height:35px;opacity:0.9;" />
             </td>
           </tr>
-
-          <!-- Confirmation Banner -->
+          
+          <!-- Mascot & Greeting -->
           <tr>
-            <td style="background:#fff;padding:24px 40px;text-align:center;">
-              <p style="margin:0;font-size:10px;letter-spacing:0.5em;text-transform:uppercase;color:#000;font-weight:900;">ORDER CONFIRMED</p>
-            </td>
-          </tr>
-
-          <!-- Greeting -->
-          <tr>
-            <td style="padding:36px 40px 0;font-size:14px;color:#aaa;line-height:1.8;">
-              <p style="margin:0 0 6px;font-size:12px;letter-spacing:0.15em;text-transform:uppercase;color:#555;">Welcome to the squad,</p>
-              <p style="margin:0;font-size:22px;font-weight:900;font-style:italic;letter-spacing:-0.02em;color:#fff;text-transform:uppercase;">
-                ${firstName} ${lastName}
+            <td style="padding:10px 30px;text-align:center;">
+              <img src="https://www.tulumora.com/images/mascot.png" alt="LUMO Mascot" style="height:140px;margin-bottom:20px;filter:drop-shadow(0 0 10px rgba(255,255,255,0.1));" />
+              <h1 style="margin:0 0 15px;font-size:26px;font-weight:900;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid #333;padding-bottom:20px;">
+                YOOOOO!<br/><span style="color:#fff;">${firstName}</span>
+              </h1>
+              <p style="margin:0;font-size:13px;color:#aaa;line-height:1.7;">
+                LUMO here! 🐾<br/>
+                Just dropping by to say <strong style="color:#fff;">THANK YOU</strong> for joining the squad. Your pre-order is safely locked in my data vault!
               </p>
             </td>
           </tr>
 
-          <!-- Body Text -->
-          <tr>
-            <td style="padding:16px 40px 32px;font-size:12px;color:#555;line-height:1.8;letter-spacing:0.05em;text-transform:uppercase;">
-              Your pre-order has been received and payment verified.<br/>
-              We will contact you via the info provided once your order ships.
-            </td>
-          </tr>
-
-          <!-- Order Summary -->
-          <tr>
-            <td style="padding:0 40px;">
-              <p style="margin:0 0 16px;font-size:10px;letter-spacing:0.4em;text-transform:uppercase;color:#444;font-weight:900;border-top:1px solid #1f1f1f;padding-top:24px;">
-                Order Summary
+          <!-- Spacer -->
+          <tr><td style="padding:10px;"></td></tr>
+          
+          <!-- Order Details -->
+           <tr>
+            <td style="padding:25px 30px;background:#0a0a0a;border-top:2px dashed #222;border-bottom:2px dashed #222;">
+              <p style="margin:0 0 20px;font-size:11px;letter-spacing:0.2em;color:#666;text-transform:uppercase;font-weight:bold;text-align:center;">
+                [ SECURE FILE: ORDER DATA ]
               </p>
+              
               <table width="100%" cellpadding="0" cellspacing="0">
-                <thead>
-                  <tr>
-                    <th style="text-align:left;font-size:9px;letter-spacing:0.3em;color:#333;text-transform:uppercase;padding-bottom:10px;font-weight:900;">Item</th>
-                    <th style="text-align:center;font-size:9px;letter-spacing:0.3em;color:#333;text-transform:uppercase;padding-bottom:10px;font-weight:900;">Size</th>
-                    <th style="text-align:center;font-size:9px;letter-spacing:0.3em;color:#333;text-transform:uppercase;padding-bottom:10px;font-weight:900;">Qty</th>
-                    <th style="text-align:right;font-size:9px;letter-spacing:0.3em;color:#333;text-transform:uppercase;padding-bottom:10px;font-weight:900;">Price</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${itemsHtml}
-                  ${discountHtml}
-                  <tr>
-                    <td colspan="3" style="padding:16px 0 4px;font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#444;font-weight:900;">Shipping</td>
-                    <td style="padding:16px 0 4px;text-align:right;">
-                      <span style="background:#fff;color:#000;font-size:9px;font-weight:900;padding:2px 8px;letter-spacing:0.2em;text-transform:uppercase;">FREE</span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </td>
-          </tr>
-
-          <!-- Total -->
-          <tr>
-            <td style="padding:24px 40px;border-top:1px solid #1a1a1a;margin-top:16px;">
-              <table width="100%">
+                ${itemsHtml}
+                ${discountHtml}
                 <tr>
-                  <td style="font-size:11px;letter-spacing:0.3em;text-transform:uppercase;color:#444;font-weight:900;">Total Paid</td>
-                  <td style="text-align:right;font-size:28px;font-weight:900;font-style:italic;color:#fff;letter-spacing:-0.02em;">฿${total}</td>
+                   <td colspan="3" style="padding:15px 0 5px;font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.1em;font-weight:bold;">DELIVERY ROUTE</td>
+                   <td style="padding:15px 0 5px;text-align:right;color:#fff;font-weight:bold;">FREE</td>
                 </tr>
               </table>
             </td>
           </tr>
 
-          <!-- Info box -->
+          <!-- Total Header -->
           <tr>
-            <td style="padding:0 40px 32px;">
-              <div style="background:#111;border:1px solid #1f1f1f;padding:20px 24px;">
-                <p style="margin:0 0 8px;font-size:9px;letter-spacing:0.4em;text-transform:uppercase;color:#444;font-weight:900;">What's Next?</p>
-                <p style="margin:0;font-size:11px;color:#555;line-height:1.8;letter-spacing:0.03em;text-transform:uppercase;">
-                  — Your order is now in our system<br/>
-                  — Tracking info will be sent via LINE / IG<br/>
-                  — Estimated delivery: 3-5 business days after dispatch
-                </p>
-              </div>
+             <td style="padding:30px 30px 20px;text-align:center;">
+              <p style="margin:0 0 5px;font-size:10px;color:#666;letter-spacing:0.3em;text-transform:uppercase;font-weight:bold;">TOTAL AMOUNT CLEARED</p>
+              <h2 style="margin:0;font-size:42px;font-weight:900;letter-spacing:-0.05em;color:#fff;">฿${total}</h2>
             </td>
           </tr>
 
-          <!-- LINE OA CTA -->
-          <tr>
-            <td style="padding:0 40px 40px;text-align:center;">
-              <a href="https://lin.ee/19k0kWS" 
-                style="display:inline-block;background:#06C755;color:#fff;padding:14px 32px;font-size:11px;font-weight:900;letter-spacing:0.3em;text-transform:uppercase;text-decoration:none;">
-                💬 Contact LINE OA
-              </a>
+          <!-- Download E-Slip Button / Action -->
+           <tr>
+            <td style="padding:0 30px 40px;text-align:center;">
+              <div style="background:#000;border:1px solid #333;padding:25px 20px;border-radius:8px;">
+                <p style="margin:0 0 20px;font-size:11px;color:#888;letter-spacing:0.05em;line-height:1.6;">
+                  "Screenshot this receipt or download your official digital Squad E-Pass right here 👇"
+                </p>
+                <a href="https://www.tulumora.com" target="_blank" style="display:inline-block;background:#fff;color:#000;text-decoration:none;padding:14px 28px;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:0.2em;border-radius:4px;box-shadow: 0 0 20px rgba(255,255,255,0.2);">
+                  ⬇ DOWNLOAD E-PASS
+                </a>
+              </div>
             </td>
           </tr>
 
           <!-- Footer -->
           <tr>
-            <td style="padding:24px 40px;border-top:1px solid #111;text-align:center;">
-              <p style="margin:0;font-size:9px;color:#2a2a2a;letter-spacing:0.3em;text-transform:uppercase;">
-                TU LUMORA — An Official Project by TUSU.RANGSIT<br/>
-                © 2026 All Rights Reserved
+            <td style="background:#000000;padding:25px 20px;text-align:center;border-top:1px solid #222;">
+              <p style="margin:0;font-size:10px;color:#444;letter-spacing:0.3em;text-transform:uppercase;font-weight:bold;">
+                TU LUMORA X TUSU.RANGSIT<br/>
+                STAY WEIRD, STAY YOU.
               </p>
             </td>
           </tr>
 
         </table>
+
+        <!-- Unsubscribe / Meta footer -->
+        <p style="margin:20px 0 0;font-size:10px;color:#333;text-align:center;font-family:sans-serif;">
+           © 2026 TU LUMORA. Sent securely by LUMO.
+        </p>
       </td>
     </tr>
   </table>
@@ -168,9 +139,9 @@ export async function POST(request: Request) {
     `;
 
     const { data, error } = await resend.emails.send({
-      from: 'TU LUMORA <orders@tulumora.com>',
+      from: 'LUMO <orders@tulumora.com>',
       to: [email],
-      subject: `✅ Order Confirmed — TU LUMORA PRE-ORDER`,
+      subject: `✅ YOUR SQUAD PASS IS READY`,
       html,
     });
 
