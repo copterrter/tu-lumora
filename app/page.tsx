@@ -76,8 +76,8 @@ export default function Home() {
   });
 
   const logoOpacity = useTransform(scrollYProgress, [0, 0.05, 0.95, 1], [0, 1, 1, 0]);
-  // มือถือ: โลโก้โผล่เมื่อเข้าโซน LOOKBOOK (ไม่ผูก scroll ทุกเฟรม = ลดกระชาก)
-  const lookbookInView = useInView(lookbookRef, { amount: 0.05, once: false });
+  // มือถือ: โลโก้โผล่เมื่อเข้าโซน LOOKBOOK — amount เล็ก = แค่เห็นโซนนิดหน่อยก็โผล่ (ไม่กระพริบ)
+  const lookbookInView = useInView(lookbookRef, { amount: 0.01, once: false });
 
   return (
     <>
@@ -266,8 +266,8 @@ export default function Home() {
             </div>
           </section>
 
-          {/* LOOKBOOK — Scroll-linked logo, editorial photos with captions */}
-          <section ref={lookbookRef} className="scroll-section relative w-full bg-white overflow-hidden flex justify-center pb-32">
+          {/* LOOKBOOK — Scroll-linked logo (ไม่ใช้ scroll-section เพื่อให้ ref/scroll คำนวณถูก) */}
+          <section ref={lookbookRef} className="relative w-full bg-white overflow-hidden flex justify-center pb-32">
 
             <motion.div
               style={
