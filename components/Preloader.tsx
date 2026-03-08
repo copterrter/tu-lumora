@@ -16,8 +16,8 @@ export default function Preloader({ onComplete }: { onComplete: () => void }) {
   ];
 
   useEffect(() => {
-    const duration = 3000;
-    const stepMs = 30;
+    const duration = 1500;
+    const stepMs = 20;
     const steps = duration / stepMs;
     let current = 0;
 
@@ -29,11 +29,11 @@ export default function Preloader({ onComplete }: { onComplete: () => void }) {
 
     const imageInterval = setInterval(() => {
       setIndex((prev) => (prev + 1 >= images.length ? 0 : prev + 1));
-    }, 800);
+    }, 400);
 
     const timeout = setTimeout(() => {
       onComplete();
-    }, 3500);
+    }, 1800);
 
     return () => {
       clearInterval(progressInterval);
@@ -45,9 +45,9 @@ export default function Preloader({ onComplete }: { onComplete: () => void }) {
 
   return (
     <motion.div
-      className="fixed inset-0 z-[100] bg-[#0a0a0a] flex flex-col items-center justify-center w-full h-screen"
+      className="fixed inset-0 z-[100] bg-[#0a0a0a] flex flex-col items-center justify-center w-full h-[100dvh]"
       initial={{ y: 0 }}
-      exit={{ y: "-100vh", transition: { duration: 1, ease: [0.76, 0, 0.24, 1] } }}
+      exit={{ y: "-100dvh", transition: { duration: 1, ease: [0.76, 0, 0.24, 1] } }}
     >
       {/* Centered product photo */}
       <div className="w-[60vw] md:w-[25vw] aspect-[3/4] overflow-hidden">
@@ -62,12 +62,12 @@ export default function Preloader({ onComplete }: { onComplete: () => void }) {
       </div>
 
       {/* Mascot — right side */}
-      <div className="absolute bottom-16 right-8 w-16 md:w-24 opacity-70">
-        <Image src="/images/mascot.png" alt="Mascot" width={96} height={96} className="w-full object-contain drop-shadow-lg" loading="lazy" />
+      <div className="absolute bottom-24 md:bottom-16 right-8 w-16 md:w-24 opacity-70">
+        <Image src="/images/mascot-email.png" alt="Mascot" width={96} height={96} className="w-full object-contain drop-shadow-lg" loading="lazy" />
       </div>
       
       {/* Progress bar — bottom */}
-      <div className="absolute bottom-8 w-[60vw] md:w-[25vw] flex flex-col gap-2">
+      <div className="absolute bottom-12 md:bottom-8 w-[60vw] md:w-[25vw] flex flex-col gap-2">
         <div className="w-full h-[1px] bg-white/10 relative overflow-hidden">
           <motion.div
             className="absolute left-0 top-0 h-full bg-white"

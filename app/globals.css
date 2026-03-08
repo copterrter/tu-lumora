@@ -1,13 +1,44 @@
 @import "tailwindcss";
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
   padding: 0;
   background-color: black;
   color: white;
+  /* Snappier touch on mobile, less input delay */
+  touch-action: manipulation;
 }
 /* เวทมนตร์ทำตัวหนังสือโปร่งใสมีแค่เส้นขอบ (สไตล์ Y2B) */
 .border-text {
   -webkit-text-stroke: 2px white; /* ความหนาและสีของเส้นขอบ */
   color: transparent; /* ทำให้สีข้างในโปร่งใส */
+}
+
+@keyframes shimmerSweep {
+  0% { left: -100%; }
+  50% { left: 150%; }
+  100% { left: 150%; }
+}
+
+/* Mobile: smooth native scroll + GPU-friendly */
+@media (max-width: 767px) {
+  html {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    /* Reduce overscroll bounce affecting inner scroll feel */
+    overscroll-behavior-y: contain;
+  }
+  /* Prevent layout thrash from heavy framer-motion elements */
+  .lookbook-logo-sticky {
+    will-change: opacity;
+  }
+  /* Off-screen sections: browser can skip work until near viewport = smoother scroll */
+  .scroll-section {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 80dvh;
+  }
 }

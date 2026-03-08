@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { sendOrderReceipt } from '@/lib/email';
 
 // Initialize Supabase client (Prefer Service Role Key for server-side inserts bypassing RLS)
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -90,15 +91,29 @@ export async function POST(request: Request) {
 
     // 5. Insert Order Securely
     const summaryItems = orderData.items.map((item: any) => `${item.quantity}x ${item.style} (${item.size})`).join(", ");
+    
+    // Aggregate for the specific columns
+    // Map frontend full names back to Supabase enum constraints (regular, crop)
+    const styleStr = orderData.items.map((i: any) => {
+      const itemStyle = String(i.style || "").toUpperCase();
+      if (itemStyle.includes("BABY") || itemStyle.includes("CROP")) return "crop";
+      return "regular";
+    }).join(", ");
+    
+    const sizeStr = orderData.items.map((i: any) => i.size).join(", ");
 
     const { error: insertError } = await supabase.from('orders').insert([{
       firstName: formData.firstName,
       lastName: formData.lastName,
+      email: formData.email,
       phone: formData.phone,
       address: formData.address,
       zipCode: formData.zipCode,
       social_contact: formData.socialContact, 
       product_name: summaryItems,
+      quantity: totalQty,
+      style: styleStr,
+      size: sizeStr,
       total_amount: expectedTotal,
       status: 'paid_and_verified',
       slip_trans_ref: transRef // Saved to prevent future reuse
@@ -111,11 +126,15 @@ export async function POST(request: Request) {
           const { error: retryError } = await supabase.from('orders').insert([{
             firstName: formData.firstName,
             lastName: formData.lastName,
+            email: formData.email,
             phone: formData.phone,
             address: formData.address,
             zipCode: formData.zipCode,
             social_contact: formData.socialContact, 
             product_name: summaryItems,
+            quantity: totalQty,
+            style: styleStr,
+            size: sizeStr,
             total_amount: expectedTotal,
             status: 'paid_and_verified'
           }]);
@@ -126,22 +145,20 @@ export async function POST(request: Request) {
        }
     }
 
-    // 6. Send Email Receipt (fire-and-forget — don't block order success if email fails)
+    // 6. Send Email Receipt
     if (formData.email) {
       const originalTotal = orderData.items.reduce((sum: number, item: any) => sum + (item.quantity * 329), 0);
       const discount = originalTotal - expectedTotal;
-      fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/send-receipt`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: formData.email,
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          items: orderData.items,
-          total: expectedTotal,
-          discount: discount > 0 ? discount : 0,
-        }),
-      }).catch((e) => console.warn('Email send failed (non-blocking):', e));
+      
+      // Call service directly instead of fetch to avoid environment variable issues and ensure delivery
+      await sendOrderReceipt({
+        email: formData.email,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        items: orderData.items,
+        total: expectedTotal,
+        discount: discount > 0 ? discount : 0,
+      }).catch((e: any) => console.warn('Email send failed (non-blocking):', e));
     }
 
     return NextResponse.json({ success: true, message: "สั่งซื้อสำเร็จ" });

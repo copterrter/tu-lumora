@@ -12,17 +12,32 @@ export default function CheckoutPage() {
   const [slipFile, setSlipFile] = useState<File | null>(null);
   const [copied, setCopied] = useState(false);
   const [showPdpaModal, setShowPdpaModal] = useState(false);
-  
+  const [showTimeoutModal, setShowTimeoutModal] = useState(false);
+  const [socialMode, setSocialMode] = useState<"ig" | "line" | "both">("ig");
+
   const [formData, setFormData] = useState({
-    firstName: "", lastName: "", email: "", phone: "", address: "", zipCode: "", socialContact: "" 
+    firstName: "", lastName: "", email: "", phone: "", address: "", zipCode: "",
+    igContact: "", lineContact: "",
   });
+
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [submitAttempted, setSubmitAttempted] = useState(false);
+
   const [timeLeft, setTimeLeft] = useState(600);
 
+  // Session countdown
   useEffect(() => {
-    if (timeLeft <= 0) return;
+    if (timeLeft <= 0) {
+      // Redirect to home when expired
+      router.push("/");
+      return;
+    }
+    if (timeLeft === 30) {
+      setShowTimeoutModal(true);
+    }
     const timer = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
     return () => clearInterval(timer);
-  }, [timeLeft]);
+  }, [timeLeft, router]);
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60).toString().padStart(2, '0');
@@ -36,7 +51,7 @@ export default function CheckoutPage() {
   }, []);
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText("0910792886"); 
+    navigator.clipboard.writeText("0910792886");
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -53,6 +68,58 @@ export default function CheckoutPage() {
       e.target.value = ''; return;
     }
     setSlipFile(file);
+    if (submitAttempted) {
+      setFormErrors(prev => ({ ...prev, slipFile: "" }));
+    }
+  };
+
+  // Validation logic
+  const validateForm = () => {
+    const errors: Record<string, string> = {};
+    if (!formData.firstName.trim()) {
+      errors.firstName = "กรุณากรอกชื่อ";
+    } else if (!/^[a-zA-Zก-๙\s]+$/.test(formData.firstName.trim())) {
+      errors.firstName = "กรุณากรอกเฉพาะตัวอักษรเท่านั้น";
+    }
+    if (!formData.email.trim()) {
+      errors.email = "กรุณากรอกอีเมล";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      errors.email = "รูปแบบอีเมลไม่ถูกต้อง";
+    }
+    if (!formData.phone.trim()) {
+      errors.phone = "กรุณากรอกเบอร์โทรศัพท์";
+    } else if (!/^\d{9,10}$/.test(formData.phone.replace(/[-\s]/g, ""))) {
+      errors.phone = "เบอร์ต้องมี 9-10 หลัก";
+    }
+    if (!formData.address.trim()) errors.address = "กรุณากรอกที่อยู่";
+    if (!formData.zipCode.trim()) {
+      errors.zipCode = "กรุณากรอกรหัสไปรษณีย์";
+    } else if (!/^\d{5}$/.test(formData.zipCode.trim())) {
+      errors.zipCode = "รหัสไปรษณีย์ต้องมี 5 หลัก";
+    }
+    // Social contact — require at least the selected channel
+    if (socialMode === "ig" || socialMode === "both") {
+      if (!formData.igContact.trim()) errors.igContact = "กรุณากรอก Instagram ID";
+    }
+    if (socialMode === "line" || socialMode === "both") {
+      if (!formData.lineContact.trim()) errors.lineContact = "กรุณากรอก LINE ID";
+    }
+    if (!slipFile) errors.slipFile = "กรุณาอัปโหลดสลิปการโอนเงิน";
+    return errors;
+  };
+
+  const handleFieldChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    if (submitAttempted && formErrors[field]) {
+      setFormErrors(prev => ({ ...prev, [field]: "" }));
+    }
+  };
+
+  // Build the combined socialContact string for the order
+  const buildSocialContact = () => {
+    if (socialMode === "ig") return `IG: ${formData.igContact}`;
+    if (socialMode === "line") return `LINE: ${formData.lineContact}`;
+    return `IG: ${formData.igContact} | LINE: ${formData.lineContact}`;
   };
 
   const verifySlipWithRDCW = async (file: File, orderData: any, formData: any) => {
@@ -65,15 +132,30 @@ export default function CheckoutPage() {
   };
 
   const handleConfirmOrder = async () => {
-    if (!formData.firstName || !formData.address || !formData.zipCode || !formData.phone || !formData.socialContact || !slipFile) {
-      return alert("กรุณากรอกข้อมูลให้ครบถ้วน รวมถึงช่อง IG / LINE ID ด้วยครับ");
+    setSubmitAttempted(true);
+    const errors = validateForm();
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      // Scroll to first error
+      const firstErrorField = document.querySelector('[data-error="true"]');
+      firstErrorField?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    if (!pdpaChecked || !noRefundChecked) {
+      setFormErrors(prev => ({
+        ...prev,
+        pdpa: !pdpaChecked ? "กรุณายอมรับนโยบายความเป็นส่วนตัว" : "",
+        noRefund: !noRefundChecked ? "กรุณายืนยันว่ารับทราบเงื่อนไข" : "",
+      }));
+      return;
     }
     setIsSubmitting(true);
     try {
-      const slipResult = await verifySlipWithRDCW(slipFile, orderData, formData);
+      const enrichedFormData = { ...formData, socialContact: buildSocialContact() };
+      const slipResult = await verifySlipWithRDCW(slipFile!, orderData, enrichedFormData);
       if (!slipResult.success) throw new Error(slipResult.message || "การสั่งซื้อไม่สำเร็จ โปรดลองอีกครั้ง");
-      localStorage.removeItem('lumora_cart'); 
-      router.push("/thankyou"); 
+      localStorage.removeItem('lumora_cart');
+      router.push("/thankyou");
     } catch (err: any) {
       alert("แจ้งเตือน: " + (err.message || "เกิดข้อผิดพลาด"));
     } finally {
@@ -87,8 +169,53 @@ export default function CheckoutPage() {
   const discount = originalTotal - orderData.total;
   const canSubmit = pdpaChecked && noRefundChecked && !isSubmitting;
 
+  const inputClass = (field: string) =>
+    `bg-transparent border p-4 text-xs tracking-widest focus:outline-none w-full transition-colors ${
+      formErrors[field]
+        ? "border-red-500 bg-red-500/5 focus:border-red-400"
+        : "border-white/20 focus:border-white"
+    }`;
+
+  const ErrorMsg = ({ field }: { field: string }) =>
+    formErrors[field] ? (
+      <p className="text-red-400 text-[10px] tracking-widest mt-1 font-bold">{formErrors[field]}</p>
+    ) : null;
+
   return (
     <main className="min-h-screen bg-black text-white font-sans selection:bg-white selection:text-black">
+
+      {/* Session Timeout Warning Modal */}
+      {showTimeoutModal && timeLeft > 0 && (
+        <div className="fixed inset-0 z-[200] bg-black/95 backdrop-blur-md flex items-center justify-center p-6">
+          <div className="border border-red-500/40 bg-[#0a0a0a] max-w-sm w-full p-8 text-center space-y-6 shadow-[0_0_60px_rgba(239,68,68,0.15)]">
+            {/* Pulsing icon */}
+            <div className="flex justify-center">
+              <div className="relative flex items-center justify-center w-16 h-16">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-20" />
+                <div className="w-12 h-12 rounded-full border-2 border-red-500 flex items-center justify-center text-red-400 text-2xl">
+                  ⏱
+                </div>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-sm font-black uppercase tracking-[0.3em] text-white">SESSION EXPIRING</h2>
+              <p className="text-[11px] text-gray-400 leading-relaxed">
+                สินค้าที่จองไว้จะถูกปล่อยในอีก
+              </p>
+              <p className="text-5xl font-black italic text-red-400 tabular-nums">
+                {formatTime(timeLeft)}
+              </p>
+              <p className="text-[10px] text-gray-600 uppercase tracking-widest">ระบบจะพากลับหน้าหลักโดยอัตโนมัติ</p>
+            </div>
+            <button
+              onClick={() => setShowTimeoutModal(false)}
+              className="w-full bg-red-600 hover:bg-red-500 text-white py-4 font-black uppercase tracking-[0.3em] text-xs transition-all"
+            >
+              ดำเนินการต่อ
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* PDPA Modal */}
       {showPdpaModal && (
@@ -107,11 +234,11 @@ export default function CheckoutPage() {
       )}
 
       {/* Countdown Banner — TOP */}
-      <div className={`w-full py-3 flex justify-center items-center gap-3 border-b border-white/5 ${timeLeft <= 60 ? 'bg-red-950' : 'bg-[#0a0a0a]'}`}>
-        {timeLeft > 0 && <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-ping" />}
+      <div className={`w-full py-3 flex justify-center items-center gap-3 border-b border-white/5 transition-colors duration-500 ${timeLeft <= 60 ? 'bg-red-950' : 'bg-[#0a0a0a]'}`}>
+        {timeLeft > 0 && <div className={`w-1.5 h-1.5 bg-red-500 rounded-full ${timeLeft <= 60 ? 'animate-ping' : 'animate-pulse'}`} />}
         <p className="text-[10px] tracking-[0.3em] uppercase font-bold text-white">
           INVENTORY RESERVED FOR{" "}
-          <span className={`ml-1 font-black tracking-widest ${timeLeft <= 60 ? 'text-red-400' : 'text-red-400'}`}>
+          <span className={`ml-1 font-black tracking-widest tabular-nums ${timeLeft <= 60 ? 'text-red-400' : 'text-red-400'}`}>
             {formatTime(timeLeft)}
           </span>
         </p>
@@ -119,7 +246,7 @@ export default function CheckoutPage() {
 
       <div className="p-4 sm:p-6 md:p-20">
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20">
-          
+
           {/* LEFT: Form */}
           <div className="space-y-12">
             <header className="space-y-4">
@@ -129,23 +256,126 @@ export default function CheckoutPage() {
 
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input onChange={(e) => setFormData({...formData, firstName: e.target.value})} type="text" placeholder="FIRST NAME" className="bg-transparent border border-white/20 p-4 text-xs tracking-widest focus:border-white outline-none w-full" />
-                <input onChange={(e) => setFormData({...formData, lastName: e.target.value})} type="text" placeholder="LAST NAME" className="bg-transparent border border-white/20 p-4 text-xs tracking-widest focus:border-white outline-none w-full" />
+                <div data-error={!!formErrors.firstName}>
+                  <input
+                    value={formData.firstName}
+                    onChange={(e) => handleFieldChange("firstName", e.target.value.replace(/[^a-zA-Zก-๙\s]/g, ""))}
+                    type="text"
+                    placeholder="FIRST NAME *"
+                    className={inputClass("firstName")}
+                  />
+                  <ErrorMsg field="firstName" />
+                </div>
+                <div>
+                  <input
+                    value={formData.lastName}
+                    onChange={(e) => handleFieldChange("lastName", e.target.value.replace(/[^a-zA-Zก-๙\s]/g, ""))}
+                    type="text"
+                    placeholder="LAST NAME"
+                    className="bg-transparent border border-white/20 p-4 text-xs tracking-widest focus:border-white outline-none w-full"
+                  />
+                </div>
               </div>
-              
-              <input onChange={(e) => setFormData({...formData, email: e.target.value})} type="email" placeholder="EMAIL (FOR RECEIPT)" className="bg-[#111] border border-white/20 p-4 text-xs tracking-widest focus:border-white outline-none w-full" />
 
-              <input onChange={(e) => setFormData({...formData, socialContact: e.target.value})} type="text" placeholder="IG / LINE ID (CONTACT)" className="bg-[#111] border border-white/20 p-4 text-xs tracking-widest focus:border-white outline-none w-full" />
+              <div data-error={!!formErrors.email}>
+                <input
+                  value={formData.email}
+                  onChange={(e) => handleFieldChange("email", e.target.value)}
+                  type="email"
+                  placeholder="EMAIL (FOR RECEIPT) *"
+                  className={`${inputClass("email")} bg-[#111]`}
+                />
+                <ErrorMsg field="email" />
+              </div>
 
-              <textarea onChange={(e) => setFormData({...formData, address: e.target.value})} placeholder="FULL ADDRESS (HOUSE NO. / STREET / DISTRICT)" rows={3} className="bg-transparent border border-white/20 p-4 text-xs tracking-widest focus:border-white outline-none w-full" />
+              {/* IG / LINE / Both Selector */}
+              <div className="space-y-3">
+                <div className="flex border border-white/10 overflow-hidden">
+                  {(["ig", "line", "both"] as const).map((mode) => (
+                    <button
+                      key={mode}
+                      type="button"
+                      onClick={() => {
+                        setSocialMode(mode);
+                        setFormErrors(prev => ({ ...prev, igContact: "", lineContact: "" }));
+                      }}
+                      className={`flex-1 py-2.5 text-[9px] font-black uppercase tracking-widest transition-all ${
+                        socialMode === mode ? "bg-white text-black" : "bg-transparent text-gray-500 hover:text-white"
+                      }`}
+                    >
+                      {mode === "ig" ? "Instagram" : mode === "line" ? "LINE" : "Both"}
+                    </button>
+                  ))}
+                </div>
+                {(socialMode === "ig" || socialMode === "both") && (
+                  <div data-error={!!formErrors.igContact}>
+                    <input
+                      value={formData.igContact}
+                      onChange={(e) => handleFieldChange("igContact", e.target.value)}
+                      type="text"
+                      autoComplete="off"
+                      placeholder="Instagram ID (e.g. @username) *"
+                      className={`${inputClass("igContact")} bg-[#111]`}
+                    />
+                    <ErrorMsg field="igContact" />
+                  </div>
+                )}
+                {(socialMode === "line" || socialMode === "both") && (
+                  <div data-error={!!formErrors.lineContact}>
+                    <input
+                      value={formData.lineContact}
+                      onChange={(e) => handleFieldChange("lineContact", e.target.value)}
+                      type="text"
+                      autoComplete="off"
+                      placeholder="LINE ID *"
+                      className={`${inputClass("lineContact")} bg-[#111]`}
+                    />
+                    <ErrorMsg field="lineContact" />
+                  </div>
+                )}
+              </div>
+
+              <div data-error={!!formErrors.address}>
+                <textarea
+                  value={formData.address}
+                  onChange={(e) => handleFieldChange("address", e.target.value)}
+                  placeholder="FULL ADDRESS (HOUSE NO. / STREET / DISTRICT) *"
+                  rows={3}
+                  className={inputClass("address")}
+                />
+                <ErrorMsg field="address" />
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input onChange={(e) => setFormData({...formData, zipCode: e.target.value})} type="text" placeholder="POSTAL CODE" className="bg-transparent border border-white/20 p-4 text-xs tracking-widest focus:border-white outline-none w-full" />
-                <input onChange={(e) => setFormData({...formData, phone: e.target.value})} type="text" placeholder="PHONE NUMBER" className="bg-transparent border border-white/20 p-4 text-xs tracking-widest focus:border-white outline-none w-full" />
+                <div data-error={!!formErrors.zipCode}>
+                  <input
+                    value={formData.zipCode}
+                    onChange={(e) => handleFieldChange("zipCode", e.target.value.replace(/\D/g, "").slice(0, 5))}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={5}
+                    placeholder="POSTAL CODE *"
+                    className={inputClass("zipCode")}
+                  />
+                  <ErrorMsg field="zipCode" />
+                </div>
+                <div data-error={!!formErrors.phone}>
+                  <input
+                    value={formData.phone}
+                    onChange={(e) => handleFieldChange("phone", e.target.value.replace(/\D/g, "").slice(0, 10))}
+                    type="tel"
+                    inputMode="numeric"
+                    maxLength={10}
+                    placeholder="PHONE NUMBER *"
+                    className={inputClass("phone")}
+                  />
+                  <ErrorMsg field="phone" />
+                </div>
               </div>
             </div>
 
             <div className="pt-10 border-t border-white/10 space-y-6">
-              <div className="bg-[#111] p-8 flex flex-col items-center gap-6 border border-white/5 relative overflow-hidden">
+              <div className="bg-[#111] p-4 sm:p-8 flex flex-col items-center gap-6 border border-white/5 relative overflow-hidden">
                 <div className="text-center space-y-2 z-10 w-full">
                   <p className="text-gray-400 text-[10px] uppercase tracking-[0.4em]">Transfer Amount</p>
                   <p className="text-4xl sm:text-5xl font-black italic text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">฿{orderData.total}</p>
@@ -153,7 +383,7 @@ export default function CheckoutPage() {
                     <p className="text-green-400 text-xs font-bold tracking-widest">You saved ฿{discount} with Squad Promo! 🎉</p>
                   )}
                 </div>
-                
+
                 {/* Bank Account Block */}
                 <div className="w-full bg-gradient-to-br from-white/10 to-transparent border border-white/20 p-6 relative overflow-hidden z-10 box-border">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/20 blur-[60px] pointer-events-none" />
@@ -167,18 +397,18 @@ export default function CheckoutPage() {
                         <img src="/images/BB.png" alt="Bangkok Bank Logo" className="w-full h-full object-cover" />
                       </div>
                     </div>
-                    
+
                     <div className="space-y-1">
                       <p className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Account Name</p>
-                      <p className="text-[11px] sm:text-xs font-bold text-gray-200 leading-relaxed uppercase">
+                      <p className="text-[11px] sm:text-xs font-bold text-gray-200 leading-relaxed uppercase break-words">
                         องค์การนักศึกษามหาวิทยาลัยธรรมศาสตร์ ศูนย์รังสิต ประจำปีการศึกษา 2568
                       </p>
                     </div>
 
-                    <div className="mt-2 flex flex-col sm:flex-row justify-between items-center bg-black/50 border border-white/10 p-2 pl-4 gap-3 box-border">
-                      <span className="font-black text-xl sm:text-2xl tracking-[0.15em] text-white">091-0-79288-6</span>
-                      <button 
-                        onClick={copyToClipboard} 
+                    <div className="mt-2 flex flex-col sm:flex-row justify-between items-center bg-black/50 border border-white/10 p-2 sm:pl-4 gap-3 box-border">
+                      <span className="font-black text-lg sm:text-2xl tracking-[0.15em] text-white">091-0-79288-6</span>
+                      <button
+                        onClick={copyToClipboard}
                         className={`w-full sm:w-auto px-6 py-3 text-[10px] font-black uppercase tracking-widest transition-all ${copied ? 'bg-green-500 text-black' : 'bg-white text-black hover:bg-gray-200'}`}
                       >
                         {copied ? "COPIED ✅" : "COPY"}
@@ -187,18 +417,21 @@ export default function CheckoutPage() {
                   </div>
                 </div>
               </div>
-              
-              <div className="space-y-3">
+
+              <div className="space-y-3" data-error={!!formErrors.slipFile}>
                 <label className="text-[10px] text-gray-500 uppercase font-black tracking-widest flex justify-between">
-                  <span>Upload Payment Slip</span>
+                  <span>Upload Payment Slip <span className="text-red-500">*</span></span>
                   <span className="text-gray-600 font-normal normal-case tracking-normal">Max 5MB (JPG, PNG)</span>
                 </label>
-                <input 
-                  type="file" 
-                  accept="image/png, image/jpeg, image/jpg" 
-                  onChange={handleFileChange} 
-                  className="w-full text-xs text-gray-400 file:bg-white file:text-black file:px-6 file:py-3 file:border-0 file:font-black file:uppercase file:tracking-widest file:mr-4 file:cursor-pointer hover:file:bg-gray-200 transition-all border border-white/10 p-1" 
+                <input
+                  type="file"
+                  accept="image/png, image/jpeg, image/jpg"
+                  onChange={handleFileChange}
+                  className={`w-full text-xs text-gray-400 file:bg-white file:text-black file:px-6 file:py-3 file:border-0 file:font-black file:uppercase file:tracking-widest file:mr-4 file:cursor-pointer hover:file:bg-gray-200 transition-all border p-1 ${
+                    formErrors.slipFile ? "border-red-500 bg-red-500/5" : "border-white/10"
+                  }`}
                 />
+                <ErrorMsg field="slipFile" />
               </div>
 
               {/* LINE OA support */}
@@ -220,7 +453,7 @@ export default function CheckoutPage() {
               <h2 className="text-xs font-bold tracking-[0.3em] uppercase opacity-30">Your Squad List</h2>
               <span className="bg-white/10 text-white text-[9px] font-black uppercase tracking-widest px-3 py-1 border border-white/10">PRE-ORDER</span>
             </div>
-            
+
             <div className="space-y-5">
               {orderData.items.map((item: any, idx: number) => (
                 <div key={idx} className="flex justify-between items-start">
@@ -255,40 +488,52 @@ export default function CheckoutPage() {
             <div className="flex justify-between font-black italic text-4xl tracking-tighter uppercase pt-4 border-t border-white/10">
               <span className="opacity-20">Total</span><span>฿{orderData.total}</span>
             </div>
-            
+
             {/* PDPA Checkbox 1 */}
-            <label className="flex items-start gap-3 cursor-pointer group">
-              <input
-                type="checkbox"
-                checked={pdpaChecked}
-                onChange={(e) => setPdpaChecked(e.target.checked)}
-                className="w-4 h-4 mt-0.5 accent-white cursor-pointer shrink-0"
-              />
-              <span className="text-[10px] text-gray-400 group-hover:text-gray-200 transition-colors leading-relaxed">
-                ฉันได้อ่านและยอมรับ{" "}
-                <button onClick={() => setShowPdpaModal(true)} className="underline underline-offset-2 text-white/60 hover:text-white">
-                  นโยบายความเป็นส่วนตัว (PDPA)
-                </button>
-                {" "}และยินยอมให้เก็บข้อมูลเพื่อดำเนินการสั่งซื้อ
-              </span>
-            </label>
+            <div>
+              <label className={`flex items-start gap-3 cursor-pointer group p-3 rounded transition-colors ${formErrors.pdpa ? 'bg-red-500/5 border border-red-500/40' : ''}`}>
+                <input
+                  type="checkbox"
+                  checked={pdpaChecked}
+                  onChange={(e) => {
+                    setPdpaChecked(e.target.checked);
+                    if (e.target.checked) setFormErrors(prev => ({ ...prev, pdpa: "" }));
+                  }}
+                  className="w-4 h-4 mt-0.5 accent-white cursor-pointer shrink-0"
+                />
+                <span className="text-[10px] text-gray-400 group-hover:text-gray-200 transition-colors leading-relaxed">
+                  ฉันได้อ่านและยอมรับ{" "}
+                  <button onClick={() => setShowPdpaModal(true)} className="underline underline-offset-2 text-white/60 hover:text-white">
+                    นโยบายความเป็นส่วนตัว (PDPA)
+                  </button>
+                  {" "}และยินยอมให้เก็บข้อมูลเพื่อดำเนินการสั่งซื้อ
+                </span>
+              </label>
+              <ErrorMsg field="pdpa" />
+            </div>
 
             {/* PDPA Checkbox 2 — No Refund */}
-            <label className="flex items-start gap-3 cursor-pointer group">
-              <input
-                type="checkbox"
-                checked={noRefundChecked}
-                onChange={(e) => setNoRefundChecked(e.target.checked)}
-                className="w-4 h-4 mt-0.5 accent-white cursor-pointer shrink-0"
-              />
-              <span className="text-[10px] text-gray-400 group-hover:text-gray-200 transition-colors leading-relaxed">
-                ฉันรับทราบว่าสินค้า Pre-Order ไม่สามารถยกเลิกหรือขอคืนเงินได้หลังชำระเงินแล้ว
-              </span>
-            </label>
+            <div>
+              <label className={`flex items-start gap-3 cursor-pointer group p-3 rounded transition-colors ${formErrors.noRefund ? 'bg-red-500/5 border border-red-500/40' : ''}`}>
+                <input
+                  type="checkbox"
+                  checked={noRefundChecked}
+                  onChange={(e) => {
+                    setNoRefundChecked(e.target.checked);
+                    if (e.target.checked) setFormErrors(prev => ({ ...prev, noRefund: "" }));
+                  }}
+                  className="w-4 h-4 mt-0.5 accent-white cursor-pointer shrink-0"
+                />
+                <span className="text-[10px] text-gray-400 group-hover:text-gray-200 transition-colors leading-relaxed">
+                  ฉันรับทราบว่าสินค้า Pre-Order ไม่สามารถยกเลิกหรือขอคืนเงินได้หลังชำระเงินแล้ว
+                </span>
+              </label>
+              <ErrorMsg field="noRefund" />
+            </div>
 
-            <button 
-              onClick={handleConfirmOrder} 
-              disabled={!canSubmit} 
+            <button
+              onClick={handleConfirmOrder}
+              disabled={isSubmitting}
               className="w-full bg-white text-black border border-transparent hover:bg-transparent hover:text-white hover:border-white py-6 font-black uppercase tracking-[0.4em] text-sm transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed shadow-[0_10px_30px_rgba(255,255,255,0.1)] hover:shadow-[0_0_20px_rgba(255,255,255,0.3)]"
             >
               {isSubmitting ? "PROCESSING..." : "CONTINUE AND PAY"}

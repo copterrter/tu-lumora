@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 const FAQ_ITEMS = [
-  { q: "Size เสื้อเป็นยังไง?", a: "Regular (T-SHIRT): S, M, L, XL, 2XL, 3XL, 4XL | Crop: S, M, L, XL กดปุ่ม Size Guide ด้านบนเพื่อดูตาราง size ครับ" },
+  { q: "Size เสื้อเป็นยังไง?", a: "Regular (T-SHIRT): S, M, L, XL, 2XL, 3XL | Crop: S, M, L, XL กดปุ่ม Size Guide ด้านบนเพื่อดูตาราง size ครับ" },
   { q: "มีสินค้าพร้อมส่งมั้ย หรือพรีออเดอร์เท่านั้น?", a: "พรีออเดอร์เท่านั้นครับ ไม่มีสต็อกพร้อมส่ง" },
   { q: "มีรอบ 2 มั้ย?", a: "มีรอบนี้รอบเดียวเท่านั้นครับผม อย่าพลาดนะครับ!" },
   { q: "พรีออเดอร์แล้วรอนานแค่ไหน?", a: "รอการยืนยันระยะเวลาจากผู้ผลิต จะอัปเดตผ่าน LINE OA ครับ" },
@@ -53,8 +53,8 @@ export default function ProductPage() {
   const [cart, setCart] = useState<any[]>([]);
   const [showSizeChart, setShowSizeChart] = useState(false);
   const [zoomedImg, setZoomedImg] = useState<string | null>(null);
-  const [promoTimeLeft, setPromoTimeLeft] = useState<{d: number, h: number, m: number, s: number} | null>(null);
-  
+  const [promoTimeLeft, setPromoTimeLeft] = useState<{ d: number, h: number, m: number, s: number } | null>(null);
+
   const sliderRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -91,14 +91,14 @@ export default function ProductPage() {
     return () => clearInterval(swipeInterval);
   }, []);
 
-  const TSHIRT_IMAGES = ["/images/front.png", "/images/back.png", "/images/product-1.jpg", "/images/regular_actor1.jpg", "/images/regular_actor2.jpg"]; 
-  const CROP_IMAGES = ["/images/front-crop.png", "/images/back-crop.png", "/images/product-2.jpg", "/images/crop_actor2.jpg", "/images/crop_actor.jpg"];   
+  const TSHIRT_IMAGES = ["/images/front.png", "/images/back.png", "/images/product-1.jpg", "/images/regular_actor1.jpg", "/images/regular_actor2.jpg"];
+  const CROP_IMAGES = ["/images/front-crop.png", "/images/back-crop.png", "/images/product-2.jpg", "/images/crop_actor2.jpg", "/images/crop_actor.jpg"];
   const productImages = selectedStyle === "T-SHIRT" ? TSHIRT_IMAGES : CROP_IMAGES;
 
   const PRICE_PER_UNIT = 329;
   const PROMO_PAIR_PRICE = 590;
 
-  const REGULAR_SIZES = ["S", "M", "L", "XL", "2XL", "3XL", "4XL"];
+  const REGULAR_SIZES = ["S", "M", "L", "XL", "2XL", "3XL"];
   const CROP_SIZES = ["S", "M", "L", "XL"];
   const currentSizes = selectedStyle === "T-SHIRT" ? REGULAR_SIZES : CROP_SIZES;
 
@@ -115,8 +115,8 @@ export default function ProductPage() {
 
   const calculateCartTotal = (currentCart: any[]) => {
     const totalQty = currentCart.reduce((sum, item) => sum + item.quantity, 0);
-    const promoQty = Math.min(totalQty, 6); 
-    const regularQty = totalQty - promoQty; 
+    const promoQty = Math.min(totalQty, 6);
+    const regularQty = totalQty - promoQty;
     const pairs = Math.floor(promoQty / 2);
     const promoSingles = promoQty % 2;
     return (pairs * PROMO_PAIR_PRICE) + ((promoSingles + regularQty) * PRICE_PER_UNIT);
@@ -162,7 +162,7 @@ export default function ProductPage() {
 
   return (
     <main className="min-h-screen bg-black text-white selection:bg-white selection:text-black pb-32">
-      
+
       {/* Zoom Modal */}
       <AnimatePresence>
         {zoomedImg && (
@@ -178,7 +178,7 @@ export default function ProductPage() {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-6">
             <div className="bg-[#e7e7e7] p-2 w-full max-w-xl relative shadow-2xl">
               <button onClick={() => setShowSizeChart(false)} className="absolute -top-3 -right-3 md:-top-4 md:-right-4 bg-red-600 text-white text-lg md:text-xl w-8 h-8 md:w-10 md:h-10 rounded-full font-black shadow-[0_0_15px_rgba(220,38,38,0.5)] hover:scale-110 hover:bg-red-500 transition-all z-10 flex items-center justify-center">X</button>
-              <img src={selectedStyle === "T-SHIRT" ? "/images/size-guide-regular.png" : "/images/size-guide-crop.png"} alt={`${selectedStyle} Size Guide`} className="w-full h-auto object-contain max-h-[85vh] md:max-h-none" /> 
+              <img src={selectedStyle === "T-SHIRT" ? "/images/size-guide-regular.png" : "/images/size-guide-crop.png"} alt={`${selectedStyle} Size Guide`} className="w-full h-auto object-contain max-h-[85vh] md:max-h-none" />
             </div>
           </motion.div>
         )}
@@ -193,15 +193,15 @@ export default function ProductPage() {
       </header>
 
       <div className="pt-24 md:pt-28 px-4 md:px-12 max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
-        
+
         {/* LEFT: Image Slider */}
         <div className="lg:col-span-7 relative group">
           <div ref={sliderRef} className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide border border-white/10 relative bg-white">
             {productImages.map((img, idx) => (
               <div key={idx} className="min-w-full snap-center aspect-square cursor-zoom-in bg-white flex items-center justify-center p-1 md:p-2" onClick={() => setZoomedImg(img)}>
-                <motion.img 
+                <motion.img
                   key={img} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.0, ease: [0.22, 1, 0.36, 1] }}
-                  src={img} alt={`view-${idx}`} className="w-full h-full object-contain" 
+                  src={img} alt={`view-${idx}`} className="w-full h-full object-contain"
                 />
               </div>
             ))}
@@ -222,79 +222,96 @@ export default function ProductPage() {
           </div>
 
           {/* 🌟 7 Days Promo + Countdown Combined 🌟 */}
-          <div className="relative overflow-hidden bg-[#050505] border border-white/10 rounded-sm">
-            <div className="absolute -top-10 -right-10 w-40 h-40 bg-red-600/20 blur-[60px] animate-pulse pointer-events-none" />
-            <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-red-800/20 blur-[60px] pointer-events-none" />
-            
-            <div className="p-5 sm:p-7 relative z-10 flex flex-col gap-6">
-              
-              {/* Header + Countdown */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-5">
-                <div className="flex items-center gap-3">
-                  <div className="relative flex items-center justify-center w-4 h-4">
-                    <span className="animate-ping absolute w-full h-full rounded-full bg-red-500 opacity-60"></span>
-                    <div className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,1)]" />
-                  </div>
-                  <div>
-                    <h3 className="text-base sm:text-lg font-black uppercase tracking-[0.2em] text-white italic leading-none">7 DAYS EXCLUSIVE</h3>
-                    <p className="text-[9px] text-gray-500 tracking-[0.3em] uppercase mt-1">Limited Time Offer</p>
-                  </div>
-                </div>
+          <div className="relative">
+            <div className="absolute -inset-[2px] bg-gradient-to-r from-red-600 via-red-400 to-red-600 rounded-sm opacity-70 blur-[3px] animate-pulse pointer-events-none" />
+            <div className="absolute -inset-[1px] bg-gradient-to-br from-red-500/40 to-transparent rounded-sm pointer-events-none" />
 
-                {/* Cyberpunk/Sleek Countdown */}
-                {promoTimeLeft && (
-                  <div className="flex items-baseline justify-center sm:justify-end gap-2 bg-black/40 border border-white/10 px-4 py-2 self-start sm:self-auto">
-                    <div className="text-center"><span className="text-lg md:text-xl font-black text-red-500 italic">{String(promoTimeLeft.d).padStart(2,'0')}</span><span className="text-[8px] text-gray-500 uppercase block -mt-1">Days</span></div><span className="text-white/20">:</span>
-                    <div className="text-center"><span className="text-lg md:text-xl font-black text-white italic">{String(promoTimeLeft.h).padStart(2,'0')}</span><span className="text-[8px] text-gray-500 uppercase block -mt-1">Hrs</span></div><span className="text-white/20">:</span>
-                    <div className="text-center"><span className="text-lg md:text-xl font-black text-white italic">{String(promoTimeLeft.m).padStart(2,'0')}</span><span className="text-[8px] text-gray-500 uppercase block -mt-1">Min</span></div><span className="text-white/20">:</span>
-                    <div className="text-center"><span className="text-lg md:text-xl font-black text-red-500 italic">{String(promoTimeLeft.s).padStart(2,'0')}</span><span className="text-[8px] text-gray-500 uppercase block -mt-1">Sec</span></div>
-                  </div>
-                )}
+            <div className="relative overflow-hidden bg-[#060606] border border-red-500/30 rounded-sm shadow-[0_0_40px_rgba(239,68,68,0.2)]">
+              <div className="absolute -top-16 -right-16 w-56 h-56 bg-red-600/25 blur-[80px] animate-pulse pointer-events-none" />
+              <div className="absolute -bottom-16 -left-16 w-56 h-56 bg-red-900/25 blur-[80px] pointer-events-none" />
+
+              {/* Shimmer */}
+              <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                <div className="absolute top-0 -left-full h-full w-1/2 bg-gradient-to-r from-transparent via-white/5 to-transparent skew-x-12" style={{ animation: "shimmerSweep 4s ease-in-out infinite" }} />
               </div>
 
-              {/* Tiers */}
-              <div className="flex flex-col gap-3">
-                <p className="text-[10px] text-gray-400 tracking-[0.2em] uppercase font-bold px-1">
-                   Buy More, Save More (Max 6)
-                </p>
-
-                <div className="grid grid-cols-2 xl:grid-cols-4 gap-2">
-                  <div className="flex flex-col justify-center items-center text-center border border-white/5 bg-white/[0.02] p-4 hover:border-white/20 transition-colors">
-                    <span className="text-[10px] font-bold tracking-widest text-gray-400 uppercase">1 ITEM</span>
-                    <span className="text-lg font-black text-white italic mt-1">329.-</span>
-                  </div>
-                  <div className="flex flex-col justify-center items-center text-center border border-red-500/10 bg-red-500/[0.02] p-4 hover:border-red-500/30 transition-colors">
-                    <span className="text-[10px] font-bold tracking-widest text-gray-400 uppercase">2 ITEMS</span>
-                    <span className="text-lg font-black text-white italic mt-1 bg-gradient-to-r from-red-400 to-white bg-clip-text text-transparent">590.-</span>
-                    <span className="text-[9px] text-red-500 font-bold uppercase tracking-widest mt-1">Save 68.-</span>
-                  </div>
-                  <div className="flex flex-col justify-center items-center text-center border border-red-500/20 bg-red-500/[0.04] p-4 hover:border-red-500/40 transition-colors">
-                    <span className="text-[10px] font-bold tracking-widest text-gray-400 uppercase">4 ITEMS</span>
-                    <span className="text-lg font-black text-white italic mt-1 bg-gradient-to-r from-red-500 to-white bg-clip-text text-transparent">1,180.-</span>
-                    <span className="text-[9px] text-red-500 font-bold uppercase tracking-widest mt-1">Save 136.-</span>
-                  </div>
-                  <div className="flex flex-col justify-center items-center text-center border border-red-500/40 bg-red-500/[0.08] p-4 relative overflow-hidden group hover:border-red-500 transition-colors cursor-default">
-                    <div className="absolute inset-0 bg-gradient-to-tr from-red-600/10 to-transparent group-hover:from-red-600/20 transition-all"></div>
-                    <span className="text-[10px] items-center gap-1 font-bold tracking-widest text-red-300 uppercase relative z-10 flex">
-                      6 ITEMS <span className="text-[8px] bg-red-600/80 text-white px-1 py-0.5 rounded-sm">MAX</span>
-                    </span>
-                    <span className="text-xl font-black text-white italic mt-1 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)] relative z-10">1,770.-</span>
-                    <span className="text-[10px] text-white font-black bg-red-600 px-2 mt-1 relative z-10 shadow-[0_0_10px_rgba(239,68,68,0.5)]">SAVE 204.-</span>
-                  </div>
+              {/* Top badge */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-gradient-to-r from-red-600 to-red-800 px-3 sm:px-5 py-2 sm:py-3 gap-1 sm:gap-4">
+                <div className="flex items-center gap-2">
+                  <span className="animate-ping absolute w-2 h-2 rounded-full bg-white opacity-50" />
+                  <div className="w-2 h-2 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)] relative shrink-0" />
+                  <span className="text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] sm:tracking-[0.4em] text-white">⚡ FLASH DEAL — 7 DAYS EXCLUSIVE</span>
                 </div>
-                <p className="text-[9px] text-red-500/60 font-bold tracking-[0.1em] uppercase text-right pt-1 opacity-70">
-                  *Mix & Match T-Shirt and Crop Allowed
-                </p>
+                <span className="text-[9px] font-bold text-red-200 uppercase tracking-widest sm:shrink-0 hidden sm:block">Limited Time Only</span>
+              </div>
+
+              <div className="p-3 sm:p-7 relative z-10 flex flex-col gap-4 sm:gap-6">
+
+                {/* Countdown */}
+                {promoTimeLeft && (
+                  <div className="flex flex-col items-center gap-1.5 py-1 sm:py-3">
+                    <p className="text-[8px] sm:text-[9px] text-red-400/70 uppercase tracking-[0.4em] font-bold">Offer Ends In</p>
+                    <div className="flex items-center gap-1.5 sm:gap-4">
+                      {[
+                        { value: promoTimeLeft.d, label: "D" },
+                        { value: promoTimeLeft.h, label: "H" },
+                        { value: promoTimeLeft.m, label: "M" },
+                        { value: promoTimeLeft.s, label: "S" },
+                      ].map((unit, i) => (
+                        <div key={i} className="flex items-center gap-1.5 sm:gap-4">
+                          <div className="flex flex-col items-center bg-black/60 border border-red-500/30 px-2 py-1.5 sm:px-5 sm:py-3 min-w-[38px] sm:min-w-[64px] shadow-[0_0_14px_rgba(239,68,68,0.15)]">
+                            <span className={`text-xl sm:text-4xl font-black italic tabular-nums leading-none ${i === 0 || i === 3 ? 'text-red-400' : 'text-white'} drop-shadow-[0_0_12px_rgba(239,68,68,0.6)]`}>
+                              {String(unit.value).padStart(2, '0')}
+                            </span>
+                            <span className="text-[7px] sm:text-[8px] text-gray-500 uppercase tracking-widest mt-0.5">{unit.label}</span>
+                          </div>
+                          {i < 3 && <span className="text-red-500/60 font-black text-base sm:text-xl -mt-2 sm:-mt-3">:</span>}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Tiers */}
+                <div className="flex flex-col gap-2 sm:gap-3">
+                  <p className="text-[9px] sm:text-[10px] text-gray-400 tracking-[0.2em] uppercase font-bold px-1">Buy More, Save More (Max 6)</p>
+                  <div className="grid grid-cols-4 gap-1 sm:gap-2">
+                    <div className="flex flex-col justify-center items-center text-center border border-white/5 bg-white/[0.02] p-2 sm:p-4 hover:border-white/20 transition-colors">
+                      <span className="text-[8px] sm:text-[10px] font-bold tracking-widest text-gray-400 uppercase">1</span>
+                      <span className="text-sm sm:text-lg font-black text-white italic mt-0.5 sm:mt-1">329.-</span>
+                    </div>
+                    <div className="flex flex-col justify-center items-center text-center border border-red-500/10 bg-red-500/[0.02] p-2 sm:p-4 hover:border-red-500/30 transition-colors">
+                      <span className="text-[8px] sm:text-[10px] font-bold tracking-widest text-gray-400 uppercase">2</span>
+                      <span className="text-sm sm:text-lg font-black text-white italic mt-0.5 sm:mt-1 bg-gradient-to-r from-red-400 to-white bg-clip-text text-transparent">590.-</span>
+                      <span className="text-[7px] sm:text-[9px] text-red-500 font-bold uppercase tracking-widest mt-0.5 sm:mt-1">-68</span>
+                    </div>
+                    <div className="flex flex-col justify-center items-center text-center border border-red-500/20 bg-red-500/[0.04] p-2 sm:p-4 hover:border-red-500/40 transition-colors">
+                      <span className="text-[8px] sm:text-[10px] font-bold tracking-widest text-gray-400 uppercase">4</span>
+                      <span className="text-sm sm:text-lg font-black text-white italic mt-0.5 sm:mt-1 bg-gradient-to-r from-red-500 to-white bg-clip-text text-transparent">1,180.-</span>
+                      <span className="text-[7px] sm:text-[9px] text-red-500 font-bold uppercase tracking-widest mt-0.5 sm:mt-1">-136</span>
+                    </div>
+                    <div className="flex flex-col justify-center items-center text-center border border-red-500/40 bg-red-500/[0.08] p-2 sm:p-4 relative overflow-hidden group hover:border-red-500 transition-colors cursor-default">
+                      <div className="absolute inset-0 bg-gradient-to-tr from-red-600/10 to-transparent group-hover:from-red-600/20 transition-all"></div>
+                      <span className="text-[8px] sm:text-[10px] font-bold tracking-widest text-red-300 uppercase relative z-10">6 MAX</span>
+                      <span className="text-sm sm:text-xl font-black text-white italic mt-0.5 sm:mt-1 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)] relative z-10">1,770.-</span>
+                      <span className="text-[7px] sm:text-[10px] text-white font-black bg-red-600 px-1 sm:px-2 mt-0.5 sm:mt-1 relative z-10">-204</span>
+                    </div>
+                  </div>
+                  <p className="text-[8px] text-red-500/60 font-bold tracking-[0.1em] uppercase text-right pt-0.5 opacity-70">
+                    *Mix & Match T-Shirt and Crop Allowed
+                  </p>
+                </div>
               </div>
             </div>
           </div>
+
 
           {/* Style & Size */}
           <div className="space-y-5">
             <div className="flex gap-3">
               {["T-SHIRT", "CROP"].map((style) => (
-                <button key={style} 
-                  onClick={() => { setSelectedStyle(style); if(sliderRef.current) sliderRef.current.scrollTo({left:0}); }} 
+                <button key={style}
+                  onClick={() => { setSelectedStyle(style); if (sliderRef.current) sliderRef.current.scrollTo({ left: 0 }); }}
                   className={`flex-1 py-4 border text-xs font-bold tracking-widest ${selectedStyle === style ? 'bg-white text-black border-white' : 'border-white/20 hover:border-white/40'}`}
                 >
                   {style}
@@ -341,7 +358,7 @@ export default function ProductPage() {
                   </div>
                 ))}
               </div>
-              
+
               <div className="space-y-5">
                 <div className="flex justify-between items-baseline">
                   <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Grand Total</span>
@@ -353,13 +370,13 @@ export default function ProductPage() {
               </div>
             </div>
           )}
-          
+
           {/* PRODUCT DETAIL */}
           <div className="pt-6 border-t border-white/10 text-xs text-gray-400 space-y-2 font-mono">
             <p className="text-white uppercase tracking-widest font-bold mb-4 text-[10px]">Product Detail</p>
-            <p>— Fabric: 100% Premium Cotton Comb 20</p>
-            <p>— Print: High-Quality Silk Screen</p>
-            <p>— Fit: T-Shirt / Crop</p>
+            <p>— Fabric: 100% PolyCotton</p>
+            <p>— Print: Silk Screen</p>
+            <p>— Fit: Regular / Crop</p>
             <p>— Tag: Custom TU LUMORA Woven Label</p>
             <p className="text-gray-600 pt-2 border-t border-white/5">— Fabric Care: Hand wash or machine wash cold / Do not bleach / Hang dry / Do not tumble dry / Iron on low heat, avoid print area</p>
           </div>
@@ -371,7 +388,7 @@ export default function ProductPage() {
         <h2 className="text-2xl md:text-3xl font-black italic uppercase text-center tracking-tighter mb-10">
           Frequently Asked Questions
         </h2>
-        
+
         <div className="space-y-2">
           {FAQ_ITEMS.map((item, idx) => (
             <FAQItem key={idx} q={item.q} a={item.a} />

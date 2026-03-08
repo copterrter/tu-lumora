@@ -1,16 +1,39 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { ReactLenis } from "@studio-freight/react-lenis";
-import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion";
+import { AnimatePresence, motion, useScroll, useTransform, useInView } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import Preloader from "../components/Preloader";
+
+function ScrollReveal({ children, className }: { children: React.ReactNode; className?: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  // once: false = ทุกครั้งที่เลื่อนมาเห็นบล็อก จะเล่น "ลอยขึ้น" เหมือนเดิม (process เดียวกัน)
+  const isInView = useInView(ref, { once: false, amount: 0.15 });
+  return (
+    <motion.div
+      ref={ref}
+      className={className}
+      initial={{ opacity: 0, y: 72 }}
+      animate={{ opacity: isInView ? 1 : 0, y: isInView ? 0 : 72 }}
+      transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+    >
+      {children}
+    </motion.div>
+  );
+}
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const [showFloatingBtn, setShowFloatingBtn] = useState(false);
   const [comingSoon, setComingSoon] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    // Detect mobile on mount — used to skip ReactLenis and heavy video on mobile
+    setIsMobile(window.innerWidth < 768);
+  }, []);
 
   useEffect(() => {
     if (isLoading) {
@@ -21,25 +44,29 @@ export default function Home() {
   }, [isLoading]);
 
   useEffect(() => {
+    let rafId: number;
     const handleScroll = () => {
-      const scrollPosition = window.scrollY;
-      const windowHeight = window.innerHeight;
-      const scrolledPastHero = scrollPosition > windowHeight * 0.8;
-      
-      let hideAtFinale = false;
-      const finaleElement = document.getElementById("finale-section");
-      if (finaleElement) {
-        const finaleRect = finaleElement.getBoundingClientRect();
-        // Hide button when the finale section reaches the bottom 20% of the screen
-        if (finaleRect.top < windowHeight * 0.8) {
-          hideAtFinale = true;
+      if (rafId != null) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        const scrollPosition = window.scrollY;
+        const windowHeight = window.innerHeight;
+        const scrolledPastHero = scrollPosition > windowHeight * 0.8;
+
+        let hideAtFinale = false;
+        const finaleElement = document.getElementById("finale-section");
+        if (finaleElement) {
+          const finaleRect = finaleElement.getBoundingClientRect();
+          if (finaleRect.top < windowHeight * 0.8) hideAtFinale = true;
         }
-      }
-      
-      setShowFloatingBtn(scrolledPastHero && !hideAtFinale);
+
+        setShowFloatingBtn(scrolledPastHero && !hideAtFinale);
+      });
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (rafId != null) cancelAnimationFrame(rafId);
+    };
   }, []);
 
   const lookbookRef = useRef<HTMLDivElement>(null);
@@ -49,6 +76,8 @@ export default function Home() {
   });
 
   const logoOpacity = useTransform(scrollYProgress, [0, 0.05, 0.95, 1], [0, 1, 1, 0]);
+  // มือถือ: โลโก้โผล่เมื่อเข้าโซน LOOKBOOK (ไม่ผูก scroll ทุกเฟรม = ลดกระชาก)
+  const lookbookInView = useInView(lookbookRef, { amount: 0.05, once: false });
 
   return (
     <>
@@ -130,47 +159,51 @@ export default function Home() {
           >
             <Link
               href="/product"
-              className="flex items-center justify-center gap-2 md:gap-3 bg-white/90 backdrop-blur-md md:bg-white text-black px-6 py-3 md:px-10 md:py-4 font-black uppercase tracking-[0.3em] md:tracking-[0.4em] text-[10px] md:text-xs shadow-[0_0_20px_rgba(255,255,255,0.15)] md:shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:shadow-[0_0_40px_rgba(255,255,255,0.4)] transition-all hover:scale-105 active:scale-95 rounded-sm mx-auto max-w-[260px] md:max-w-none whitespace-nowrap"
+              className="group relative flex items-center justify-center gap-2 md:gap-3 bg-black text-white border border-white/20 px-6 py-3 md:px-10 md:py-4 font-black uppercase tracking-[0.3em] md:tracking-[0.4em] text-[10px] md:text-xs shadow-[0_10px_30px_rgba(0,0,0,0.8)] md:shadow-[0_20px_50px_rgba(0,0,0,0.8)] hover:shadow-[0_0_40px_rgba(255,255,255,0.5)] transition-all duration-500 hover:scale-110 hover:border-white active:scale-95 rounded-sm mx-auto max-w-[260px] md:max-w-none whitespace-nowrap overflow-hidden"
             >
-              PRE-ORDER NOW
+              {/* Shimmer reflection effect */}
+              <div className="absolute top-0 left-[-100%] w-1/2 h-full bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-[30deg] group-hover:animate-[shimmerSweep_1.5s_infinite_ease-in-out]" />
+              <span className="relative z-10 group-hover:brightness-200 transition-all duration-300">PRE-ORDER NOW</span>
             </Link>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <ReactLenis root>
+      {/* ReactLenis only on desktop — iOS has great native smooth scroll already */}
+      <ReactLenis root options={{ lerp: isMobile ? 0 : 0.1, duration: isMobile ? 0 : 1.2 }}>
         <main className="bg-black text-white min-h-screen font-sans selection:bg-white selection:text-black">
 
           {/* HERO */}
           <section className="h-[100dvh] flex items-center justify-center relative overflow-hidden bg-black">
-            <video autoPlay loop muted playsInline preload="none" className="absolute inset-0 w-full h-[100dvh] object-cover opacity-50">
+            {/* Cinematic Background Video */}
+            <video autoPlay loop muted playsInline preload="metadata" className="absolute inset-0 w-full h-[100dvh] object-cover opacity-50">
               <source src="/bg-video.mp4" type="video/mp4" />
             </video>
             <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 z-[1]" />
 
             <div className="z-10 flex flex-col items-center gap-8 px-5 text-center w-full max-w-2xl mx-auto">
               <motion.div
-                initial={{ opacity: 0, scale: 1.05 }}
-                animate={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0, y: 48, scale: 1.02 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ delay: 2.5, duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
                 className="w-[75vw] sm:w-[55vw] md:w-[42vw]"
               >
-                <Image src="/images/brand.png" alt="TU LUMORA" width={800} height={300} priority className="w-full h-auto object-contain" />
+                <Image src="/images/brand.png" alt="TU LUMORA" width={800} height={300} priority className="w-full h-auto object-contain brightness-200" />
               </motion.div>
 
               <motion.p
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 28 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 3.2, duration: 0.8 }}
+                transition={{ delay: 3.2, duration: 1, ease: [0.22, 1, 0.36, 1] }}
                 className="text-[9px] tracking-[0.8em] text-white/40 uppercase font-light"
               >
                 New Arrival 2026
               </motion.p>
 
               <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 3.6, duration: 1 }}
+                initial={{ opacity: 0, y: 32, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ delay: 3.6, duration: 1, ease: [0.22, 1, 0.36, 1] }}
               >
                 <Link
                   href="/product"
@@ -184,9 +217,9 @@ export default function Home() {
               </motion.div>
 
               <motion.span
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 4.2, duration: 1 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 4.2, duration: 1, ease: [0.22, 1, 0.36, 1] }}
                 className="text-[12px] font-bold text-white/30 italic tracking-widest"
               >
                 #TULUMORA
@@ -205,7 +238,7 @@ export default function Home() {
           </section>
 
           {/* EDITORIAL PHOTO — full bleed */}
-          <section className="relative w-full h-[80dvh] overflow-hidden" id="lookbook">
+          <section className="scroll-section relative w-full h-[80dvh] overflow-hidden" id="lookbook">
             <Image
               src="/images/work3.jpg"
               alt="Editorial"
@@ -215,16 +248,16 @@ export default function Home() {
               priority
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
-            <div className="absolute bottom-10 left-6 md:left-16 max-w-xl">
+            <ScrollReveal className="absolute bottom-10 left-6 md:left-16 max-w-xl">
               <p className="text-[10px] uppercase tracking-[0.5em] text-white/50 mb-3 [text-shadow:0_1px_4px_rgba(0,0,0,0.8)]">TU LUMORA 2026</p>
               <h2 className="text-4xl md:text-7xl font-black uppercase italic tracking-tighter text-white leading-none [text-shadow:0_2px_12px_rgba(0,0,0,0.8)]">
                 WEAR<br />YOUR SOUL
               </h2>
-            </div>
+            </ScrollReveal>
           </section>
 
           {/* #lumosquad — no LINE OA link */}
-          <section className="h-[100dvh] flex items-center justify-center relative overflow-hidden bg-black border-y border-white/5">
+          <section className="scroll-section h-[100dvh] flex items-center justify-center relative overflow-hidden bg-black border-y border-white/5">
             <Image src="/images/squad.jpg" alt="Lumosquad" fill sizes="100vw" className="object-cover opacity-40 grayscale" loading="lazy" />
             <div className="z-10 flex flex-col items-center gap-4 text-center px-4">
               <h1 className="text-4xl md:text-[6vw] font-black uppercase italic tracking-tighter [text-shadow:0_2px_10px_rgba(0,0,0,0.5)]">
@@ -234,11 +267,16 @@ export default function Home() {
           </section>
 
           {/* LOOKBOOK — Scroll-linked logo, editorial photos with captions */}
-          <section ref={lookbookRef} className="relative w-full bg-white overflow-hidden flex justify-center pb-32">
+          <section ref={lookbookRef} className="scroll-section relative w-full bg-white overflow-hidden flex justify-center pb-32">
 
             <motion.div
-              style={{ opacity: logoOpacity, willChange: "transform, opacity" }}
-              className="fixed top-1/2 -translate-y-1/2 left-0 w-full z-50 pointer-events-none mix-blend-difference px-[5vw] md:px-[10vw] flex justify-center"
+              style={
+                isMobile
+                  ? { opacity: lookbookInView ? 1 : 0 }
+                  : { opacity: logoOpacity, willChange: "transform, opacity" }
+              }
+              transition={isMobile ? { duration: 0.35 } : undefined}
+              className="lookbook-logo-sticky fixed top-1/2 -translate-y-1/2 left-0 w-full z-50 pointer-events-none mix-blend-difference px-[5vw] md:px-[10vw] flex justify-center"
             >
               <Image src="/images/brand.png" alt="TU LUMORA Logo" width={1200} height={400} className="w-[80vw] md:w-[65vw] h-auto object-contain brightness-200" loading="lazy" />
             </motion.div>
@@ -252,10 +290,10 @@ export default function Home() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
                   <p className="absolute bottom-4 left-4 md:bottom-5 md:left-5 text-[9px] md:text-[10px] uppercase tracking-[0.4em] text-white/90 font-bold drop-shadow-md">01 — THE START</p>
                 </div>
-                <div className="flex flex-col gap-4">
+                <ScrollReveal className="flex flex-col gap-4">
                   <h3 className="text-3xl md:text-5xl lg:text-7xl font-black italic tracking-[-0.03em] text-black leading-[1.1]">&ldquo;Maybe the world just<br className="hidden md:block"/> needed a little more noise&rdquo;</h3>
                   <div className="w-16 h-[2px] bg-black/20 mt-2" />
-                </div>
+                </ScrollReveal>
               </div>
 
               {/* 2 — Pure Form: permanently grayscale */}
@@ -265,14 +303,14 @@ export default function Home() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                   <p className="absolute bottom-4 left-4 md:bottom-5 md:left-5 text-[9px] md:text-[10px] uppercase tracking-[0.4em] text-white/90 font-bold drop-shadow-md">02 — THE MOVEMENT</p>
                 </div>
-                <div className="flex flex-col pt-4 md:pt-[20%] gap-4 md:gap-5">
+                <ScrollReveal className="flex flex-col pt-4 md:pt-[20%] gap-4 md:gap-5">
                   <h3 className="text-2xl md:text-4xl lg:text-6xl font-black uppercase tracking-[-0.03em] text-black italic leading-[1.1]">AGAINST<br/>THE TIDE.</h3>
                   <div className="border-l-2 md:border-l-4 border-black/10 pl-4 md:pl-5 py-1">
                     <p className="text-black/50 text-xs md:text-base leading-relaxed tracking-wide max-w-sm">
                       True style dares to swim upstream. Timeless in its defiance, this collection is crafted to ignite a new cultural movement. We are redefining the campus aesthetic by championing absolute fluidity in wear, an uncommon simplicity that speaks for itself. Stand apart, effortlessly.
                     </p>
                   </div>
-                </div>
+                </ScrollReveal>
               </div>
 
               {/* 3 */}
@@ -282,14 +320,14 @@ export default function Home() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                   <p className="absolute bottom-4 right-4 md:bottom-5 md:right-5 text-[9px] md:text-[10px] uppercase tracking-[0.4em] text-white/90 font-bold drop-shadow-md">03 — THE PRESENCE</p>
                 </div>
-                <div className="flex flex-col pt-4 md:pb-[12%] gap-4 md:gap-5 items-start md:items-end text-left md:text-right">
+                <ScrollReveal className="flex flex-col pt-4 md:pb-[12%] gap-4 md:gap-5 items-start md:items-end text-left md:text-right">
                   <h3 className="text-2xl md:text-4xl lg:text-6xl font-black uppercase tracking-[-0.03em] text-black leading-[1.1]">OWN THE<br/>STREET.</h3>
                   <div className="border-l-2 md:border-r-4 md:border-l-0 border-black/10 pl-4 md:pl-0 md:pr-5 py-1">
                     <p className="text-black/50 text-xs md:text-base leading-relaxed tracking-wide max-w-sm">
                       Confidence isn&apos;t something you ask for, it&apos;s something you carry. A fit that moves with you, made for the street and everything that happens on it. Walk your way, take your space, and let your presence speak before you do. Own your voice. Own the street.
                     </p>
                   </div>
-                </div>
+                </ScrollReveal>
               </div>
                     {/* 4 */}
               <div className="flex flex-col md:flex-row items-center md:items-stretch gap-8 w-[100%] md:w-[80vw]">
@@ -298,13 +336,13 @@ export default function Home() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                   <p className="absolute bottom-4 left-4 md:bottom-5 md:left-5 text-[9px] md:text-[10px] uppercase tracking-[0.4em] text-white/90 font-bold drop-shadow-md">04 — THE VOICE</p>
                 </div>
-                <div className="flex flex-col items-start md:items-start text-left gap-4 md:gap-5 md:px-12">
+                <ScrollReveal className="flex flex-col items-start md:items-start text-left gap-4 md:gap-5 md:px-12">
                   <h3 className="text-2xl md:text-4xl lg:text-6xl font-black uppercase tracking-[-0.03em] text-black leading-[1.1] italic">UN-SILENCED.</h3>
                   <div className="w-12 h-[2px] bg-black/15" />
                   <p className="text-black/50 text-xs md:text-base leading-relaxed tracking-wide max-w-sm">
                     Simply as a quiet nod to those who are tired of being told to stay silent. Inspired by Lumo and his friends who just decided to speak up, this tee is a small reminder, you don&apos;t need to be loud to be heard. The real strength is just knowing the value of your own voice, and being brave enough to use it.
                   </p>
-                </div>
+                </ScrollReveal>
               </div>
 
               {/* 5 */}
@@ -314,13 +352,13 @@ export default function Home() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                   <p className="absolute bottom-4 left-4 md:bottom-5 md:left-5 text-[9px] md:text-[10px] uppercase tracking-[0.4em] text-white/90 font-bold drop-shadow-md">05 — THE EXPRESSION</p>
                 </div>
-                <div className="flex flex-col items-start md:items-end text-left md:text-right gap-4 md:gap-5">
+                <ScrollReveal className="flex flex-col items-start md:items-end text-left md:text-right gap-4 md:gap-5">
                   <h3 className="text-2xl md:text-4xl lg:text-6xl font-black uppercase tracking-[-0.03em] text-black leading-[1.1]">SPEAK THROUGH<br/>STYLE.</h3>
                   <div className="w-12 h-[2px] bg-black/15 self-start md:self-end" />
                   <p className="text-black/50 text-xs md:text-base leading-relaxed tracking-wide max-w-sm">
                     In a city that tells you to stay quiet, style becomes a language. More than fabric, more than a fit, it&apos;s a voice you wear. Every line, every silhouette is a signal that you refuse to disappear. Because sometimes the loudest thing you can do is simply show up as yourself.
                   </p>
-                </div>
+                </ScrollReveal>
               </div>
 
               {/* 6 */}
@@ -330,24 +368,24 @@ export default function Home() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                   <p className="absolute bottom-4 right-4 md:bottom-5 md:right-5 text-[9px] md:text-[10px] uppercase tracking-[0.4em] text-white/90 font-bold drop-shadow-md">06 — THE FORM</p>
                 </div>
-                <div className="flex flex-col justify-end pb-4 md:pb-14 gap-4 md:gap-5">
+                <ScrollReveal className="flex flex-col justify-end pb-4 md:pb-14 gap-4 md:gap-5">
                   <h3 className="text-2xl md:text-4xl lg:text-6xl font-black uppercase tracking-[-0.03em] text-black leading-[1.1] italic">EFFORTLESS.</h3>
                   <div className="w-12 h-[2px] bg-black/15" />
                   <p className="text-black/50 text-xs md:text-base leading-relaxed tracking-wide max-w-md">
                     Fashion should liberate, not complicate. We designed this silhouette to be a universal canvas, adapting flawlessly to whoever you are. There is no need to force a look, the confidence is built-in. Woven into every thread is the unyielding soul of those who stand tall and refuse to be consumed by the shadows. Effortless in form. Defiant in spirit.
                   </p>
-                </div>
+                </ScrollReveal>
               </div>
 
               <div id="finale-section" className="flex flex-col w-[100%] md:w-[92vw] gap-0 mt-12 bg-black text-white shadow-2xl overflow-hidden relative">
                 <div className="px-6 md:px-16 py-12 md:py-16 border-b border-white/5 absolute -top-[1000px]">
                   {/* Hid this block physically but kept structure for backward comp if needed, actually let's just remove the text and move it */}
                 </div>
-                <div className="px-4 md:px-16 pt-8 pb-4 md:pt-12 md:pb-8 flex justify-center w-full">
+                <ScrollReveal className="px-4 md:px-16 pt-8 pb-4 md:pt-12 md:pb-8 flex justify-center w-full">
                   <h3 className="text-[9vw] sm:text-4xl md:text-6xl lg:text-[7rem] font-black italic tracking-[-0.04em] text-white leading-none whitespace-nowrap">
                     &ldquo;Let the city speak&rdquo;
                   </h3>
-                </div>
+                </ScrollReveal>
                 <div className="relative w-full aspect-[4/3] md:aspect-[21/9] group overflow-hidden bg-zinc-900">
                   <p className="absolute top-4 left-4 md:top-8 md:left-8 text-[9px] md:text-[10px] uppercase tracking-[0.4em] text-white/50 font-bold drop-shadow-md z-10 hidden md:block">07 — FINAL STATEMENT</p>
                   <Image src="/images/DSC07728.jpg" alt="Glam Finale" fill sizes="100vw" className="object-cover transition-transform duration-1000 group-hover:scale-105" loading="lazy" />
@@ -370,7 +408,7 @@ export default function Home() {
           </section>
 
           {/* Footer — no ® */}
-          <footer className="h-[50dvh] min-h-[400px] bg-black flex flex-col items-center justify-center border-t border-white/5 space-y-8 px-6">
+          <footer className="scroll-section h-[50dvh] min-h-[400px] bg-black flex flex-col items-center justify-center border-t border-white/5 space-y-8 px-6">
             <div className="text-center space-y-2">
               <p className="text-gray-600 tracking-[1em] uppercase text-[10px]">Established 2026</p>
               <h2 className="text-xl sm:text-2xl md:text-4xl font-black tracking-tighter uppercase text-white italic">TU LUMORA</h2>
