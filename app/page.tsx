@@ -76,8 +76,6 @@ export default function Home() {
   });
 
   const logoOpacity = useTransform(scrollYProgress, [0, 0.05, 0.95, 1], [0, 1, 1, 0]);
-  // มือถือ: โลโก้โผล่เมื่อเข้าโซน LOOKBOOK — amount เล็ก = แค่เห็นโซนนิดหน่อยก็โผล่ (ไม่กระพริบ)
-  const lookbookInView = useInView(lookbookRef, { amount: 0.01, once: false });
 
   return (
     <>
@@ -270,12 +268,7 @@ export default function Home() {
           <section ref={lookbookRef} className="relative w-full bg-white overflow-hidden flex justify-center pb-32">
 
             <motion.div
-              style={
-                isMobile
-                  ? { opacity: lookbookInView ? 1 : 0 }
-                  : { opacity: logoOpacity, willChange: "transform, opacity" }
-              }
-              transition={isMobile ? { duration: 0.35 } : undefined}
+              style={{ opacity: logoOpacity, willChange: "transform, opacity" }}
               className="lookbook-logo-sticky fixed top-1/2 -translate-y-1/2 left-0 w-full z-50 pointer-events-none mix-blend-difference px-[5vw] md:px-[10vw] flex justify-center"
             >
               <Image src="/images/brand.png" alt="TU LUMORA Logo" width={1200} height={400} className="w-[80vw] md:w-[65vw] h-auto object-contain brightness-200" loading="lazy" />
