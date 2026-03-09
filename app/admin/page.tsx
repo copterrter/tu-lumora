@@ -93,7 +93,9 @@ export default function AdminDashboard() {
     if (orders.length === 0) return [{ name: 'N/A', value: 1 }];
     const map: Record<string, number> = {};
     orders.forEach(o => {
-      const name = o.product_name || "Unknown";
+      let name = o.product_name || "Unknown";
+      // ตัดชื่อให้สั้นลงเพื่อความเป็นระเบียบ (เอา "TU LUMORA" ออก)
+      name = name.replace(/TU LUMORA /i, "").trim();
       map[name] = (map[name] || 0) + 1;
     });
     return Object.entries(map).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
@@ -206,12 +208,12 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           
           {/* Pie Chart: Product Breakdown */}
-          <div className="w-full h-80 bg-[#0a0a0a] border border-white/10 p-6 relative overflow-hidden group shadow-[0_0_20px_rgba(0,255,204,0.03)] hover:shadow-[0_0_30px_rgba(0,255,204,0.1)] transition-all duration-700">
+          <div className="w-full h-96 bg-[#0a0a0a] border border-white/10 p-6 relative overflow-hidden group shadow-[0_0_20px_rgba(0,255,204,0.03)] hover:shadow-[0_0_30px_rgba(0,255,204,0.1)] transition-all duration-700">
             <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#00ffcc] to-transparent opacity-30 group-hover:opacity-100 transition-opacity duration-1000" />
             <h2 className="text-[10px] tracking-[0.4em] text-gray-500 uppercase flex items-center gap-4 mb-4 relative z-10">
               Product Breakdown
             </h2>
-            <div className="h-[220px] w-full relative z-10 flex justify-center items-center">
+            <div className="h-[280px] w-full relative z-10 flex flex-col justify-center items-center">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie 
@@ -219,9 +221,9 @@ export default function AdminDashboard() {
                     dataKey="value" 
                     nameKey="name" 
                     cx="50%" 
-                    cy="45%" 
-                    innerRadius={60} 
-                    outerRadius={80} 
+                    cy="40%" 
+                    innerRadius={70} 
+                    outerRadius={90} 
                     paddingAngle={5} 
                     stroke="none"
                     animationDuration={1500}
@@ -236,8 +238,19 @@ export default function AdminDashboard() {
                   />
                   <Legend 
                     iconType="circle" 
+                    layout="horizontal"
                     verticalAlign="bottom"
-                    wrapperStyle={{ fontSize: '10px', fontFamily: 'monospace', textTransform: 'uppercase', paddingTop: '10px' }} 
+                    align="center"
+                    wrapperStyle={{ 
+                      fontSize: '10px', 
+                      fontFamily: 'monospace', 
+                      textTransform: 'uppercase', 
+                      paddingTop: '20px',
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      justifyContent: 'center',
+                      gap: '12px'
+                    }} 
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -245,12 +258,12 @@ export default function AdminDashboard() {
           </div>
 
           {/* Bar Chart: Order Status */}
-          <div className="w-full h-80 bg-[#0a0a0a] border border-white/10 p-6 relative overflow-hidden group shadow-[0_0_20px_rgba(255,0,255,0.03)] hover:shadow-[0_0_30px_rgba(255,0,255,0.1)] transition-all duration-700">
+          <div className="w-full h-96 bg-[#0a0a0a] border border-white/10 p-6 relative overflow-hidden group shadow-[0_0_20px_rgba(255,0,255,0.03)] hover:shadow-[0_0_30px_rgba(255,0,255,0.1)] transition-all duration-700">
             <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#ff00ff] to-transparent opacity-30 group-hover:opacity-100 transition-opacity duration-1000" />
             <h2 className="text-[10px] tracking-[0.4em] text-gray-500 uppercase flex items-center gap-4 mb-4 relative z-10">
               Order Status Overview
             </h2>
-            <div className="h-[220px] w-full relative z-10">
+            <div className="h-[280px] w-full relative z-10">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={statusData} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
