@@ -41,24 +41,31 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Excel file is empty or missing headers" }, { status: 400 });
     }
 
-    // Identify Columns (predict human errors from courier exports)
-    const headers = rawData[0].map((h: string) => String(h).toLowerCase().trim());
-    
-    // Find index for Phone, Name, Tracking
-    let phoneIdx = headers.findIndex(h => h.includes("โทร") || h.includes("phone") || h.includes("tel"));
-    let nameIdx = headers.findIndex(h => h.includes("ชื่อ") || h.includes("name") || h.includes("ผู้รับ"));
-    let trackIdx = headers.findIndex(h => h.includes("track") || h.includes("เลข") || h.includes("พัสดุ"));
+    // Identify Columns (Scan first 10 rows for headers - couriers often have summary rows at top)
+    let headerRowIdx = -1;
+    let phoneIdx = -1;
+    let nameIdx = -1;
+    let trackIdx = -1;
 
-    if (phoneIdx === -1 && nameIdx === -1) {
-      return NextResponse.json({ error: "Cannot find Name or Phone columns in Excel" }, { status: 400 });
+    for (let i = 0; i < Math.min(10, rawData.length); i++) {
+      const row = rawData[i].map((h: any) => String(h).toLowerCase().trim());
+      phoneIdx = row.findIndex(h => h.includes("โทร") || h.includes("phone") || h.includes("tel"));
+      nameIdx = row.findIndex(h => h.includes("ชื่อ") || h.includes("name") || h.includes("ผู้รับ"));
+      trackIdx = row.findIndex(h => h.includes("track") || h.includes("เลข") || h.includes("พัสดุ"));
+
+      if (trackIdx !== -1 && (phoneIdx !== -1 || nameIdx !== -1)) {
+        headerRowIdx = i;
+        break;
+      }
     }
-    if (trackIdx === -1) {
-      return NextResponse.json({ error: "Cannot find Tracking Number column in Excel (look for 'track' or 'เลข')" }, { status: 400 });
+
+    if (headerRowIdx === -1) {
+      return NextResponse.json({ error: "Cannot find valid headers (Tracking + Name/Phone) in the first 10 rows of the Excel file" }, { status: 400 });
     }
 
     // Extract Tracking Data from Excel
     const updates = [];
-    for (let i = 1; i < rawData.length; i++) {
+    for (let i = headerRowIdx + 1; i < rawData.length; i++) {
       const row = rawData[i];
       const phone = phoneIdx !== -1 ? cleanPhone(row[phoneIdx]) : "";
       const name = nameIdx !== -1 ? cleanName(row[nameIdx]) : "";
@@ -84,14 +91,23 @@ export async function POST(request: Request) {
 
     // Mapping and Updating
     for (const item of updates) {
-      // Fuzzy Match by Phone OR Name
+      // Fuzzy Match by Phone OR Name (with minimum length safeguards against false positives)
       const matchedOrder = dbOrders?.find(o => {
         const dbPhone = cleanPhone(o.phone);
         const dbName1 = cleanName(`${o.firstName} ${o.lastName}`);
         const dbName2 = cleanName(`${o.firstName}${o.lastName}`);
+        const cleanFirstName = cleanName(o.firstName);
         
-        const phoneMatch = item.phone && dbPhone && dbPhone.includes(item.phone);
-        const nameMatch = item.name && (dbName1.includes(item.name) || dbName2.includes(item.name) || item.name.includes(cleanName(o.firstName)));
+        // phone must be at least 8 digits to match
+        const phoneMatch = item.phone && item.phone.length >= 8 && dbPhone && dbPhone.includes(item.phone);
+        
+        // name must be at least 3 chars to prevent single letter matches
+        const firstNameMatch = cleanFirstName.length >= 3 && item.name.includes(cleanFirstName);
+        const nameMatch = item.name && item.name.length >= 3 && (
+          dbName1.includes(item.name) || 
+          dbName2.includes(item.name) || 
+          firstNameMatch
+        );
         
         return phoneMatch || nameMatch;
       });
