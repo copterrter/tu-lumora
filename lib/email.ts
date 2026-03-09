@@ -249,7 +249,7 @@ export async function sendTrackingEmail({
         <!-- TEXT HEADER -->
         <tr>
           <td style="background:#000;border:1px solid #1a1a1a;overflow:hidden;">
-            <div style="height:4px;background:linear-gradient(90deg,#dc2626,#ef4444,#dc2626);font-size:0;">&nbsp;</div>
+            <div style="height:4px;background:linear-gradient(90deg,#000000,#06C755,#000000);font-size:0;">&nbsp;</div>
             <div style="background:#000;padding:36px 40px 24px;text-align:center;border-bottom:1px solid #0f0f0f;">
               <p style="margin:0 0 6px;font-size:36px;font-weight:900;font-style:italic;letter-spacing:-0.04em;text-transform:uppercase;color:#fff;">
                 TU LUMORA
@@ -267,9 +267,9 @@ export async function sendTrackingEmail({
             </div>
 
             <!-- HERO IMAGE (Same vibe as receipt) -->
-            <div style="overflow:hidden;font-size:0;line-height:0;border-bottom:1px solid #0f0f0f;">
-              <img src="https://raw.githubusercontent.com/copterrter/tu-lumora/main/public/images/work3-cropped-email.jpg" alt="TU LUMORA SQUAD" width="580"
-                style="display:block;width:100%;max-width:580px;height:auto;opacity:0.85;" />
+            <div style="overflow:hidden;font-size:0;line-height:0;border-bottom:1px solid #0f0f0f;background:#000;padding:20px 0;">
+              <img src="https://raw.githubusercontent.com/copterrter/tu-lumora/main/public/images/LUMOWEB-CR.png" alt="TU LUMORA SQUAD" width="400"
+                style="display:block;margin:0 auto;width:100%;max-width:400px;height:auto;opacity:0.9;" />
             </div>
 
             <!-- GREETING -->
@@ -314,7 +314,7 @@ export async function sendTrackingEmail({
               </a>
             </div>
 
-            <div style="height:4px;background:linear-gradient(90deg,#dc2626,#ef4444,#dc2626);font-size:0;">&nbsp;</div>
+            <div style="height:4px;background:linear-gradient(90deg,#000000,#06C755,#000000);font-size:0;">&nbsp;</div>
           </td>
         </tr>
 
