@@ -12,6 +12,7 @@ export default function AdminDashboard() {
   const [password, setPassword] = useState("");
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [uploadingTracking, setUploadingTracking] = useState(false);
 
   // 🔒 รหัสผ่านเข้าหลังบ้าน (เปลี่ยนตรงนี้ได้ตามใจชอบ)
   const ADMIN_PIN = "LUMORA2026"; 
@@ -60,6 +61,39 @@ export default function AdminDashboard() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  // ฟังก์ชันอัปโหลดไฟล์ Tracking (Excel)
+  const handleTrackingUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!confirm(`คุณต้องการอัปโหลดไฟล์ ${file.name} เพื่อจับคู่เลข Tracking และส่งอีเมลหาลูกค้าใช่หรือไม่?`)) {
+      e.target.value = ""; // reset input
+      return;
+    }
+
+    setUploadingTracking(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("/api/upload-tracking", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || "Upload failed");
+
+      alert(`✅ สำเร็จ!\nจับคู่และอัปเดตไป ${data.details.matchCount} ออเดอร์\nส่งอีเมลสำเร็จ ${data.details.emailCount} ฉบับ`);
+      fetchOrders(); // Refresh table
+    } catch (err: any) {
+      alert(`❌ ผิดพลาด: ${err.message}`);
+    } finally {
+      setUploadingTracking(false);
+      e.target.value = ""; // reset input
+    }
   };
 
   // 1. ข้อมูลสำหรับกราฟเส้น (Sales vs Visitors)
@@ -290,13 +324,25 @@ export default function AdminDashboard() {
         </div>
 
         {/* Action Bar */}
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <button onClick={fetchOrders} className="text-xs font-bold tracking-widest uppercase border border-white/20 px-4 py-2 hover:bg-white hover:text-black transition-all">
             {loading ? "Refreshing..." : "Refresh Data"}
           </button>
-          <button onClick={exportToCSV} className="text-xs font-black tracking-widest uppercase bg-white text-black px-6 py-2 hover:bg-gray-300 transition-all">
-            Export to Excel
-          </button>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <label className={`cursor-pointer text-xs font-black tracking-widest uppercase border border-[#00ffcc] text-[#00ffcc] px-6 py-2 hover:bg-[#00ffcc] hover:text-black transition-all text-center ${uploadingTracking ? 'opacity-50 cursor-not-allowed' : ''}`}>
+              {uploadingTracking ? "Processing..." : "Upload Tracking (Excel)"}
+              <input 
+                type="file" 
+                accept=".xlsx, .xls, .csv" 
+                className="hidden" 
+                onChange={handleTrackingUpload}
+                disabled={uploadingTracking}
+              />
+            </label>
+            <button onClick={exportToCSV} className="text-xs font-black tracking-widest uppercase bg-white text-black px-6 py-2 hover:bg-gray-300 transition-all">
+              Export to Excel
+            </button>
+          </div>
         </div>
 
         {/* Data Table */}
@@ -308,7 +354,7 @@ export default function AdminDashboard() {
                 <th className="p-4 border-b border-white/10">Customer</th>
                 <th className="p-4 border-b border-white/10">Items</th>
                 <th className="p-4 border-b border-white/10">Total</th>
-                <th className="p-4 border-b border-white/10">Status</th>
+                <th className="p-4 border-b border-white/10">Status / Tracking</th>
               </tr>
             </thead>
             <tbody className="text-xs">
@@ -327,9 +373,20 @@ export default function AdminDashboard() {
                     <td className="p-4 font-bold italic">{order.product_name}</td>
                     <td className="p-4 font-black">฿{order.total_amount}</td>
                     <td className="p-4">
-                      <span className="bg-green-500/20 text-green-400 border border-green-500/50 px-2 py-1 text-[9px] uppercase tracking-widest font-black">
-                        {order.status}
-                      </span>
+                      <div className="flex flex-col gap-2 items-start">
+                        <span className={`px-2 py-1 text-[9px] uppercase tracking-widest font-black border ${
+                          order.status === 'SHIPPED' 
+                            ? 'bg-[#00ffcc]/20 text-[#00ffcc] border-[#00ffcc]/50' 
+                            : 'bg-green-500/20 text-green-400 border-green-500/50'
+                        }`}>
+                          {order.status}
+                        </span>
+                        {order.tracking_number && (
+                          <span className="text-[10px] text-gray-400 font-monospace tracking-widest bg-black/50 px-2 py-1 border border-white/10">
+                            {order.tracking_number}
+                          </span>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))

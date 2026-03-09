@@ -209,6 +209,116 @@ export async function sendOrderReceipt({
     }
 
     return { success: true, id: data?.id };
+export async function sendTrackingEmail({
+  email,
+  firstName,
+  trackingNumber,
+  courier = 'FLASH EXPRESS'
+}: {
+  email: string;
+  firstName: string;
+  trackingNumber: string;
+  courier?: string;
+}) {
+  if (!email) return { success: false, message: 'No email provided' };
+  
+  const resend = new Resend(process.env.RESEND_API_KEY);
+  const BASE_URL = 'https://www.tulumora.com';
+  
+  const html = `
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TU LUMORA — Order Shipped</title>
+</head>
+<body style="margin:0;padding:0;background:#080808;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#fff;">
+
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#080808;">
+  <tr>
+    <td align="center" style="padding:32px 16px 48px;">
+      <table width="100%" style="max-width:580px;" cellpadding="0" cellspacing="0">
+        <tr>
+          <td style="background:#000;border:1px solid #1a1a1a;overflow:hidden;">
+            <div style="height:4px;background:linear-gradient(90deg,#00ffcc,#3b82f6,#00ffcc);font-size:0;">&nbsp;</div>
+            <div style="background:#000;padding:36px 40px 24px;text-align:center;border-bottom:1px solid #0f0f0f;">
+              <p style="margin:0 0 6px;font-size:36px;font-weight:900;font-style:italic;letter-spacing:-0.04em;text-transform:uppercase;color:#fff;">
+                TU LUMORA
+              </p>
+            </div>
+
+            <!-- SHIPPED STRIPE -->
+            <div style="background:#00ffcc;padding:13px 40px;text-align:center;">
+              <span style="font-size:9px;letter-spacing:0.7em;text-transform:uppercase;color:#000;font-weight:900;">
+                ORDER SHIPPED
+              </span>
+            </div>
+
+            <div style="padding:36px 40px 0;">
+              <p style="margin:0 0 6px;font-size:9px;letter-spacing:0.5em;text-transform:uppercase;color:#888;">
+                It's on the way,
+              </p>
+              <p style="margin:0;font-size:28px;font-weight:900;font-style:italic;letter-spacing:-0.02em;color:#fff;text-transform:uppercase;">
+                ${firstName || 'CAPTAIN'}
+              </p>
+            </div>
+            
+            <div style="padding:14px 40px 28px;">
+              <p style="margin:0;font-size:11px;color:#888;line-height:2;letter-spacing:0.07em;text-transform:uppercase;">
+                Your TU LUMORA package has been handed over to the courier.<br/>
+                Get ready to wear your soul.
+              </p>
+            </div>
+
+            <div style="padding:0 40px;margin-bottom:28px;">
+              <div style="height:1px;background:linear-gradient(to right,transparent,#2a2a2a,transparent);font-size:0;">&nbsp;</div>
+            </div>
+
+            <div style="padding:0 40px 16px;text-align:center;">
+              <p style="margin:0 0 8px;font-size:9px;letter-spacing:0.5em;text-transform:uppercase;color:#777;font-weight:900;">
+                COURIER: ${courier}
+              </p>
+              <div style="background:#111;border:1px dashed #333;padding:24px;display:inline-block;">
+                <p style="margin:0 0 8px;font-size:10px;color:#00ffcc;letter-spacing:0.4em;text-transform:uppercase;font-weight:bold;">TRACKING NUMBER</p>
+                <p style="margin:0;font-size:24px;font-family:monospace;letter-spacing:0.1em;color:#fff;">${trackingNumber}</p>
+              </div>
+            </div>
+
+            <div style="padding:20px 40px 40px;text-align:center;">
+              <a href="https://lin.ee/19k0kWS"
+                style="display:inline-block;background:#06C755;color:#fff;padding:14px 36px;font-size:10px;font-weight:900;letter-spacing:0.45em;text-transform:uppercase;text-decoration:none;">
+                CONTACT LINE OA
+              </a>
+            </div>
+
+            <div style="height:4px;background:linear-gradient(90deg,#00ffcc,#3b82f6,#00ffcc);font-size:0;">&nbsp;</div>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>
+  `;
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: 'LUMO <orders@tulumora.com>',
+      to: email,
+      replyTo: 'support@tulumora.com',
+      subject: `ORDER SHIPPED — TU LUMORA`,
+      html,
+    });
+
+    if (error) {
+      console.error('Resend error:', error);
+      return { success: false, message: error.message };
+    }
+
+    return { success: true, id: data?.id };
   } catch (err: any) {
     console.error('Email service error:', err);
     return { success: false, message: err.message };
