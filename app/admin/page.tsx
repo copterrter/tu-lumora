@@ -1,7 +1,11 @@
 "use client";
 import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/lib/supabase";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { 
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell,
+  BarChart, Bar, Legend
+} from "recharts";
 
 export default function AdminDashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -40,13 +44,11 @@ export default function AdminDashboard() {
 
   // ฟังก์ชันดาวน์โหลดเป็นไฟล์ Excel (CSV)
   const exportToCSV = () => {
-    // ใส่ \uFEFF เพื่อให้ Excel อ่านภาษาไทยได้ไม่เพี้ยน
     const csvContent = "\uFEFF" + 
       "Order ID,Date,Customer Name,Phone,Address,Items,Total Amount,Status\n" +
       orders.map(o => {
         const date = new Date(o.created_at).toLocaleString('th-TH');
         const name = `${o.firstName} ${o.lastName}`;
-        // ใส่เครื่องหมายคำพูดครอบ Address และ Items เพื่อป้องกันลูกน้ำ (,) ทำให้คอลัมน์เพี้ยน
         return `${o.id},${date},${name},${o.phone},"${o.address} ${o.zipCode}","${o.product_name}",${o.total_amount},${o.status}`;
       }).join("\n");
 
@@ -60,10 +62,9 @@ export default function AdminDashboard() {
     document.body.removeChild(link);
   };
 
-  // เตรียมข้อมูลสำหรับกราฟ
+  // 1. ข้อมูลสำหรับกราฟเส้น (Sales vs Visitors)
   const chartData = useMemo(() => {
     if (orders.length === 0) {
-      // Dummy data if no orders
       return Array.from({length: 7}).map((_, i) => ({
         date: `Day ${i+1}`,
         sales: Math.floor(Math.random() * 5000),
@@ -78,7 +79,6 @@ export default function AdminDashboard() {
       const displayDate = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
       
       if (!dataMap[rawDate]) {
-        // จำลองยอดคนเข้าเว็บแบบมีเสถียรภาพตามวันที่
         const pseudoRandom = rawDate.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
         dataMap[rawDate] = { rawDate, date: displayDate, sales: 0, visitors: (pseudoRandom % 800) + 200 };
       }
@@ -86,6 +86,30 @@ export default function AdminDashboard() {
     });
 
     return Object.values(dataMap).sort((a, b) => a.rawDate.localeCompare(b.rawDate));
+  }, [orders]);
+
+  // 2. ข้อมูลสำหรับกราฟโดนัท (Top Products / Sizes)
+  const productData = useMemo(() => {
+    if (orders.length === 0) return [{ name: 'N/A', value: 1 }];
+    const map: Record<string, number> = {};
+    orders.forEach(o => {
+      const name = o.product_name || "Unknown";
+      map[name] = (map[name] || 0) + 1;
+    });
+    return Object.entries(map).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+  }, [orders]);
+
+  const PIE_COLORS = ['#00ffcc', '#ff00ff', '#f5df4d', '#39ff14', '#ff073a'];
+
+  // 3. ข้อมูลสำหรับกราฟแท่ง (Order Status)
+  const statusData = useMemo(() => {
+    if (orders.length === 0) return [{ status: 'N/A', count: 0 }];
+    const map: Record<string, number> = {};
+    orders.forEach(o => {
+      const status = o.status || "Unknown";
+      map[status] = (map[status] || 0) + 1;
+    });
+    return Object.entries(map).map(([status, count]) => ({ status, count }));
   }, [orders]);
 
   // ---------------- หน้าจอ Login ----------------
@@ -138,9 +162,8 @@ export default function AdminDashboard() {
           </div>
         </header>
 
-        {/* Futuristic Chart */}
+        {/* 1. Main Line Chart */}
         <div className="w-full h-96 bg-[#0a0a0a] border border-white/10 p-6 relative overflow-hidden group shadow-[0_0_30px_rgba(0,255,204,0.05)] hover:shadow-[0_0_40px_rgba(255,0,255,0.08)] transition-all duration-700">
-          {/* Decorative elements */}
           <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#00ffcc] to-transparent opacity-50 group-hover:opacity-100 transition-opacity duration-1000" />
           <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#ff00ff] to-transparent opacity-50 group-hover:opacity-100 transition-opacity duration-1000" />
           <div className="absolute -left-10 top-1/2 -translate-y-1/2 w-20 h-full bg-gradient-to-r from-[#00ffcc]/5 to-transparent blur-2xl" />
@@ -148,7 +171,7 @@ export default function AdminDashboard() {
           
           <div className="flex justify-between items-end mb-6 relative z-10">
             <h2 className="text-[10px] tracking-[0.4em] text-gray-500 uppercase flex items-center gap-4">
-              Analytics Overview 
+              Revenue & Traffic Overview 
               <span className="flex items-center gap-2 text-white">
                 <span className="w-2 h-2 rounded-full bg-[#00ffcc] shadow-[0_0_8px_#00ffcc]"></span> Sales
               </span>
@@ -162,72 +185,95 @@ export default function AdminDashboard() {
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
-                  <filter id="glowSales" x="-20%" y="-20%" width="140%" height="140%">
-                    <feGaussianBlur stdDeviation="3" result="blur" />
-                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                  </filter>
-                  <filter id="glowVisitors" x="-20%" y="-20%" width="140%" height="140%">
+                  <filter id="glowLine" x="-20%" y="-20%" width="140%" height="140%">
                     <feGaussianBlur stdDeviation="3" result="blur" />
                     <feComposite in="SourceGraphic" in2="blur" operator="over" />
                   </filter>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
-                <XAxis 
-                  dataKey="date" 
-                  stroke="#555" 
-                  tick={{ fill: '#777', fontSize: 10, fontFamily: 'monospace' }} 
-                  tickLine={false} 
-                  axisLine={false} 
-                  dy={10}
-                />
-                <YAxis 
-                  yAxisId="left" 
-                  stroke="#555" 
-                  tick={{ fill: '#777', fontSize: 10, fontFamily: 'monospace' }} 
-                  tickLine={false} 
-                  axisLine={false} 
-                  tickFormatter={(val) => `฿${val}`}
-                />
-                <YAxis 
-                  yAxisId="right" 
-                  orientation="right" 
-                  stroke="#555" 
-                  tick={{ fill: '#777', fontSize: 10, fontFamily: 'monospace' }} 
-                  tickLine={false} 
-                  axisLine={false} 
-                />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#050505', border: '1px solid #333', borderRadius: '0px', boxShadow: '0 10px 30px rgba(0,0,0,0.8)' }}
-                  itemStyle={{ fontSize: '12px', fontWeight: 'bold', fontFamily: 'monospace' }}
-                  labelStyle={{ color: '#888', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}
-                />
-                <Line 
-                  yAxisId="left" 
-                  type="monotone" 
-                  dataKey="sales" 
-                  name="Sales" 
-                  stroke="#00ffcc" 
-                  strokeWidth={2} 
-                  dot={{ r: 3, fill: '#000', stroke: '#00ffcc', strokeWidth: 2 }} 
-                  activeDot={{ r: 6, fill: '#00ffcc', stroke: '#fff' }} 
-                  filter="url(#glowSales)" 
-                  animationDuration={2000}
-                />
-                <Line 
-                  yAxisId="right" 
-                  type="monotone" 
-                  dataKey="visitors" 
-                  name="Visitors" 
-                  stroke="#ff00ff" 
-                  strokeWidth={2} 
-                  dot={{ r: 3, fill: '#000', stroke: '#ff00ff', strokeWidth: 2 }} 
-                  activeDot={{ r: 6, fill: '#ff00ff', stroke: '#fff' }} 
-                  filter="url(#glowVisitors)" 
-                  animationDuration={2000}
-                />
+                <XAxis dataKey="date" stroke="#555" tick={{ fill: '#777', fontSize: 10, fontFamily: 'monospace' }} tickLine={false} axisLine={false} dy={10} />
+                <YAxis yAxisId="left" stroke="#555" tick={{ fill: '#777', fontSize: 10, fontFamily: 'monospace' }} tickLine={false} axisLine={false} tickFormatter={(val) => `฿${val}`} />
+                <YAxis yAxisId="right" orientation="right" stroke="#555" tick={{ fill: '#777', fontSize: 10, fontFamily: 'monospace' }} tickLine={false} axisLine={false} />
+                <Tooltip contentStyle={{ backgroundColor: '#050505', border: '1px solid #333', borderRadius: '0px' }} itemStyle={{ fontSize: '12px', fontWeight: 'bold', fontFamily: 'monospace' }} labelStyle={{ color: '#888', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }} />
+                <Line yAxisId="left" type="monotone" dataKey="sales" name="Sales" stroke="#00ffcc" strokeWidth={2} dot={{ r: 3, fill: '#000', stroke: '#00ffcc', strokeWidth: 2 }} activeDot={{ r: 6, fill: '#00ffcc', stroke: '#fff' }} filter="url(#glowLine)" animationDuration={2000} />
+                <Line yAxisId="right" type="monotone" dataKey="visitors" name="Visitors" stroke="#ff00ff" strokeWidth={2} dot={{ r: 3, fill: '#000', stroke: '#ff00ff', strokeWidth: 2 }} activeDot={{ r: 6, fill: '#ff00ff', stroke: '#fff' }} filter="url(#glowLine)" animationDuration={2000} />
               </LineChart>
             </ResponsiveContainer>
           </div>
+        </div>
+
+        {/* 2. Secondary Charts Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          {/* Pie Chart: Product Breakdown */}
+          <div className="w-full h-80 bg-[#0a0a0a] border border-white/10 p-6 relative overflow-hidden group shadow-[0_0_20px_rgba(0,255,204,0.03)] hover:shadow-[0_0_30px_rgba(0,255,204,0.1)] transition-all duration-700">
+            <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#00ffcc] to-transparent opacity-30 group-hover:opacity-100 transition-opacity duration-1000" />
+            <h2 className="text-[10px] tracking-[0.4em] text-gray-500 uppercase flex items-center gap-4 mb-4 relative z-10">
+              Product Breakdown
+            </h2>
+            <div className="h-[220px] w-full relative z-10 flex justify-center items-center">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie 
+                    data={productData} 
+                    dataKey="value" 
+                    nameKey="name" 
+                    cx="50%" 
+                    cy="45%" 
+                    innerRadius={60} 
+                    outerRadius={80} 
+                    paddingAngle={5} 
+                    stroke="none"
+                    animationDuration={1500}
+                  >
+                    {productData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} style={{ filter: `drop-shadow(0px 0px 6px ${PIE_COLORS[index % PIE_COLORS.length]}80)` }} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#050505', border: '1px solid #333', borderRadius: '0px' }} 
+                    itemStyle={{ fontSize: '12px', fontWeight: 'bold', fontFamily: 'monospace' }} 
+                  />
+                  <Legend 
+                    iconType="circle" 
+                    verticalAlign="bottom"
+                    wrapperStyle={{ fontSize: '10px', fontFamily: 'monospace', textTransform: 'uppercase', paddingTop: '10px' }} 
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Bar Chart: Order Status */}
+          <div className="w-full h-80 bg-[#0a0a0a] border border-white/10 p-6 relative overflow-hidden group shadow-[0_0_20px_rgba(255,0,255,0.03)] hover:shadow-[0_0_30px_rgba(255,0,255,0.1)] transition-all duration-700">
+            <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#ff00ff] to-transparent opacity-30 group-hover:opacity-100 transition-opacity duration-1000" />
+            <h2 className="text-[10px] tracking-[0.4em] text-gray-500 uppercase flex items-center gap-4 mb-4 relative z-10">
+              Order Status Overview
+            </h2>
+            <div className="h-[220px] w-full relative z-10">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={statusData} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
+                  <XAxis dataKey="status" stroke="#555" tick={{ fill: '#777', fontSize: 10, fontFamily: 'monospace' }} tickLine={false} axisLine={false} dy={10} />
+                  <YAxis stroke="#555" tick={{ fill: '#777', fontSize: 10, fontFamily: 'monospace' }} tickLine={false} axisLine={false} allowDecimals={false} />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#050505', border: '1px solid #333', borderRadius: '0px' }} 
+                    itemStyle={{ color: '#ff00ff', fontSize: '12px', fontWeight: 'bold', fontFamily: 'monospace' }} 
+                    cursor={{fill: '#111'}} 
+                  />
+                  <Bar 
+                    dataKey="count" 
+                    name="Orders"
+                    fill="#ff00ff" 
+                    radius={[4, 4, 0, 0]} 
+                    animationDuration={1500}
+                    style={{ filter: 'drop-shadow(0px 0px 5px rgba(255,0,255,0.5))' }}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
         </div>
 
         {/* Action Bar */}
