@@ -209,6 +209,12 @@ export async function sendOrderReceipt({
     }
 
     return { success: true, id: data?.id };
+  } catch (err: any) {
+    console.error('Email service error:', err);
+    return { success: false, message: err.message };
+  }
+}
+
 export async function sendTrackingEmail({
   email,
   firstName,
