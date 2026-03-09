@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 html {
-  scroll-behavior: smooth;
+  /* Removed global scroll-behavior: smooth; as it conflicts with ReactLenis on desktop and causes heavy lag */
 }
 
 body {
