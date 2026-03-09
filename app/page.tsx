@@ -14,6 +14,7 @@ function ScrollReveal({ children, className }: { children: React.ReactNode; clas
     <motion.div
       ref={ref}
       className={className}
+      style={{ willChange: "transform, opacity" }}
       initial={{ opacity: 0, y: 72 }}
       animate={{ opacity: isInView ? 1 : 0, y: isInView ? 0 : 72 }}
       transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
@@ -167,8 +168,8 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      {/* ReactLenis only on desktop — iOS has great native smooth scroll already */}
-      <ReactLenis root options={{ lerp: isMobile ? 0 : 0.1, duration: isMobile ? 0 : 1.2 }}>
+      {/* ReactLenis handles smooth scroll on desktop automatically, disables on touch */}
+      <ReactLenis root options={{ lerp: 0.08 }}>
         <main className="bg-black text-white min-h-screen font-sans selection:bg-white selection:text-black">
 
           {/* HERO */}
