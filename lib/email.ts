@@ -268,7 +268,7 @@ export async function sendTrackingEmail({
 
             <!-- HERO IMAGE (Same vibe as receipt) -->
             <div style="overflow:hidden;font-size:0;line-height:0;border-bottom:1px solid #0f0f0f;">
-              <img src="${BASE_URL}/images/work3-cropped-email.jpg" alt="TU LUMORA SQUAD" width="580"
+              <img src="https://raw.githubusercontent.com/copterrter/tu-lumora/main/public/images/work3-cropped-email.jpg" alt="TU LUMORA SQUAD" width="580"
                 style="display:block;width:100%;max-width:580px;height:auto;opacity:0.85;" />
             </div>
 
