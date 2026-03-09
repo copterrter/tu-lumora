@@ -135,7 +135,7 @@ export default function AdminDashboard() {
     return Object.entries(map).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
   }, [orders]);
 
-  const PIE_COLORS = ['#00ffcc', '#ff00ff', '#f5df4d', '#39ff14', '#ff073a'];
+  const PIE_COLORS = ['#ffffff', '#cccccc', '#999999', '#666666', '#333333'];
 
   // 3. ข้อมูลสำหรับกราฟแท่ง (Order Status)
   const statusData = useMemo(() => {
@@ -193,26 +193,21 @@ export default function AdminDashboard() {
             </div>
             <div className="text-right">
               <p className="text-[10px] tracking-widest text-gray-500 uppercase">Total Revenue</p>
-              <p className="text-3xl font-black italic text-[#00ffcc]">฿{totalRevenue.toLocaleString()}</p>
+              <p className="text-3xl font-black italic text-white">฿{totalRevenue.toLocaleString()}</p>
             </div>
           </div>
         </header>
 
         {/* 1. Main Line Chart */}
-        <div className="w-full h-96 bg-[#0a0a0a] border border-white/10 p-6 relative overflow-hidden group shadow-[0_0_30px_rgba(0,255,204,0.05)] hover:shadow-[0_0_40px_rgba(255,0,255,0.08)] transition-all duration-700">
-          <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#00ffcc] to-transparent opacity-50 group-hover:opacity-100 transition-opacity duration-1000" />
-          <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#ff00ff] to-transparent opacity-50 group-hover:opacity-100 transition-opacity duration-1000" />
-          <div className="absolute -left-10 top-1/2 -translate-y-1/2 w-20 h-full bg-gradient-to-r from-[#00ffcc]/5 to-transparent blur-2xl" />
-          <div className="absolute -right-10 top-1/2 -translate-y-1/2 w-20 h-full bg-gradient-to-l from-[#ff00ff]/5 to-transparent blur-2xl" />
-          
+        <div className="w-full h-96 bg-[#0a0a0a] border border-white/10 p-6 relative overflow-hidden group hover:border-white/20 transition-all duration-700">
           <div className="flex justify-between items-end mb-6 relative z-10">
             <h2 className="text-[10px] tracking-[0.4em] text-gray-500 uppercase flex items-center gap-4">
               Revenue & Traffic Overview 
               <span className="flex items-center gap-2 text-white">
-                <span className="w-2 h-2 rounded-full bg-[#00ffcc] shadow-[0_0_8px_#00ffcc]"></span> Sales
+                <span className="w-2 h-2 bg-white"></span> Sales
               </span>
               <span className="flex items-center gap-2 text-white">
-                <span className="w-2 h-2 rounded-full bg-[#ff00ff] shadow-[0_0_8px_#ff00ff]"></span> Visitors
+                <span className="w-2 h-2 bg-gray-600"></span> Visitors
               </span>
             </h2>
           </div>
@@ -220,19 +215,13 @@ export default function AdminDashboard() {
           <div className="h-[280px] w-full relative z-10">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <defs>
-                  <filter id="glowLine" x="-20%" y="-20%" width="140%" height="140%">
-                    <feGaussianBlur stdDeviation="3" result="blur" />
-                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                  </filter>
-                </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
                 <XAxis dataKey="date" stroke="#555" tick={{ fill: '#777', fontSize: 10, fontFamily: 'monospace' }} tickLine={false} axisLine={false} dy={10} />
                 <YAxis yAxisId="left" stroke="#555" tick={{ fill: '#777', fontSize: 10, fontFamily: 'monospace' }} tickLine={false} axisLine={false} tickFormatter={(val) => `฿${val}`} />
                 <YAxis yAxisId="right" orientation="right" stroke="#555" tick={{ fill: '#777', fontSize: 10, fontFamily: 'monospace' }} tickLine={false} axisLine={false} />
-                <Tooltip contentStyle={{ backgroundColor: '#050505', border: '1px solid #333', borderRadius: '0px' }} itemStyle={{ fontSize: '12px', fontWeight: 'bold', fontFamily: 'monospace' }} labelStyle={{ color: '#888', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }} />
-                <Line yAxisId="left" type="monotone" dataKey="sales" name="Sales" stroke="#00ffcc" strokeWidth={2} dot={{ r: 3, fill: '#000', stroke: '#00ffcc', strokeWidth: 2 }} activeDot={{ r: 6, fill: '#00ffcc', stroke: '#fff' }} filter="url(#glowLine)" animationDuration={2000} />
-                <Line yAxisId="right" type="monotone" dataKey="visitors" name="Visitors" stroke="#ff00ff" strokeWidth={2} dot={{ r: 3, fill: '#000', stroke: '#ff00ff', strokeWidth: 2 }} activeDot={{ r: 6, fill: '#ff00ff', stroke: '#fff' }} filter="url(#glowLine)" animationDuration={2000} />
+                <Tooltip contentStyle={{ backgroundColor: '#050505', border: '1px solid #333', borderRadius: '0px' }} itemStyle={{ fontSize: '12px', fontWeight: 'bold', fontFamily: 'monospace', color: '#fff' }} labelStyle={{ color: '#888', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }} />
+                <Line yAxisId="left" type="monotone" dataKey="sales" name="Sales" stroke="#ffffff" strokeWidth={2} dot={{ r: 3, fill: '#000', stroke: '#fff', strokeWidth: 2 }} activeDot={{ r: 6, fill: '#fff', stroke: '#000' }} animationDuration={2000} />
+                <Line yAxisId="right" type="monotone" dataKey="visitors" name="Visitors" stroke="#666666" strokeWidth={2} dot={{ r: 3, fill: '#000', stroke: '#666', strokeWidth: 2 }} activeDot={{ r: 6, fill: '#666', stroke: '#000' }} animationDuration={2000} strokeDasharray="5 5" />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -242,8 +231,7 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           
           {/* Pie Chart: Product Breakdown */}
-          <div className="w-full h-96 bg-[#0a0a0a] border border-white/10 p-6 relative overflow-hidden group shadow-[0_0_20px_rgba(0,255,204,0.03)] hover:shadow-[0_0_30px_rgba(0,255,204,0.1)] transition-all duration-700">
-            <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#00ffcc] to-transparent opacity-30 group-hover:opacity-100 transition-opacity duration-1000" />
+          <div className="w-full h-96 bg-[#0a0a0a] border border-white/10 p-6 relative overflow-hidden group hover:border-white/20 transition-all duration-700">
             <h2 className="text-[10px] tracking-[0.4em] text-gray-500 uppercase flex items-center gap-4 mb-4 relative z-10">
               Product Breakdown
             </h2>
@@ -258,20 +246,20 @@ export default function AdminDashboard() {
                     cy="40%" 
                     innerRadius={70} 
                     outerRadius={90} 
-                    paddingAngle={5} 
+                    paddingAngle={2} 
                     stroke="none"
                     animationDuration={1500}
                   >
                     {productData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} style={{ filter: `drop-shadow(0px 0px 6px ${PIE_COLORS[index % PIE_COLORS.length]}80)` }} />
+                      <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                     ))}
                   </Pie>
                   <Tooltip 
                     contentStyle={{ backgroundColor: '#050505', border: '1px solid #333', borderRadius: '0px' }} 
-                    itemStyle={{ fontSize: '12px', fontWeight: 'bold', fontFamily: 'monospace' }} 
+                    itemStyle={{ fontSize: '12px', fontWeight: 'bold', fontFamily: 'monospace', color: '#fff' }} 
                   />
                   <Legend 
-                    iconType="circle" 
+                    iconType="square" 
                     layout="horizontal"
                     verticalAlign="bottom"
                     align="center"
@@ -283,7 +271,8 @@ export default function AdminDashboard() {
                       display: 'flex',
                       flexWrap: 'wrap',
                       justifyContent: 'center',
-                      gap: '12px'
+                      gap: '12px',
+                      color: '#aaa'
                     }} 
                   />
                 </PieChart>
@@ -292,8 +281,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Bar Chart: Order Status */}
-          <div className="w-full h-96 bg-[#0a0a0a] border border-white/10 p-6 relative overflow-hidden group shadow-[0_0_20px_rgba(255,0,255,0.03)] hover:shadow-[0_0_30px_rgba(255,0,255,0.1)] transition-all duration-700">
-            <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#ff00ff] to-transparent opacity-30 group-hover:opacity-100 transition-opacity duration-1000" />
+          <div className="w-full h-96 bg-[#0a0a0a] border border-white/10 p-6 relative overflow-hidden group hover:border-white/20 transition-all duration-700">
             <h2 className="text-[10px] tracking-[0.4em] text-gray-500 uppercase flex items-center gap-4 mb-4 relative z-10">
               Order Status Overview
             </h2>
@@ -305,16 +293,15 @@ export default function AdminDashboard() {
                   <YAxis stroke="#555" tick={{ fill: '#777', fontSize: 10, fontFamily: 'monospace' }} tickLine={false} axisLine={false} allowDecimals={false} />
                   <Tooltip 
                     contentStyle={{ backgroundColor: '#050505', border: '1px solid #333', borderRadius: '0px' }} 
-                    itemStyle={{ color: '#ff00ff', fontSize: '12px', fontWeight: 'bold', fontFamily: 'monospace' }} 
-                    cursor={{fill: '#111'}} 
+                    itemStyle={{ color: '#fff', fontSize: '12px', fontWeight: 'bold', fontFamily: 'monospace' }} 
+                    cursor={{fill: '#1a1a1a'}} 
                   />
                   <Bar 
                     dataKey="count" 
                     name="Orders"
-                    fill="#ff00ff" 
-                    radius={[4, 4, 0, 0]} 
+                    fill="#ffffff" 
+                    radius={[2, 2, 0, 0]} 
                     animationDuration={1500}
-                    style={{ filter: 'drop-shadow(0px 0px 5px rgba(255,0,255,0.5))' }}
                   />
                 </BarChart>
               </ResponsiveContainer>
@@ -329,7 +316,7 @@ export default function AdminDashboard() {
             {loading ? "Refreshing..." : "Refresh Data"}
           </button>
           <div className="flex flex-col sm:flex-row gap-4">
-            <label className={`cursor-pointer text-xs font-black tracking-widest uppercase border border-[#00ffcc] text-[#00ffcc] px-6 py-2 hover:bg-[#00ffcc] hover:text-black transition-all text-center ${uploadingTracking ? 'opacity-50 cursor-not-allowed' : ''}`}>
+            <label className={`cursor-pointer text-xs font-black tracking-widest uppercase border border-white text-white px-6 py-2 hover:bg-white hover:text-black transition-all text-center ${uploadingTracking ? 'opacity-50 cursor-not-allowed' : ''}`}>
               {uploadingTracking ? "Processing..." : "Upload Tracking (Excel)"}
               <input 
                 type="file" 
@@ -376,8 +363,8 @@ export default function AdminDashboard() {
                       <div className="flex flex-col gap-2 items-start">
                         <span className={`px-2 py-1 text-[9px] uppercase tracking-widest font-black border ${
                           order.status === 'SHIPPED' 
-                            ? 'bg-[#00ffcc]/20 text-[#00ffcc] border-[#00ffcc]/50' 
-                            : 'bg-green-500/20 text-green-400 border-green-500/50'
+                            ? 'bg-white text-black border-white' 
+                            : 'bg-transparent text-gray-400 border-gray-600'
                         }`}>
                           {order.status}
                         </span>
