@@ -245,22 +245,34 @@ export async function sendTrackingEmail({
   <tr>
     <td align="center" style="padding:32px 16px 48px;">
       <table width="100%" style="max-width:580px;" cellpadding="0" cellspacing="0">
+
+        <!-- TEXT HEADER -->
         <tr>
           <td style="background:#000;border:1px solid #1a1a1a;overflow:hidden;">
-            <div style="height:4px;background:linear-gradient(90deg,#00ffcc,#3b82f6,#00ffcc);font-size:0;">&nbsp;</div>
+            <div style="height:4px;background:linear-gradient(90deg,#dc2626,#ef4444,#dc2626);font-size:0;">&nbsp;</div>
             <div style="background:#000;padding:36px 40px 24px;text-align:center;border-bottom:1px solid #0f0f0f;">
               <p style="margin:0 0 6px;font-size:36px;font-weight:900;font-style:italic;letter-spacing:-0.04em;text-transform:uppercase;color:#fff;">
                 TU LUMORA
               </p>
+              <p style="margin:0;font-size:8px;letter-spacing:0.5em;text-transform:uppercase;color:#555;">
+                AN OFFICIAL PROJECT BY TUSU.RANGSIT
+              </p>
             </div>
 
             <!-- SHIPPED STRIPE -->
-            <div style="background:#00ffcc;padding:13px 40px;text-align:center;">
+            <div style="background:#fff;padding:13px 40px;text-align:center;">
               <span style="font-size:9px;letter-spacing:0.7em;text-transform:uppercase;color:#000;font-weight:900;">
                 ORDER SHIPPED
               </span>
             </div>
 
+            <!-- HERO IMAGE (Same vibe as receipt) -->
+            <div style="overflow:hidden;font-size:0;line-height:0;border-bottom:1px solid #0f0f0f;">
+              <img src="${BASE_URL}/images/squad-email.jpg" alt="" width="580"
+                style="display:block;width:100%;max-width:580px;height:auto;opacity:0.7;" />
+            </div>
+
+            <!-- GREETING -->
             <div style="padding:36px 40px 0;">
               <p style="margin:0 0 6px;font-size:9px;letter-spacing:0.5em;text-transform:uppercase;color:#888;">
                 It's on the way,
@@ -281,26 +293,39 @@ export async function sendTrackingEmail({
               <div style="height:1px;background:linear-gradient(to right,transparent,#2a2a2a,transparent);font-size:0;">&nbsp;</div>
             </div>
 
+            <!-- TRACKING SECTION -->
             <div style="padding:0 40px 16px;text-align:center;">
               <p style="margin:0 0 8px;font-size:9px;letter-spacing:0.5em;text-transform:uppercase;color:#777;font-weight:900;">
                 COURIER: ${courier}
               </p>
-              <div style="background:#111;border:1px dashed #333;padding:24px;display:inline-block;">
-                <p style="margin:0 0 8px;font-size:10px;color:#00ffcc;letter-spacing:0.4em;text-transform:uppercase;font-weight:bold;">TRACKING NUMBER</p>
+              <div style="background:#111;border:1px solid #333;padding:24px;display:inline-block;min-width:200px;">
+                <p style="margin:0 0 8px;font-size:10px;color:#888;letter-spacing:0.4em;text-transform:uppercase;font-weight:bold;">TRACKING NUMBER</p>
                 <p style="margin:0;font-size:24px;font-family:monospace;letter-spacing:0.1em;color:#fff;">${trackingNumber}</p>
               </div>
             </div>
 
+            <!-- FOOTER LINKS -->
             <div style="padding:20px 40px 40px;text-align:center;">
+              <img src="${BASE_URL}/images/mascot-email.png" alt="LUMO" width="52"
+                style="display:block;margin:0 auto 18px;width:52px;height:auto;opacity:0.5;" />
               <a href="https://lin.ee/19k0kWS"
                 style="display:inline-block;background:#06C755;color:#fff;padding:14px 36px;font-size:10px;font-weight:900;letter-spacing:0.45em;text-transform:uppercase;text-decoration:none;">
                 CONTACT LINE OA
               </a>
             </div>
 
-            <div style="height:4px;background:linear-gradient(90deg,#00ffcc,#3b82f6,#00ffcc);font-size:0;">&nbsp;</div>
+            <div style="height:4px;background:linear-gradient(90deg,#dc2626,#ef4444,#dc2626);font-size:0;">&nbsp;</div>
           </td>
         </tr>
+
+        <tr>
+          <td style="padding:20px 0;text-align:center;">
+            <p style="margin:0 0 4px;font-size:8px;color:#1f1f1f;letter-spacing:0.4em;text-transform:uppercase;">
+              TU LUMORA &nbsp;&middot;&nbsp; TUSU.RANGSIT &nbsp;&middot;&nbsp; 2026
+            </p>
+          </td>
+        </tr>
+
       </table>
     </td>
   </tr>
