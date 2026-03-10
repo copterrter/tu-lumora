@@ -167,10 +167,17 @@ export default function AdminDashboard() {
     if (orders.length === 0) return [{ status: 'N/A', count: 0 }];
     const map: Record<string, number> = {};
     orders.forEach(o => {
-      const status = o.status || "Unknown";
+      const status = (o.status || "Unknown").toUpperCase();
       map[status] = (map[status] || 0) + 1;
     });
-    return Object.entries(map).map(([status, count]) => ({ status, count }));
+    const orderPriority: Record<string, number> = {
+      'PENDING_MANUAL_VERIFY': 1,
+      'PAID_AND_VERIFIED': 2,
+      'SHIPPED': 3,
+    };
+    return Object.entries(map)
+      .map(([status, count]) => ({ status, count }))
+      .sort((a, b) => (orderPriority[a.status] || 99) - (orderPriority[b.status] || 99));
   }, [orders]);
 
   // ---------------- หน้าจอ Login ----------------
@@ -201,30 +208,35 @@ export default function AdminDashboard() {
   const totalRevenue = orders.reduce((sum, order) => sum + order.total_amount, 0);
 
   return (
-    <main className="min-h-screen bg-[#050505] text-white p-6 md:p-12 font-sans selection:bg-white selection:text-black">
-      <div className="max-w-7xl mx-auto space-y-10">
+    <main className="min-h-screen bg-gradient-to-b from-[#020617] via-[#020617] to-black text-white p-6 md:p-10 font-sans selection:bg-white selection:text-black">
+      <div className="max-w-7xl mx-auto space-y-8">
         
         {/* Header & Stats */}
-        <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-white/10 pb-8">
-          <div>
-            <h1 className="text-4xl font-black uppercase italic tracking-tighter">TU LUMORA HQ</h1>
-            <p className="text-xs tracking-[0.3em] text-gray-500 mt-2 uppercase">Live Order Tracking</p>
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 pb-6 border-b border-white/10">
+          <div className="space-y-2">
+            <p className="text-[10px] tracking-[0.35em] text-sky-400/70 uppercase">Admin Control</p>
+            <h1 className="text-3xl md:text-4xl font-black uppercase italic tracking-tight">
+              TU LUMORA <span className="text-sky-400">HQ</span>
+            </h1>
+            <p className="text-[11px] tracking-[0.25em] text-gray-500 uppercase">
+              Live overview of orders & payments
+            </p>
           </div>
           
-          <div className="flex gap-8">
-            <div className="text-right">
-              <p className="text-[10px] tracking-widest text-gray-500 uppercase">Total Orders</p>
-              <p className="text-3xl font-black italic">{orders.length}</p>
+          <div className="grid grid-cols-2 gap-4 md:gap-6 w-full md:w-auto">
+            <div className="rounded-2xl bg-gradient-to-br from-sky-500/10 via-sky-500/5 to-transparent border border-sky-500/40 px-4 py-3 flex flex-col items-end shadow-[0_0_40px_rgba(56,189,248,0.25)]">
+              <p className="text-[9px] tracking-[0.3em] uppercase text-sky-300/80 font-semibold">Total Orders</p>
+              <p className="text-3xl font-black italic text-white leading-tight">{orders.length}</p>
             </div>
-            <div className="text-right">
-              <p className="text-[10px] tracking-widest text-gray-500 uppercase">Total Revenue</p>
-              <p className="text-3xl font-black italic text-white">฿{totalRevenue.toLocaleString()}</p>
+            <div className="rounded-2xl bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent border border-emerald-500/40 px-4 py-3 flex flex-col items-end shadow-[0_0_40px_rgba(16,185,129,0.25)]">
+              <p className="text-[9px] tracking-[0.3em] uppercase text-emerald-300/80 font-semibold">Total Revenue</p>
+              <p className="text-3xl font-black italic text-emerald-200 leading-tight">฿{totalRevenue.toLocaleString()}</p>
             </div>
           </div>
         </header>
 
         {/* 1. Main Line Chart */}
-        <div className="w-full h-96 bg-[#0a0a0a] border border-white/10 p-6 relative overflow-hidden group hover:border-white/20 transition-all duration-700">
+        <div className="w-full h-96 bg-[#020617] border border-sky-500/30 rounded-3xl p-6 relative overflow-hidden group hover:border-sky-400/60 transition-all duration-700 shadow-[0_0_60px_rgba(56,189,248,0.25)]">
           <div className="flex justify-between items-end mb-6 relative z-10">
             <h2 className="text-[10px] tracking-[0.4em] text-gray-500 uppercase flex items-center gap-4">
               Revenue & Traffic Overview 
@@ -256,7 +268,7 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           
           {/* Pie Chart: Product Breakdown */}
-          <div className="w-full h-96 bg-[#0a0a0a] border border-white/10 p-6 relative overflow-hidden group hover:border-white/20 transition-all duration-700">
+          <div className="w-full h-96 bg-[#020617] border border-fuchsia-500/30 rounded-3xl p-6 relative overflow-hidden group hover:border-fuchsia-400/60 transition-all duration-700 shadow-[0_0_50px_rgba(236,72,153,0.25)]">
             <h2 className="text-[10px] tracking-[0.4em] text-gray-500 uppercase flex items-center gap-4 mb-4 relative z-10">
               Product Breakdown
             </h2>
@@ -306,7 +318,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Bar Chart: Order Status */}
-          <div className="w-full h-96 bg-[#0a0a0a] border border-white/10 p-6 relative overflow-hidden group hover:border-white/20 transition-all duration-700">
+          <div className="w-full h-96 bg-[#020617] border border-emerald-500/30 rounded-3xl p-6 relative overflow-hidden group hover:border-emerald-400/60 transition-all duration-700 shadow-[0_0_50px_rgba(16,185,129,0.25)]">
             <h2 className="text-[10px] tracking-[0.4em] text-gray-500 uppercase flex items-center gap-4 mb-4 relative z-10">
               Order Status Overview
             </h2>
@@ -337,11 +349,15 @@ export default function AdminDashboard() {
 
         {/* Action Bar */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <button onClick={fetchOrders} className="text-xs font-bold tracking-widest uppercase border border-white/20 px-4 py-2 hover:bg-white hover:text-black transition-all">
+          <button
+            onClick={fetchOrders}
+            className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[0.25em] uppercase border border-sky-500/50 px-4 py-2 rounded-full hover:bg-sky-500 hover:text-black transition-all"
+          >
+            <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse" />
             {loading ? "Refreshing..." : "Refresh Data"}
           </button>
           <div className="flex flex-col sm:flex-row gap-4">
-            <label className={`cursor-pointer text-xs font-black tracking-widest uppercase border border-white text-white px-6 py-2 hover:bg-white hover:text-black transition-all text-center ${uploadingTracking ? 'opacity-50 cursor-not-allowed' : ''}`}>
+            <label className={`cursor-pointer text-[10px] font-black tracking-[0.25em] uppercase border border-purple-400/60 text-purple-100 px-6 py-2 rounded-full hover:bg-purple-400 hover:text-black transition-all text-center ${uploadingTracking ? 'opacity-50 cursor-not-allowed' : ''}`}>
               {uploadingTracking ? "Processing..." : "Upload Tracking (Excel)"}
               <input 
                 type="file" 
@@ -351,16 +367,19 @@ export default function AdminDashboard() {
                 disabled={uploadingTracking}
               />
             </label>
-            <button onClick={exportToCSV} className="text-xs font-black tracking-widest uppercase bg-white text-black px-6 py-2 hover:bg-gray-300 transition-all">
-              Export to Excel
+            <button
+              onClick={exportToCSV}
+              className="text-[10px] font-black tracking-[0.25em] uppercase bg-white text-black px-6 py-2 rounded-full hover:bg-gray-200 transition-all"
+            >
+              Export CSV
             </button>
           </div>
         </div>
 
         {/* Data Table */}
-        <div className="overflow-x-auto border border-white/10">
+        <div className="overflow-x-auto border border-white/10 rounded-3xl bg-black/40 backdrop-blur-sm">
           <table className="w-full text-left text-sm whitespace-nowrap">
-            <thead className="bg-[#111] text-[10px] tracking-widest uppercase text-gray-400">
+            <thead className="bg-white/5 text-[10px] tracking-[0.25em] uppercase text-gray-300">
               <tr>
                 <th className="p-4 border-b border-white/10">Date</th>
                 <th className="p-4 border-b border-white/10">Customer</th>
@@ -376,27 +395,44 @@ export default function AdminDashboard() {
                 </tr>
               ) : (
                 orders.map((order) => (
-                  <tr key={order.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                    <td className="p-4 text-gray-500">{new Date(order.created_at).toLocaleDateString('th-TH')}</td>
-                    <td className="p-4">
-                      <p className="font-bold">{order.firstName} {order.lastName}</p>
-                      <p className="text-[10px] text-gray-500">{order.phone}</p>
+                  <tr
+                    key={order.id}
+                    className="border-t border-white/5 hover:bg-white/5 transition-colors"
+                  >
+                    <td className="p-4 text-gray-400 align-top">
+                      <p>{new Date(order.created_at).toLocaleDateString('th-TH')}</p>
+                      <p className="text-[9px] text-gray-500">
+                        {new Date(order.created_at).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}
+                      </p>
                     </td>
-                    <td className="p-4 font-bold italic">{order.product_name}</td>
-                    <td className="p-4 font-black">฿{order.total_amount}</td>
+                    <td className="p-4">
+                      <p className="font-bold tracking-wide">{order.firstName} {order.lastName}</p>
+                      <p className="text-[10px] text-gray-500">{order.phone}</p>
+                      <p className="text-[10px] text-gray-600 mt-1 max-w-xs truncate">
+                        {order.address} {order.zipCode}
+                      </p>
+                    </td>
+                    <td className="p-4 font-bold italic text-gray-100 max-w-xs">
+                      {order.product_name}
+                    </td>
+                    <td className="p-4 font-black text-emerald-200">฿{order.total_amount}</td>
                     <td className="p-4">
                       <div className="flex flex-col gap-2 items-start">
-                        <span className={`px-2 py-1 text-[9px] uppercase tracking-widest font-black border ${
-                          order.status === 'SHIPPED' 
-                            ? 'bg-white text-black border-white' 
-                            : order.status === 'pending_manual_verify'
-                              ? 'bg-yellow-500/10 text-yellow-300 border-yellow-500'
-                              : 'bg-transparent text-gray-400 border-gray-600'
-                        }`}>
-                          {order.status}
+                        <span
+                          className={`px-2 py-1 text-[9px] uppercase tracking-[0.22em] font-black border rounded-full ${
+                            order.status === 'SHIPPED' 
+                              ? 'bg-emerald-400 text-black border-emerald-300' 
+                              : order.status === 'paid_and_verified'
+                                ? 'bg-sky-500/15 text-sky-200 border-sky-400'
+                                : order.status === 'pending_manual_verify'
+                                  ? 'bg-amber-400/10 text-amber-300 border-amber-400'
+                                  : 'bg-transparent text-gray-400 border-gray-600'
+                          }`}
+                        >
+                          {String(order.status || '').toUpperCase() || 'UNKNOWN'}
                         </span>
                         {order.tracking_number && (
-                          <span className="text-[10px] text-gray-400 font-monospace tracking-widest bg-black/50 px-2 py-1 border border-white/10">
+                          <span className="text-[10px] text-gray-300 font-mono tracking-widest bg-black/60 px-2 py-1 border border-white/10 rounded">
                             {order.tracking_number}
                           </span>
                         )}
@@ -404,7 +440,7 @@ export default function AdminDashboard() {
                           <button
                             onClick={() => handleApproveOrder(order.id)}
                             disabled={approvingId === order.id}
-                            className="mt-1 text-[9px] uppercase tracking-widest font-black border border-white/40 px-3 py-1 hover:bg-white hover:text-black transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="mt-1 text-[9px] uppercase tracking-[0.2em] font-black border border-emerald-400/70 px-3 py-1 rounded-full hover:bg-emerald-400 hover:text-black transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             {approvingId === order.id ? "Approving..." : "Mark as Paid"}
                           </button>
