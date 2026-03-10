@@ -160,7 +160,7 @@ export default function AdminDashboard() {
     return Object.entries(map).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
   }, [orders]);
 
-  const PIE_COLORS = ['#ffffff', '#cccccc', '#999999', '#666666', '#333333'];
+  const PIE_COLORS = ['#38bdf8', '#22c55e', '#f97316', '#e11d48', '#a855f7'];
 
   // 3. ข้อมูลสำหรับกราฟแท่ง (Order Status)
   const statusData = useMemo(() => {
@@ -256,9 +256,30 @@ export default function AdminDashboard() {
                 <XAxis dataKey="date" stroke="#555" tick={{ fill: '#777', fontSize: 10, fontFamily: 'monospace' }} tickLine={false} axisLine={false} dy={10} />
                 <YAxis yAxisId="left" stroke="#555" tick={{ fill: '#777', fontSize: 10, fontFamily: 'monospace' }} tickLine={false} axisLine={false} tickFormatter={(val) => `฿${val}`} />
                 <YAxis yAxisId="right" orientation="right" stroke="#555" tick={{ fill: '#777', fontSize: 10, fontFamily: 'monospace' }} tickLine={false} axisLine={false} />
-                <Tooltip contentStyle={{ backgroundColor: '#050505', border: '1px solid #333', borderRadius: '0px' }} itemStyle={{ fontSize: '12px', fontWeight: 'bold', fontFamily: 'monospace', color: '#fff' }} labelStyle={{ color: '#888', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }} />
-                <Line yAxisId="left" type="monotone" dataKey="sales" name="Sales" stroke="#ffffff" strokeWidth={2} dot={{ r: 3, fill: '#000', stroke: '#fff', strokeWidth: 2 }} activeDot={{ r: 6, fill: '#fff', stroke: '#000' }} animationDuration={2000} />
-                <Line yAxisId="right" type="monotone" dataKey="visitors" name="Visitors" stroke="#666666" strokeWidth={2} dot={{ r: 3, fill: '#000', stroke: '#666', strokeWidth: 2 }} activeDot={{ r: 6, fill: '#666', stroke: '#000' }} animationDuration={2000} strokeDasharray="5 5" />
+                <Tooltip contentStyle={{ backgroundColor: '#020617', border: '1px solid #1e293b', borderRadius: '0px' }} itemStyle={{ fontSize: '12px', fontWeight: 'bold', fontFamily: 'monospace', color: '#e5e7eb' }} labelStyle={{ color: '#94a3b8', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }} />
+                <Line
+                  yAxisId="left"
+                  type="monotone"
+                  dataKey="sales"
+                  name="Sales"
+                  stroke="#22c55e"
+                  strokeWidth={2.2}
+                  dot={{ r: 3, fill: '#020617', stroke: '#22c55e', strokeWidth: 2 }}
+                  activeDot={{ r: 6, fill: '#22c55e', stroke: '#020617' }}
+                  animationDuration={1800}
+                />
+                <Line
+                  yAxisId="right"
+                  type="monotone"
+                  dataKey="visitors"
+                  name="Visitors"
+                  stroke="#64748b"
+                  strokeWidth={2}
+                  dot={{ r: 3, fill: '#020617', stroke: '#64748b', strokeWidth: 2 }}
+                  activeDot={{ r: 6, fill: '#64748b', stroke: '#020617' }}
+                  animationDuration={1800}
+                  strokeDasharray="5 5"
+                />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -329,17 +350,25 @@ export default function AdminDashboard() {
                   <XAxis dataKey="status" stroke="#555" tick={{ fill: '#777', fontSize: 10, fontFamily: 'monospace' }} tickLine={false} axisLine={false} dy={10} />
                   <YAxis stroke="#555" tick={{ fill: '#777', fontSize: 10, fontFamily: 'monospace' }} tickLine={false} axisLine={false} allowDecimals={false} />
                   <Tooltip 
-                    contentStyle={{ backgroundColor: '#050505', border: '1px solid #333', borderRadius: '0px' }} 
-                    itemStyle={{ color: '#fff', fontSize: '12px', fontWeight: 'bold', fontFamily: 'monospace' }} 
+                    contentStyle={{ backgroundColor: '#020617', border: '1px solid #1e293b', borderRadius: '0px' }} 
+                    itemStyle={{ color: '#e5e7eb', fontSize: '12px', fontWeight: 'bold', fontFamily: 'monospace' }} 
                     cursor={{fill: '#1a1a1a'}} 
                   />
                   <Bar 
                     dataKey="count" 
                     name="Orders"
-                    fill="#ffffff" 
-                    radius={[2, 2, 0, 0]} 
+                    radius={[4, 4, 0, 0]} 
                     animationDuration={1500}
-                  />
+                  >
+                    {statusData.map((entry) => {
+                      const key = entry.status.toUpperCase();
+                      let color = "#64748b"; // default slate
+                      if (key === "PENDING_MANUAL_VERIFY") color = "#facc15"; // yellow
+                      else if (key === "PAID_AND_VERIFIED") color = "#38bdf8"; // sky
+                      else if (key === "SHIPPED") color = "#22c55e"; // green
+                      return <Cell key={entry.status} fill={color} />;
+                    })}
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>
