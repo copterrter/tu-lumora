@@ -442,7 +442,7 @@ export default function AdminDashboard() {
                         {order.address} {order.zipCode}
                       </p>
                     </td>
-                    <td className="p-4 font-bold italic text-gray-100 max-w-xs">
+                    <td className="p-4 font-bold italic text-gray-100 max-w-xs whitespace-normal break-words">
                       {order.product_name}
                     </td>
                     <td className="p-4 font-black text-emerald-200">฿{order.total_amount}</td>
@@ -465,6 +465,16 @@ export default function AdminDashboard() {
                           <span className="text-[10px] text-gray-300 font-mono tracking-widest bg-black/60 px-2 py-1 border border-white/10 rounded">
                             {order.tracking_number}
                           </span>
+                        )}
+                        {order.slip_image_url && (
+                          <a
+                            href={order.slip_image_url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1 text-[10px] text-sky-300 hover:text-sky-200 underline underline-offset-2"
+                          >
+                            <span>View slip image</span>
+                          </a>
                         )}
                         {order.status === 'pending_manual_verify' && (
                           <div className="mt-1 flex flex-col gap-1">

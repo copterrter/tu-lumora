@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     
     const sizeStr = orderData.items.map((i: any) => i.size).join(", ");
 
-    const insertOrder = async (status: string, slipTransRef?: string | null) => {
+    const insertOrder = async (status: string, slipTransRef?: string | null, slipImageUrl?: string | null) => {
       const baseOrder: any = {
         firstName: formData.firstName,
         lastName: formData.lastName,
@@ -61,16 +61,23 @@ export async function POST(request: Request) {
       if (slipTransRef) {
         baseOrder.slip_trans_ref = slipTransRef;
       }
+      if (slipImageUrl) {
+        baseOrder.slip_image_url = slipImageUrl;
+      }
 
       const { error: insertError } = await supabase.from('orders').insert([baseOrder]);
 
       if (insertError) {
         // Graceful degradation if slip_trans_ref column doesn't exist yet
-        if (slipTransRef && (insertError.code === 'PGRST204' || insertError.message.includes("slip_trans_ref"))) {
-          const { slip_trans_ref, ...withoutSlipRef } = baseOrder;
-          const { error: retryError } = await supabase.from('orders').insert([withoutSlipRef]);
+        if (
+          insertError.code === 'PGRST204' ||
+          insertError.message.includes("slip_trans_ref") ||
+          insertError.message.includes("slip_image_url")
+        ) {
+          const { slip_trans_ref, slip_image_url, ...withoutExtras } = baseOrder;
+          const { error: retryError } = await supabase.from('orders').insert([withoutExtras]);
           if (retryError) throw retryError;
-          console.warn("WARNING: Inserted order without slip_trans_ref. Please add the column to Supabase.");
+          console.warn("WARNING: Inserted order without some optional columns (slip_trans_ref / slip_image_url). Please ensure these columns exist in Supabase if you need them.");
         } else {
           throw insertError;
         }
@@ -78,6 +85,29 @@ export async function POST(request: Request) {
     };
 
     // 3. Auto verify flow with RDCW API (มี fallback ไปตรวจมือในทุกเคสที่อ่านสลิปไม่ได้/ยอดไม่ตรง)
+    const bytes = await file.arrayBuffer();
+    const imageBlob = new Blob([bytes], { type: file.type || 'image/jpeg' });
+
+    // Upload slip image to Supabase Storage for admin review (best-effort)
+    let slipImageUrl: string | null = null;
+    try {
+      const fileExt = (file.name || 'slip.jpg').split('.').pop() || 'jpg';
+      const safeExt = fileExt.toLowerCase().startsWith('jp') ? 'jpg' : fileExt.toLowerCase();
+      const path = `slips/${Date.now()}-${Math.random().toString(36).slice(2)}.${safeExt}`;
+      const { error: uploadError } = await supabase
+        .storage
+        .from('order_slips')
+        .upload(path, imageBlob, { contentType: file.type || 'image/jpeg', upsert: false });
+      if (!uploadError) {
+        const { data } = supabase.storage.from('order_slips').getPublicUrl(path);
+        slipImageUrl = data.publicUrl;
+      } else {
+        console.warn("Slip upload error:", uploadError);
+      }
+    } catch (e) {
+      console.warn("Slip upload unexpected error:", e);
+    }
+
     const clientId = process.env.SLIP_CLIENT_ID?.trim(); 
     const clientSecret = process.env.SLIP_CLIENT_SECRET?.trim();
 
@@ -86,8 +116,6 @@ export async function POST(request: Request) {
     }
 
     const authHeader = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
-    const bytes = await file.arrayBuffer();
-    const imageBlob = new Blob([bytes], { type: file.type || 'image/jpeg' });
     
     const apiFormData = new FormData();
     apiFormData.append("file", imageBlob, file.name || "slip.jpg"); 
@@ -104,7 +132,7 @@ export async function POST(request: Request) {
 
     if (!response.ok || slipResult.code) {
       // Fallback: บันทึกออเดอร์ให้ไปตรวจมือแทน (ยังไม่ส่งอีเมลยืนยันจนกว่าจะอนุมัติจากหลังบ้าน)
-      await insertOrder('pending_manual_verify');
+      await insertOrder('pending_manual_verify', undefined, slipImageUrl);
 
       return NextResponse.json({ 
         success: true,
@@ -117,7 +145,7 @@ export async function POST(request: Request) {
     const slipAmount = slipResult.data.amount;
     if (Number(slipAmount) !== Number(expectedTotal)) {
       // Fallback: ยอดไม่ตรง แต่ยังบันทึกให้ทีมงานตรวจมือ (ยังไม่ส่งอีเมลยืนยันจนกว่าจะอนุมัติจากหลังบ้าน)
-      await insertOrder('pending_manual_verify');
+      await insertOrder('pending_manual_verify', undefined, slipImageUrl);
 
       return NextResponse.json({ 
         success: true,
@@ -146,7 +174,7 @@ export async function POST(request: Request) {
     }
 
     // 7. Insert Order Securely
-    await insertOrder('paid_and_verified', transRef);
+    await insertOrder('paid_and_verified', transRef, slipImageUrl);
 
     // 6. Send Email Receipt
     if (formData.email) {
