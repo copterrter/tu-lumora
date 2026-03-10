@@ -13,6 +13,7 @@ export default function AdminDashboard() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploadingTracking, setUploadingTracking] = useState(false);
+  const [approvingId, setApprovingId] = useState<string | null>(null);
 
   // 🔒 รหัสผ่านเข้าหลังบ้าน (เปลี่ยนตรงนี้ได้ตามใจชอบ)
   const ADMIN_PIN = "LUMORA2026"; 
@@ -93,6 +94,30 @@ export default function AdminDashboard() {
     } finally {
       setUploadingTracking(false);
       e.target.value = ""; // reset input
+    }
+  };
+
+  const handleApproveOrder = async (orderId: string) => {
+    if (!confirm("ยืนยันการอนุมัติสลิปนี้และเปลี่ยนสถานะออเดอร์เป็นชำระเงินสำเร็จ?")) {
+      return;
+    }
+    setApprovingId(orderId);
+    try {
+      const res = await fetch("/api/orders/approve", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || "Approve failed");
+      }
+      alert("✅ อนุมัติสลิปและอัปเดตสถานะออเดอร์เรียบร้อยแล้ว");
+      fetchOrders();
+    } catch (err: any) {
+      alert(`❌ ผิดพลาด: ${err.message}`);
+    } finally {
+      setApprovingId(null);
     }
   };
 
@@ -364,7 +389,9 @@ export default function AdminDashboard() {
                         <span className={`px-2 py-1 text-[9px] uppercase tracking-widest font-black border ${
                           order.status === 'SHIPPED' 
                             ? 'bg-white text-black border-white' 
-                            : 'bg-transparent text-gray-400 border-gray-600'
+                            : order.status === 'pending_manual_verify'
+                              ? 'bg-yellow-500/10 text-yellow-300 border-yellow-500'
+                              : 'bg-transparent text-gray-400 border-gray-600'
                         }`}>
                           {order.status}
                         </span>
@@ -372,6 +399,15 @@ export default function AdminDashboard() {
                           <span className="text-[10px] text-gray-400 font-monospace tracking-widest bg-black/50 px-2 py-1 border border-white/10">
                             {order.tracking_number}
                           </span>
+                        )}
+                        {order.status === 'pending_manual_verify' && (
+                          <button
+                            onClick={() => handleApproveOrder(order.id)}
+                            disabled={approvingId === order.id}
+                            className="mt-1 text-[9px] uppercase tracking-widest font-black border border-white/40 px-3 py-1 hover:bg-white hover:text-black transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {approvingId === order.id ? "Approving..." : "Mark as Paid"}
+                          </button>
                         )}
                       </div>
                     </td>

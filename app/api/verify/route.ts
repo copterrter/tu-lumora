@@ -29,7 +29,55 @@ export async function POST(request: Request) {
     const promoSingles = promoQty % 2;
     const expectedTotal = (pairs * 590) + ((promoSingles + regularQty) * 329);
 
-    // 2. Verify Slip with RDCW API
+    // 2. Prepare common order fields
+    const summaryItems = orderData.items.map((item: any) => `${item.quantity}x ${item.style} (${item.size})`).join(", ");
+    
+    // Map frontend full names back to Supabase enum constraints (regular, crop)
+    const styleStr = orderData.items.map((i: any) => {
+      const itemStyle = String(i.style || "").toUpperCase();
+      if (itemStyle.includes("BABY") || itemStyle.includes("CROP")) return "crop";
+      return "regular";
+    }).join(", ");
+    
+    const sizeStr = orderData.items.map((i: any) => i.size).join(", ");
+
+    const insertOrder = async (status: string, slipTransRef?: string | null) => {
+      const baseOrder: any = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+        zipCode: formData.zipCode,
+        social_contact: formData.socialContact, 
+        product_name: summaryItems,
+        quantity: totalQty,
+        style: styleStr,
+        size: sizeStr,
+        total_amount: expectedTotal,
+        status
+      };
+
+      if (slipTransRef) {
+        baseOrder.slip_trans_ref = slipTransRef;
+      }
+
+      const { error: insertError } = await supabase.from('orders').insert([baseOrder]);
+
+      if (insertError) {
+        // Graceful degradation if slip_trans_ref column doesn't exist yet
+        if (slipTransRef && (insertError.code === 'PGRST204' || insertError.message.includes("slip_trans_ref"))) {
+          const { slip_trans_ref, ...withoutSlipRef } = baseOrder;
+          const { error: retryError } = await supabase.from('orders').insert([withoutSlipRef]);
+          if (retryError) throw retryError;
+          console.warn("WARNING: Inserted order without slip_trans_ref. Please add the column to Supabase.");
+        } else {
+          throw insertError;
+        }
+      }
+    };
+
+    // 3. Auto verify flow with RDCW API (มี fallback ไปตรวจมือในทุกเคสที่อ่านสลิปไม่ได้/ยอดไม่ตรง)
     const clientId = process.env.SLIP_CLIENT_ID?.trim(); 
     const clientSecret = process.env.SLIP_CLIENT_SECRET?.trim();
 
@@ -55,24 +103,60 @@ export async function POST(request: Request) {
     const slipResult = await response.json();
 
     if (!response.ok || slipResult.code) {
-       return NextResponse.json({ 
-         success: false, 
-         message: slipResult.message || "สลิปนี้ไม่ถูกต้อง หรือเคยใช้งานไปแล้วครับ" 
-       });
-    }
+      // Fallback: บันทึกออเดอร์ให้ไปตรวจมือแทน
+      await insertOrder('pending_manual_verify');
 
-    // 3. Validate Amount
-    const slipAmount = slipResult.data.amount;
-    if (Number(slipAmount) !== Number(expectedTotal)) {
+      if (formData.email) {
+        const originalTotal = orderData.items.reduce((sum: number, item: any) => sum + (item.quantity * 329), 0);
+        const discount = originalTotal - expectedTotal;
+        
+        await sendOrderReceipt({
+          email: formData.email,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          items: orderData.items,
+          total: expectedTotal,
+          discount: discount > 0 ? discount : 0,
+        }).catch((e: any) => console.warn('Email send failed (non-blocking):', e));
+      }
+
       return NextResponse.json({ 
-        success: false, 
-        message: `ยอดเงินไม่ตรง! สลิปมียอด ฿${slipAmount} แต่ยอดสั่งซื้อที่ถูกต้องคือ ฿${expectedTotal}` 
+        success: true,
+        manualFallback: true,
+        message: slipResult.message || "ไม่สามารถตรวจสอบสลิปอัตโนมัติได้ ระบบจะรอตรวจสอบด้วยมือ" 
       });
     }
 
-    const transRef = slipResult.data.transRef;
+    // 5. Validate Amount
+    const slipAmount = slipResult.data.amount;
+    if (Number(slipAmount) !== Number(expectedTotal)) {
+      // Fallback: ยอดไม่ตรง แต่ยังบันทึกให้ทีมงานตรวจมือ
+      await insertOrder('pending_manual_verify');
 
-    // 4. Duplicate Slip Check (Anti Double Spend)
+      if (formData.email) {
+        const originalTotal = orderData.items.reduce((sum: number, item: any) => sum + (item.quantity * 329), 0);
+        const discount = originalTotal - expectedTotal;
+        
+        await sendOrderReceipt({
+          email: formData.email,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          items: orderData.items,
+          total: expectedTotal,
+          discount: discount > 0 ? discount : 0,
+        }).catch((e: any) => console.warn('Email send failed (non-blocking):', e));
+      }
+
+      return NextResponse.json({ 
+        success: true,
+        manualFallback: true,
+        message: `ยอดเงินในสลิป ฿${slipAmount} ไม่ตรงกับยอดที่คำนวณ (฿${expectedTotal}) ระบบจะรอตรวจสอบด้วยมือ` 
+      });
+    }
+    
+    const transRef = slipResult.data.transRef;
+    
+    // 6. Duplicate Slip Check (Anti Double Spend)
     // Note: This requires the 'slip_trans_ref' column in the 'orders' table.
     const { data: existingOrder, error: checkError } = await supabase
       .from('orders')
@@ -89,61 +173,8 @@ export async function POST(request: Request) {
       console.warn("Supabase Check Error (might be missing slip_trans_ref column):", checkError);
     }
 
-    // 5. Insert Order Securely
-    const summaryItems = orderData.items.map((item: any) => `${item.quantity}x ${item.style} (${item.size})`).join(", ");
-    
-    // Aggregate for the specific columns
-    // Map frontend full names back to Supabase enum constraints (regular, crop)
-    const styleStr = orderData.items.map((i: any) => {
-      const itemStyle = String(i.style || "").toUpperCase();
-      if (itemStyle.includes("BABY") || itemStyle.includes("CROP")) return "crop";
-      return "regular";
-    }).join(", ");
-    
-    const sizeStr = orderData.items.map((i: any) => i.size).join(", ");
-
-    const { error: insertError } = await supabase.from('orders').insert([{
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      email: formData.email,
-      phone: formData.phone,
-      address: formData.address,
-      zipCode: formData.zipCode,
-      social_contact: formData.socialContact, 
-      product_name: summaryItems,
-      quantity: totalQty,
-      style: styleStr,
-      size: sizeStr,
-      total_amount: expectedTotal,
-      status: 'paid_and_verified',
-      slip_trans_ref: transRef // Saved to prevent future reuse
-    }]);
-
-    if (insertError) {
-       // Graceful degradation if slip_trans_ref column doesn't exist yet
-       if (insertError.code === 'PGRST204' || insertError.message.includes("slip_trans_ref")) {
-          // Retry without slip_trans_ref
-          const { error: retryError } = await supabase.from('orders').insert([{
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-            email: formData.email,
-            phone: formData.phone,
-            address: formData.address,
-            zipCode: formData.zipCode,
-            social_contact: formData.socialContact, 
-            product_name: summaryItems,
-            quantity: totalQty,
-            style: styleStr,
-            size: sizeStr,
-            total_amount: expectedTotal,
-            status: 'paid_and_verified'
-          }]);
-          if (retryError) throw retryError;
-          console.warn("WARNING: Inserted order without slip_trans_ref. Please add the column to Supabase.");
-       } else {
-          throw insertError;
-       }
-    }
+    // 7. Insert Order Securely
+    await insertOrder('paid_and_verified', transRef);
 
     // 6. Send Email Receipt
     if (formData.email) {

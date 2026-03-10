@@ -2,8 +2,11 @@
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 
 export default function ThankYouPage() {
+  const searchParams = useSearchParams();
+  const isManual = searchParams.get("manual") === "1";
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -138,10 +141,21 @@ export default function ThankYouPage() {
         className="mb-10"
       >
         <h1 className="text-4xl md:text-6xl font-black uppercase italic tracking-tighter leading-tight mb-2">
-          ORDER <span className="text-white/40">CONFIRMED</span>
+          {isManual ? (
+            <>
+              PAYMENT <span className="text-white/40">PENDING REVIEW</span>
+            </>
+          ) : (
+            <>
+              ORDER <span className="text-white/40">CONFIRMED</span>
+            </>
+          )}
         </h1>
         <p className="text-gray-500 uppercase tracking-[0.2em] text-[9px] md:text-xs">
-          Your order has been received. Check your email for the receipt.
+          {isManual
+            ? "เราได้รับคำสั่งซื้อและสลิปของคุณแล้ว กำลังรอตรวจสอบการชำระเงินโดยทีมงาน"
+            : "Your order has been received. Check your email for the receipt."
+          }
         </p>
       </motion.div>
 

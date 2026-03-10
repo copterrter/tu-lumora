@@ -155,7 +155,8 @@ export default function CheckoutPage() {
       const slipResult = await verifySlipWithRDCW(slipFile!, orderData, enrichedFormData);
       if (!slipResult.success) throw new Error(slipResult.message || "การสั่งซื้อไม่สำเร็จ โปรดลองอีกครั้ง");
       localStorage.removeItem('lumora_cart');
-      router.push("/thankyou");
+      const shouldGoManualThankyou = !!slipResult.manualFallback;
+      router.push(shouldGoManualThankyou ? "/thankyou?manual=1" : "/thankyou");
     } catch (err: any) {
       alert("แจ้งเตือน: " + (err.message || "เกิดข้อผิดพลาด"));
     } finally {
