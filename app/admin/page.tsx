@@ -180,6 +180,19 @@ export default function AdminDashboard() {
       .sort((a, b) => (orderPriority[a.status] || 99) - (orderPriority[b.status] || 99));
   }, [orders]);
 
+  const pendingManualCount = useMemo(
+    () => orders.filter(o => o.status === 'pending_manual_verify').length,
+    [orders]
+  );
+  const paidCount = useMemo(
+    () => orders.filter(o => o.status === 'paid_and_verified').length,
+    [orders]
+  );
+  const shippedCount = useMemo(
+    () => orders.filter(o => o.status === 'SHIPPED').length,
+    [orders]
+  );
+
   // ---------------- หน้าจอ Login ----------------
   if (!isAuthenticated) {
     return (
@@ -288,54 +301,42 @@ export default function AdminDashboard() {
         {/* 2. Secondary Charts Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           
-          {/* Pie Chart: Product Breakdown */}
-          <div className="w-full h-96 bg-[#020617] border border-fuchsia-500/30 rounded-3xl p-6 relative overflow-hidden group hover:border-fuchsia-400/60 transition-all duration-700 shadow-[0_0_50px_rgba(236,72,153,0.25)]">
-            <h2 className="text-[10px] tracking-[0.4em] text-gray-500 uppercase flex items-center gap-4 mb-4 relative z-10">
-              Product Breakdown
-            </h2>
-            <div className="h-[280px] w-full relative z-10 flex flex-col justify-center items-center">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie 
-                    data={productData} 
-                    dataKey="value" 
-                    nameKey="name" 
-                    cx="50%" 
-                    cy="40%" 
-                    innerRadius={70} 
-                    outerRadius={90} 
-                    paddingAngle={2} 
-                    stroke="none"
-                    animationDuration={1500}
-                  >
-                    {productData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: '#050505', border: '1px solid #333', borderRadius: '0px' }} 
-                    itemStyle={{ fontSize: '12px', fontWeight: 'bold', fontFamily: 'monospace', color: '#fff' }} 
-                  />
-                  <Legend 
-                    iconType="square" 
-                    layout="horizontal"
-                    verticalAlign="bottom"
-                    align="center"
-                    wrapperStyle={{ 
-                      fontSize: '10px', 
-                      fontFamily: 'monospace', 
-                      textTransform: 'uppercase', 
-                      paddingTop: '20px',
-                      display: 'flex',
-                      flexWrap: 'wrap',
-                      justifyContent: 'center',
-                      gap: '12px',
-                      color: '#aaa'
-                    }} 
-                  />
-                </PieChart>
-              </ResponsiveContainer>
+          {/* Status Summary */}
+          <div className="w-full h-96 bg-[#020617] border border-slate-500/40 rounded-3xl p-6 flex flex-col justify-between">
+            <div className="space-y-3">
+              <h2 className="text-[10px] tracking-[0.4em] text-gray-400 uppercase flex items-center gap-4 mb-1">
+                Status Snapshot
+              </h2>
+              <p className="text-[11px] text-gray-500 tracking-[0.18em] uppercase">
+                Quick counts for each payment & fulfillment state.
+              </p>
             </div>
+            <div className="space-y-3 mt-4">
+              <div className="flex justify-between items-center bg-amber-500/5 border border-amber-400/40 px-4 py-3 rounded-2xl">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                  <span className="text-[10px] tracking-[0.25em] uppercase text-amber-200 font-semibold">Pending Manual Verify</span>
+                </div>
+                <span className="text-xl font-black text-amber-300 tabular-nums">{pendingManualCount}</span>
+              </div>
+              <div className="flex justify-between items-center bg-sky-500/5 border border-sky-400/40 px-4 py-3 rounded-2xl">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-sky-400" />
+                  <span className="text-[10px] tracking-[0.25em] uppercase text-sky-200 font-semibold">Paid & Verified</span>
+                </div>
+                <span className="text-xl font-black text-sky-300 tabular-nums">{paidCount}</span>
+              </div>
+              <div className="flex justify-between items-center bg-emerald-500/5 border border-emerald-400/40 px-4 py-3 rounded-2xl">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                  <span className="text-[10px] tracking-[0.25em] uppercase text-emerald-200 font-semibold">Shipped</span>
+                </div>
+                <span className="text-xl font-black text-emerald-300 tabular-nums">{shippedCount}</span>
+              </div>
+            </div>
+            <p className="text-[10px] text-slate-500 tracking-[0.18em] uppercase mt-4">
+              Use this panel to see at a glance how many orders are waiting for manual slip verification.
+            </p>
           </div>
 
           {/* Bar Chart: Order Status */}
@@ -466,13 +467,18 @@ export default function AdminDashboard() {
                           </span>
                         )}
                         {order.status === 'pending_manual_verify' && (
-                          <button
-                            onClick={() => handleApproveOrder(order.id)}
-                            disabled={approvingId === order.id}
-                            className="mt-1 text-[9px] uppercase tracking-[0.2em] font-black border border-emerald-400/70 px-3 py-1 rounded-full hover:bg-emerald-400 hover:text-black transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            {approvingId === order.id ? "Approving..." : "Mark as Paid"}
-                          </button>
+                          <div className="mt-1 flex flex-col gap-1">
+                            <span className="text-[9px] text-amber-200 uppercase tracking-[0.2em]">
+                              Review slip & confirm payment
+                            </span>
+                            <button
+                              onClick={() => handleApproveOrder(order.id)}
+                              disabled={approvingId === order.id}
+                              className="text-[9px] uppercase tracking-[0.2em] font-black border border-emerald-400/80 px-3 py-1 rounded-full bg-emerald-500/10 hover:bg-emerald-400 hover:text-black transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {approvingId === order.id ? "Approving..." : "Mark as Paid"}
+                            </button>
+                          </div>
                         )}
                       </div>
                     </td>
