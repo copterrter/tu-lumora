@@ -103,22 +103,8 @@ export async function POST(request: Request) {
     const slipResult = await response.json();
 
     if (!response.ok || slipResult.code) {
-      // Fallback: บันทึกออเดอร์ให้ไปตรวจมือแทน
+      // Fallback: บันทึกออเดอร์ให้ไปตรวจมือแทน (ยังไม่ส่งอีเมลยืนยันจนกว่าจะอนุมัติจากหลังบ้าน)
       await insertOrder('pending_manual_verify');
-
-      if (formData.email) {
-        const originalTotal = orderData.items.reduce((sum: number, item: any) => sum + (item.quantity * 329), 0);
-        const discount = originalTotal - expectedTotal;
-        
-        await sendOrderReceipt({
-          email: formData.email,
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          items: orderData.items,
-          total: expectedTotal,
-          discount: discount > 0 ? discount : 0,
-        }).catch((e: any) => console.warn('Email send failed (non-blocking):', e));
-      }
 
       return NextResponse.json({ 
         success: true,
@@ -130,22 +116,8 @@ export async function POST(request: Request) {
     // 5. Validate Amount
     const slipAmount = slipResult.data.amount;
     if (Number(slipAmount) !== Number(expectedTotal)) {
-      // Fallback: ยอดไม่ตรง แต่ยังบันทึกให้ทีมงานตรวจมือ
+      // Fallback: ยอดไม่ตรง แต่ยังบันทึกให้ทีมงานตรวจมือ (ยังไม่ส่งอีเมลยืนยันจนกว่าจะอนุมัติจากหลังบ้าน)
       await insertOrder('pending_manual_verify');
-
-      if (formData.email) {
-        const originalTotal = orderData.items.reduce((sum: number, item: any) => sum + (item.quantity * 329), 0);
-        const discount = originalTotal - expectedTotal;
-        
-        await sendOrderReceipt({
-          email: formData.email,
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          items: orderData.items,
-          total: expectedTotal,
-          discount: discount > 0 ? discount : 0,
-        }).catch((e: any) => console.warn('Email send failed (non-blocking):', e));
-      }
 
       return NextResponse.json({ 
         success: true,

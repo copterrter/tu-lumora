@@ -215,6 +215,118 @@ export async function sendOrderReceipt({
   }
 }
 
+export async function sendManualApprovalEmail({
+  email,
+  firstName,
+}: {
+  email: string;
+  firstName: string;
+}) {
+  if (!email) return { success: false, message: 'No email provided' };
+
+  const resend = new Resend(process.env.RESEND_API_KEY);
+  const BASE_URL = 'https://www.tulumora.com';
+
+  const html = `
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TU LUMORA — Payment Verified</title>
+</head>
+<body style="margin:0;padding:0;background:#080808;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#fff;">
+
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#080808;">
+  <tr>
+    <td align="center" style="padding:32px 16px 48px;">
+      <table width="100%" style="max-width:580px;" cellpadding="0" cellspacing="0">
+
+        <tr>
+          <td style="background:#000;border:1px solid #1a1a1a;overflow:hidden;">
+            <div style="height:4px;background:linear-gradient(90deg,#22c55e,#4ade80,#22c55e);font-size:0;">&nbsp;</div>
+            <div style="background:#000;padding:36px 40px 24px;text-align:center;border-bottom:1px solid #0f0f0f;">
+              <p style="margin:0 0 6px;font-size:36px;font-weight:900;font-style:italic;letter-spacing:-0.04em;text-transform:uppercase;color:#fff;">
+                TU LUMORA
+              </p>
+              <p style="margin:0;font-size:8px;letter-spacing:0.5em;text-transform:uppercase;color:#555;">
+                AN OFFICIAL PROJECT BY TUSU.RANGSIT
+              </p>
+            </div>
+
+            <div style="background:#fff;padding:13px 40px;text-align:center;">
+              <span style="font-size:9px;letter-spacing:0.7em;text-transform:uppercase;color:#000;font-weight:900;">
+                PAYMENT VERIFIED
+              </span>
+            </div>
+
+            <div style="padding:32px 40px 28px;text-align:left;">
+              <p style="margin:0 0 8px;font-size:10px;letter-spacing:0.4em;text-transform:uppercase;color:#888;">
+                ขอบคุณที่ชำระเงิน,
+              </p>
+              <p style="margin:0 0 18px;font-size:26px;font-weight:900;font-style:italic;letter-spacing:-0.02em;color:#fff;text-transform:uppercase;">
+                ${firstName || 'CAPTAIN'}
+              </p>
+              <p style="margin:0 0 18px;font-size:11px;color:#aaa;line-height:1.7;letter-spacing:0.05em;text-transform:uppercase;">
+                ทีมงานได้ตรวจสอบสลิปของคุณเรียบร้อยแล้ว<br/>
+                สถานะคำสั่งซื้อถูกอัปเดตเป็น <span style="color:#4ade80;font-weight:900;">ชำระเงินสำเร็จ</span>.
+              </p>
+              <p style="margin:0;font-size:10px;color:#666;line-height:1.7;letter-spacing:0.06em;text-transform:uppercase;">
+                เราจะอัปเดตสถานะการจัดส่งให้คุณทราบผ่าน LINE OA / ช่องทางติดต่อที่ให้ไว้
+              </p>
+            </div>
+
+            <div style="padding:0 40px 40px;text-align:center;">
+              <img src="${BASE_URL}/images/mascot-email.png" alt="LUMO" width="52"
+                style="display:block;margin:0 auto 18px;width:52px;height:auto;opacity:0.5;" />
+              <a href="https://lin.ee/19k0kWS"
+                style="display:inline-block;background:#06C755;color:#fff;padding:14px 36px;font-size:10px;font-weight:900;letter-spacing:0.45em;text-transform:uppercase;text-decoration:none;">
+                CONTACT LINE OA
+              </a>
+            </div>
+
+            <div style="height:4px;background:linear-gradient(90deg,#22c55e,#4ade80,#22c55e);font-size:0;">&nbsp;</div>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="padding:20px 0;text-align:center;">
+            <p style="margin:0 0 4px;font-size:8px;color:#1f1f1f;letter-spacing:0.4em;text-transform:uppercase;">
+              TU LUMORA &nbsp;&middot;&nbsp; TUSU.RANGSIT &nbsp;&middot;&nbsp; 2026
+            </p>
+          </td>
+        </tr>
+
+      </table>
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>
+  `;
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: 'LUMO <orders@tulumora.com>',
+      to: email,
+      replyTo: 'support@tulumora.com',
+      subject: `PAYMENT VERIFIED — TU LUMORA`,
+      html,
+    });
+
+    if (error) {
+      console.error('Resend error:', error);
+      return { success: false, message: error.message };
+    }
+
+    return { success: true, id: data?.id };
+  } catch (err: any) {
+    console.error('Email service error:', err);
+    return { success: false, message: err.message };
+  }
+}
+
 export async function sendTrackingEmail({
   email,
   firstName,

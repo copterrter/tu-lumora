@@ -2,16 +2,21 @@
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
 
 export default function ThankYouPage() {
-  const searchParams = useSearchParams();
-  const isManual = searchParams.get("manual") === "1";
+  const [isManual, setIsManual] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      setIsManual(params.get("manual") === "1");
+    }
+  }, []);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -153,7 +158,7 @@ export default function ThankYouPage() {
         </h1>
         <p className="text-gray-500 uppercase tracking-[0.2em] text-[9px] md:text-xs">
           {isManual
-            ? "เราได้รับคำสั่งซื้อและสลิปของคุณแล้ว กำลังรอตรวจสอบการชำระเงินโดยทีมงาน"
+            ? "We have received your order and payment slip. Our team is currently reviewing your payment."
             : "Your order has been received. Check your email for the receipt."
           }
         </p>

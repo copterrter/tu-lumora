@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { sendManualApprovalEmail } from '@/lib/email';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -37,11 +38,19 @@ export async function POST(request: Request) {
       throw updateError;
     }
 
-    return NextResponse.json({ success: true, message: 'Order approved' });
+    if (order.email) {
+      await sendManualApprovalEmail({
+        email: order.email,
+        firstName: order.firstName || 'Customer',
+      }).catch((e: any) =>
+        console.warn('Manual approval email failed (non-blocking):', e)
+      );
+    }
+
+    return NextResponse.json({ success: true, message: 'Order approved and email sent (if possible)' });
   } catch (err: any) {
     console.error('Approve order error:', err);
     return NextResponse.json({ success: false, message: err.message || 'Internal error' }, { status: 500 });
   }
 }
-
 
