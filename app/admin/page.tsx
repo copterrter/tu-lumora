@@ -193,6 +193,36 @@ export default function AdminDashboard() {
     [orders]
   );
 
+  // 4. นับจำนวนเสื้อที่ขายไป แยก T-SHIRT / CROP (เฉพาะออเดอร์ที่จ่ายแล้วหรือส่งแล้ว)
+  const { tshirtSold, cropSold } = useMemo(() => {
+    let tshirt = 0;
+    let crop = 0;
+
+    orders.forEach((o) => {
+      const status = (o.status || "").toString().toLowerCase();
+      if (status !== "paid_and_verified" && status !== "shipped") return;
+
+      const raw = (o.product_name || "").toString();
+      if (!raw) return;
+
+      raw.split(",").forEach((part: string) => {
+        const text = part.trim();
+        if (!text) return;
+        const match = text.match(/(\d+)\s*x\s*([A-Za-z\- ]+)/i);
+        if (!match) return;
+        const qty = parseInt(match[1], 10) || 0;
+        const styleName = match[2].toUpperCase();
+        if (styleName.includes("CROP")) {
+          crop += qty;
+        } else if (styleName.includes("T-SHIRT") || styleName.includes("TSHIRT")) {
+          tshirt += qty;
+        }
+      });
+    });
+
+    return { tshirtSold: tshirt, cropSold: crop };
+  }, [orders]);
+
   // ---------------- หน้าจอ Login ----------------
   if (!isAuthenticated) {
     return (
@@ -233,6 +263,12 @@ export default function AdminDashboard() {
             </h1>
             <p className="text-[11px] tracking-[0.25em] text-gray-500 uppercase">
               Live overview of orders & payments
+            </p>
+            <p className="text-[10px] tracking-[0.2em] text-gray-400 uppercase mt-1">
+              Units sold (Paid + Shipped):{" "}
+              <span className="text-sky-300 font-black ml-1">T-SHIRT {tshirtSold}</span>
+              <span className="mx-2 text-gray-600">•</span>
+              <span className="text-pink-300 font-black">CROP {cropSold}</span>
             </p>
           </div>
           
