@@ -121,18 +121,14 @@ export default function AdminDashboard() {
     }
   };
 
-  // 1. ข้อมูลสำหรับกราฟเส้น (Sales vs Orders)
+  // 1. ข้อมูลสำหรับกราฟเส้น (Sales vs Orders) — ใช้เฉพาะออเดอร์ที่ชำระแล้ว / ส่งแล้ว
   const chartData = useMemo(() => {
-    if (orders.length === 0) {
-      return Array.from({length: 7}).map((_, i) => ({
-        date: `Day ${i+1}`,
-        sales: Math.floor(Math.random() * 5000),
-        orders: Math.floor(Math.random() * 20) + 1
-      }));
-    }
-
     const dataMap: Record<string, { rawDate: string, date: string, sales: number, orders: number }> = {};
     orders.forEach(order => {
+      const status = (order.status || "").toString().toLowerCase();
+      // นับเฉพาะออเดอร์ที่ชำระเงินสำเร็จหรือส่งของแล้ว
+      if (status !== "paid_and_verified" && status !== "shipped") return;
+
       const d = new Date(order.created_at);
       const rawDate = d.toISOString().split('T')[0];
       const displayDate = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
@@ -144,7 +140,10 @@ export default function AdminDashboard() {
       dataMap[rawDate].orders += 1;
     });
 
-    return Object.values(dataMap).sort((a, b) => a.rawDate.localeCompare(b.rawDate));
+    const sorted = Object.values(dataMap).sort((a, b) => a.rawDate.localeCompare(b.rawDate));
+
+    // ถ้ายังไม่มีออเดอร์ที่จ่ายแล้ว/ส่งแล้ว ให้คืน array ว่าง ๆ เพื่อไม่ให้แสดงกราฟสุ่ม
+    return sorted;
   }, [orders]);
 
   // 2. ข้อมูลสำหรับกราฟโดนัท (Top Products / Sizes)
@@ -287,13 +286,13 @@ export default function AdminDashboard() {
         {/* 1. Main Line Chart */}
         <div className="w-full h-96 bg-[#020617] border border-sky-500/30 rounded-3xl p-6 relative overflow-hidden group hover:border-sky-400/60 transition-all duration-700 shadow-[0_0_60px_rgba(56,189,248,0.25)]">
           <div className="flex justify-between items-end mb-6 relative z-10">
-            <h2 className="text-[10px] tracking-[0.4em] text-gray-500 uppercase flex items-center gap-4">
-              Revenue & Orders Overview 
+            <h2 className="text-[10px] tracking-[0.4em] text-gray-500 uppercase flex items-center gap-4 flex-wrap">
+              Revenue & Orders Overview
               <span className="flex items-center gap-2 text-white">
-                <span className="w-2 h-2 bg-white"></span> Sales
+                <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.7)]"></span> Sales (฿)
               </span>
               <span className="flex items-center gap-2 text-white">
-                <span className="w-2 h-2 bg-gray-600"></span> Orders
+                <span className="w-2 h-2 rounded-full bg-sky-400 shadow-[0_0_10px_rgba(56,189,248,0.7)]"></span> Orders (count)
               </span>
             </h2>
           </div>
@@ -320,14 +319,14 @@ export default function AdminDashboard() {
                 <Line
                   yAxisId="right"
                   type="monotone"
-                  dataKey="visitors"
-                  name="Visitors"
-                  stroke="#64748b"
+                  dataKey="orders"
+                  name="Orders"
+                  stroke="#38bdf8"
                   strokeWidth={2}
-                  dot={{ r: 3, fill: '#020617', stroke: '#64748b', strokeWidth: 2 }}
-                  activeDot={{ r: 6, fill: '#64748b', stroke: '#020617' }}
+                  dot={{ r: 3, fill: '#020617', stroke: '#38bdf8', strokeWidth: 2 }}
+                  activeDot={{ r: 6, fill: '#38bdf8', stroke: '#020617' }}
                   animationDuration={1800}
-                  strokeDasharray="5 5"
+                  strokeDasharray="6 4"
                 />
               </LineChart>
             </ResponsiveContainer>
