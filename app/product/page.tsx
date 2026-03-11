@@ -54,6 +54,7 @@ export default function ProductPage() {
   const [showSizeChart, setShowSizeChart] = useState(false);
   const [zoomedImg, setZoomedImg] = useState<string | null>(null);
   const [promoTimeLeft, setPromoTimeLeft] = useState<{ d: number, h: number, m: number, s: number } | null>(null);
+  const [lastAddedItem, setLastAddedItem] = useState<string | null>(null);
 
   const sliderRef = useRef<HTMLDivElement>(null);
 
@@ -136,6 +137,10 @@ export default function ProductPage() {
     else newCart.push(newItem);
     setCart(newCart);
     localStorage.setItem('lumora_cart', JSON.stringify(newCart));
+    setLastAddedItem(`${selectedStyle} • Size ${selectedSize}`);
+    setTimeout(() => {
+      setLastAddedItem((prev) => (prev === `${selectedStyle} • Size ${selectedSize}` ? null : prev));
+    }, 2000);
   };
 
   const removeFromCart = (index: number) => {
@@ -333,9 +338,16 @@ export default function ProductPage() {
               </div>
             </div>
 
-            <button onClick={addToCart} className="w-full bg-white text-black py-5 font-black uppercase tracking-[0.3em] text-xs hover:bg-gray-200 transition-all">
-              + Add To Squad
-            </button>
+            <div className="space-y-2">
+              <button onClick={addToCart} className="w-full bg-white text-black py-5 font-black uppercase tracking-[0.3em] text-xs hover:bg-gray-200 transition-all">
+                + Add To Squad
+              </button>
+              {lastAddedItem && (
+                <p className="text-[10px] text-green-400 uppercase tracking-[0.2em]">
+                  ✓ เพิ่มสินค้าแล้ว: <span className="text-white">{lastAddedItem}</span>
+                </p>
+              )}
+            </div>
           </div>
 
           {/* Cart */}

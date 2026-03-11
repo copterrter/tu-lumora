@@ -492,43 +492,49 @@ export default function CheckoutPage() {
 
             {/* PDPA Checkbox 1 */}
             <div>
-              <label className={`flex items-start gap-3 cursor-pointer group p-3 rounded transition-colors ${formErrors.pdpa ? 'bg-red-500/5 border border-red-500/40' : ''}`}>
-                <input
-                  type="checkbox"
-                  checked={pdpaChecked}
-                  onChange={(e) => {
-                    setPdpaChecked(e.target.checked);
-                    if (e.target.checked) setFormErrors(prev => ({ ...prev, pdpa: "" }));
-                  }}
-                  className="w-4 h-4 mt-0.5 accent-white cursor-pointer shrink-0"
-                />
+              <div className={`flex items-start gap-3 cursor-pointer group p-3 rounded transition-colors ${formErrors.pdpa ? 'bg-red-500/5 border border-red-500/40' : ''}`} onClick={() => {
+                const next = !pdpaChecked;
+                setPdpaChecked(next);
+                if (next) setFormErrors(prev => ({ ...prev, pdpa: "" }));
+              }}>
+                <button
+                  type="button"
+                  className={`w-4 h-4 mt-0.5 flex items-center justify-center border text-[10px] font-black shrink-0 ${
+                    pdpaChecked ? 'bg-white text-black border-white' : 'border-white/40 text-transparent'
+                  }`}
+                >
+                  ✓
+                </button>
                 <span className="text-[10px] text-gray-400 group-hover:text-gray-200 transition-colors leading-relaxed">
                   ฉันได้อ่านและยอมรับ{" "}
-                  <button onClick={() => setShowPdpaModal(true)} className="underline underline-offset-2 text-white/60 hover:text-white">
+                  <button type="button" onClick={(e) => { e.stopPropagation(); setShowPdpaModal(true); }} className="underline underline-offset-2 text-white/60 hover:text-white">
                     นโยบายความเป็นส่วนตัว (PDPA)
                   </button>
                   {" "}และยินยอมให้เก็บข้อมูลเพื่อดำเนินการสั่งซื้อ
                 </span>
-              </label>
+              </div>
               <ErrorMsg field="pdpa" />
             </div>
 
             {/* PDPA Checkbox 2 — No Refund */}
             <div>
-              <label className={`flex items-start gap-3 cursor-pointer group p-3 rounded transition-colors ${formErrors.noRefund ? 'bg-red-500/5 border border-red-500/40' : ''}`}>
-                <input
-                  type="checkbox"
-                  checked={noRefundChecked}
-                  onChange={(e) => {
-                    setNoRefundChecked(e.target.checked);
-                    if (e.target.checked) setFormErrors(prev => ({ ...prev, noRefund: "" }));
-                  }}
-                  className="w-4 h-4 mt-0.5 accent-white cursor-pointer shrink-0"
-                />
+              <div className={`flex items-start gap-3 cursor-pointer group p-3 rounded transition-colors ${formErrors.noRefund ? 'bg-red-500/5 border border-red-500/40' : ''}`} onClick={() => {
+                const next = !noRefundChecked;
+                setNoRefundChecked(next);
+                if (next) setFormErrors(prev => ({ ...prev, noRefund: "" }));
+              }}>
+                <button
+                  type="button"
+                  className={`w-4 h-4 mt-0.5 flex items-center justify-center border text-[10px] font-black shrink-0 ${
+                    noRefundChecked ? 'bg-white text-black border-white' : 'border-white/40 text-transparent'
+                  }`}
+                >
+                  ✓
+                </button>
                 <span className="text-[10px] text-gray-400 group-hover:text-gray-200 transition-colors leading-relaxed">
                   ฉันรับทราบว่าสินค้า Pre-Order ไม่สามารถยกเลิกหรือขอคืนเงินได้หลังชำระเงินแล้ว
                 </span>
-              </label>
+              </div>
               <ErrorMsg field="noRefund" />
             </div>
 
