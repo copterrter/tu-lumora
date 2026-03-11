@@ -131,7 +131,8 @@ export default function AdminDashboard() {
 
       const d = new Date(order.created_at);
       const rawDate = d.toISOString().split('T')[0];
-      const displayDate = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      // แสดงวันที่แบบละเอียดในรูปแบบ YYYY-MM-DD เช่น 2026-03-11
+      const displayDate = rawDate;
       
       if (!dataMap[rawDate]) {
         dataMap[rawDate] = { rawDate, date: displayDate, sales: 0, orders: 0 };
@@ -222,6 +223,17 @@ export default function AdminDashboard() {
     return { tshirtSold: tshirt, cropSold: crop };
   }, [orders]);
 
+  // รวมยอดรายได้จากออเดอร์ที่ชำระแล้ว / ส่งแล้วเท่านั้น
+  const totalRevenue = useMemo(
+    () =>
+      orders.reduce((sum, order) => {
+        const status = (order.status || "").toString().toLowerCase();
+        if (status !== "paid_and_verified" && status !== "shipped") return sum;
+        return sum + order.total_amount;
+      }, 0),
+    [orders]
+  );
+
   // ---------------- หน้าจอ Login ----------------
   if (!isAuthenticated) {
     return (
@@ -247,8 +259,6 @@ export default function AdminDashboard() {
   }
 
   // ---------------- หน้าจอ Dashboard ----------------
-  const totalRevenue = orders.reduce((sum, order) => sum + order.total_amount, 0);
-
   return (
     <main className="min-h-screen bg-gradient-to-b from-[#020617] via-[#020617] to-black text-white p-6 md:p-10 font-sans selection:bg-white selection:text-black">
       <div className="max-w-7xl mx-auto space-y-8">
