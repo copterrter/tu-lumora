@@ -121,27 +121,27 @@ export default function AdminDashboard() {
     }
   };
 
-  // 1. ข้อมูลสำหรับกราฟเส้น (Sales vs Visitors)
+  // 1. ข้อมูลสำหรับกราฟเส้น (Sales vs Orders)
   const chartData = useMemo(() => {
     if (orders.length === 0) {
       return Array.from({length: 7}).map((_, i) => ({
         date: `Day ${i+1}`,
         sales: Math.floor(Math.random() * 5000),
-        visitors: Math.floor(Math.random() * 1000) + 200
+        orders: Math.floor(Math.random() * 20) + 1
       }));
     }
 
-    const dataMap: Record<string, { rawDate: string, date: string, sales: number, visitors: number }> = {};
+    const dataMap: Record<string, { rawDate: string, date: string, sales: number, orders: number }> = {};
     orders.forEach(order => {
       const d = new Date(order.created_at);
       const rawDate = d.toISOString().split('T')[0];
       const displayDate = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
       
       if (!dataMap[rawDate]) {
-        const pseudoRandom = rawDate.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-        dataMap[rawDate] = { rawDate, date: displayDate, sales: 0, visitors: (pseudoRandom % 800) + 200 };
+        dataMap[rawDate] = { rawDate, date: displayDate, sales: 0, orders: 0 };
       }
       dataMap[rawDate].sales += order.total_amount;
+      dataMap[rawDate].orders += 1;
     });
 
     return Object.values(dataMap).sort((a, b) => a.rawDate.localeCompare(b.rawDate));
@@ -252,12 +252,12 @@ export default function AdminDashboard() {
         <div className="w-full h-96 bg-[#020617] border border-sky-500/30 rounded-3xl p-6 relative overflow-hidden group hover:border-sky-400/60 transition-all duration-700 shadow-[0_0_60px_rgba(56,189,248,0.25)]">
           <div className="flex justify-between items-end mb-6 relative z-10">
             <h2 className="text-[10px] tracking-[0.4em] text-gray-500 uppercase flex items-center gap-4">
-              Revenue & Traffic Overview 
+              Revenue & Orders Overview 
               <span className="flex items-center gap-2 text-white">
                 <span className="w-2 h-2 bg-white"></span> Sales
               </span>
               <span className="flex items-center gap-2 text-white">
-                <span className="w-2 h-2 bg-gray-600"></span> Visitors
+                <span className="w-2 h-2 bg-gray-600"></span> Orders
               </span>
             </h2>
           </div>
