@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { sendOrderReceipt } from '@/lib/email';
+import { calculateTotalForCart } from '@/lib/pricing';
 
 // Initialize Supabase client (Prefer Service Role Key for server-side inserts bypassing RLS)
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -21,13 +22,15 @@ export async function POST(request: Request) {
     const orderData = JSON.parse(orderDataRaw);
     const formData = JSON.parse(formDataRaw);
 
-    // 1. Calculate expected total securely on the server
-    const totalQty = orderData.items.reduce((sum: number, item: any) => sum + item.quantity, 0);
-    const promoQty = Math.min(totalQty, 6); 
-    const regularQty = totalQty - promoQty; 
-    const pairs = Math.floor(promoQty / 2);
-    const promoSingles = promoQty % 2;
-    const expectedTotal = (pairs * 590) + ((promoSingles + regularQty) * 329);
+    // 1. Calculate expected total securely on the server (respect pricing phases)
+    const { phase, total: expectedTotal, originalTotal } = calculateTotalForCart(orderData.items);
+
+    if (phase === "closed") {
+      return NextResponse.json(
+        { success: false, message: "รอบพรีออเดอร์สิ้นสุดแล้ว" },
+        { status: 400 }
+      );
+    }
 
     // 2. Prepare common order fields
     const summaryItems = orderData.items.map((item: any) => `${item.quantity}x ${item.style} (${item.size})`).join(", ");
@@ -51,7 +54,7 @@ export async function POST(request: Request) {
         zipCode: formData.zipCode,
         social_contact: formData.socialContact, 
         product_name: summaryItems,
-        quantity: totalQty,
+        quantity: orderData.items.reduce((sum: number, item: any) => sum + item.quantity, 0),
         style: styleStr,
         size: sizeStr,
         total_amount: expectedTotal,
@@ -178,7 +181,6 @@ export async function POST(request: Request) {
 
     // 6. Send Email Receipt
     if (formData.email) {
-      const originalTotal = orderData.items.reduce((sum: number, item: any) => sum + (item.quantity * 329), 0);
       const discount = originalTotal - expectedTotal;
       
       // Call service directly instead of fetch to avoid environment variable issues and ensure delivery

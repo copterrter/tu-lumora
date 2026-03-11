@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { calculateTotalForCart, getCurrentPhase } from "@/lib/pricing";
 
 const FAQ_ITEMS = [
   { q: "Size เสื้อเป็นยังไง?", a: "Regular (T-SHIRT): S, M, L, XL, 2XL, 3XL | Crop: S, M, L, XL กดปุ่ม Size Guide ด้านบนเพื่อดูตาราง size ครับ" },
@@ -58,8 +59,9 @@ export default function ProductPage() {
 
   const sliderRef = useRef<HTMLDivElement>(null);
 
+  // Flash sale 1 countdown (ใช้แค่ช่วยบอกเวลา phase แรก)
   useEffect(() => {
-    const targetDate = new Date("2026-03-14T18:00:00+07:00").getTime();
+    const targetDate = new Date("2026-03-14T23:59:59+07:00").getTime();
     const interval = setInterval(() => {
       const now = new Date().getTime();
       const difference = targetDate - now;
@@ -96,9 +98,6 @@ export default function ProductPage() {
   const CROP_IMAGES = ["/images/front-crop.png", "/images/back-crop.png", "/images/product-2.jpg", "/images/crop_actor2.jpg", "/images/crop_actor.jpg"];
   const productImages = selectedStyle === "T-SHIRT" ? TSHIRT_IMAGES : CROP_IMAGES;
 
-  const PRICE_PER_UNIT = 329;
-  const PROMO_PAIR_PRICE = 590;
-
   const REGULAR_SIZES = ["S", "M", "L", "XL", "2XL", "3XL"];
   const CROP_SIZES = ["S", "M", "L", "XL"];
   const currentSizes = selectedStyle === "T-SHIRT" ? REGULAR_SIZES : CROP_SIZES;
@@ -114,13 +113,12 @@ export default function ProductPage() {
     }
   }, [selectedStyle, currentSizes, selectedSize]);
 
+  const phase = getCurrentPhase();
+  const isClosed = phase === "closed";
+
   const calculateCartTotal = (currentCart: any[]) => {
-    const totalQty = currentCart.reduce((sum, item) => sum + item.quantity, 0);
-    const promoQty = Math.min(totalQty, 6);
-    const regularQty = totalQty - promoQty;
-    const pairs = Math.floor(promoQty / 2);
-    const promoSingles = promoQty % 2;
-    return (pairs * PROMO_PAIR_PRICE) + ((promoSingles + regularQty) * PRICE_PER_UNIT);
+    const { total } = calculateTotalForCart(currentCart);
+    return total;
   };
 
   const addToCart = () => {
@@ -226,89 +224,188 @@ export default function ProductPage() {
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase italic leading-tight tracking-tighter">TU LUMORA SERIES</h1>
           </div>
 
-          {/* 🌟 7 Days Promo + Countdown Combined 🌟 */}
-          <div className="relative">
-            <div className="absolute -inset-[2px] bg-gradient-to-r from-red-600 via-red-400 to-red-600 rounded-sm opacity-70 blur-[3px] animate-pulse pointer-events-none" />
-            <div className="absolute -inset-[1px] bg-gradient-to-br from-red-500/40 to-transparent rounded-sm pointer-events-none" />
+          {/* Dynamic Promo / Pricing Box by Phase */}
+          {!isClosed && (
+            <div className="relative">
+              <div className="absolute -inset-[2px] bg-gradient-to-r from-red-600 via-red-400 to-red-600 rounded-sm opacity-70 blur-[3px] animate-pulse pointer-events-none" />
+              <div className="absolute -inset-[1px] bg-gradient-to-br from-red-500/40 to-transparent rounded-sm pointer-events-none" />
 
-            <div className="relative overflow-hidden bg-[#060606] border border-red-500/30 rounded-sm shadow-[0_0_40px_rgba(239,68,68,0.2)]">
-              <div className="absolute -top-16 -right-16 w-56 h-56 bg-red-600/25 blur-[80px] animate-pulse pointer-events-none" />
-              <div className="absolute -bottom-16 -left-16 w-56 h-56 bg-red-900/25 blur-[80px] pointer-events-none" />
+              <div className="relative overflow-hidden bg-[#060606] border border-red-500/30 rounded-sm shadow-[0_0_40px_rgba(239,68,68,0.2)]">
+                <div className="absolute -top-16 -right-16 w-56 h-56 bg-red-600/25 blur-[80px] animate-pulse pointer-events-none" />
+                <div className="absolute -bottom-16 -left-16 w-56 h-56 bg-red-900/25 blur-[80px] pointer-events-none" />
 
-              {/* Shimmer */}
-              <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                <div className="absolute top-0 -left-full h-full w-1/2 bg-gradient-to-r from-transparent via-white/5 to-transparent skew-x-12" style={{ animation: "shimmerSweep 4s ease-in-out infinite" }} />
-              </div>
-
-              {/* Top badge */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-gradient-to-r from-red-600 to-red-800 px-3 sm:px-5 py-2 sm:py-3 gap-1 sm:gap-4">
-                <div className="flex items-center gap-2">
-                  <span className="animate-ping absolute w-2 h-2 rounded-full bg-white opacity-50" />
-                  <div className="w-2 h-2 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)] relative shrink-0" />
-                  <span className="text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] sm:tracking-[0.4em] text-white">⚡ FLASH DEAL — 7 DAYS EXCLUSIVE</span>
+                {/* Top badge by phase */}
+                <div
+                  className={
+                    "flex flex-col sm:flex-row sm:items-center justify-between px-3 sm:px-5 py-2 sm:py-3 gap-1 sm:gap-4 " +
+                    (phase === "flash2"
+                      ? "bg-gradient-to-r from-emerald-500 to-emerald-700"
+                      : phase === "normal"
+                      ? "bg-gradient-to-r from-slate-600 to-slate-800"
+                      : "bg-gradient-to-r from-red-600 to-red-800")
+                  }
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)] relative shrink-0" />
+                    <span className="text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] sm:tracking-[0.4em] text-white">
+                      {phase === "flash1" && "⚡ FLASH DEAL — ROUND I"}
+                      {phase === "normal" && "STANDARD PRICE WINDOW"}
+                      {phase === "flash2" && "⚡ FLASH DEAL — ROUND II (299.-)"}
+                    </span>
+                  </div>
+                  {phase !== "normal" && (
+                    <span className="text-[9px] font-bold text-red-200 uppercase tracking-widest sm:shrink-0 hidden sm:block">
+                      Limited Time Only
+                    </span>
+                  )}
                 </div>
-                <span className="text-[9px] font-bold text-red-200 uppercase tracking-widest sm:shrink-0 hidden sm:block">Limited Time Only</span>
-              </div>
 
-              <div className="p-3 sm:p-7 relative z-10 flex flex-col gap-4 sm:gap-6">
-
-                {/* Countdown */}
-                {promoTimeLeft && (
-                  <div className="flex flex-col items-center gap-1.5 py-1 sm:py-3">
-                    <p className="text-[8px] sm:text-[9px] text-red-400/70 uppercase tracking-[0.4em] font-bold">Offer Ends In</p>
-                    <div className="flex items-center gap-1.5 sm:gap-4">
-                      {[
-                        { value: promoTimeLeft.d, label: "D" },
-                        { value: promoTimeLeft.h, label: "H" },
-                        { value: promoTimeLeft.m, label: "M" },
-                        { value: promoTimeLeft.s, label: "S" },
-                      ].map((unit, i) => (
-                        <div key={i} className="flex items-center gap-1.5 sm:gap-4">
-                          <div className="flex flex-col items-center bg-black/60 border border-red-500/30 px-2 py-1.5 sm:px-5 sm:py-3 min-w-[38px] sm:min-w-[64px] shadow-[0_0_14px_rgba(239,68,68,0.15)]">
-                            <span className={`text-xl sm:text-4xl font-black italic tabular-nums leading-none ${i === 0 || i === 3 ? 'text-red-400' : 'text-white'} drop-shadow-[0_0_12px_rgba(239,68,68,0.6)]`}>
-                              {String(unit.value).padStart(2, '0')}
-                            </span>
-                            <span className="text-[7px] sm:text-[8px] text-gray-500 uppercase tracking-widest mt-0.5">{unit.label}</span>
+                <div className="p-3 sm:p-7 relative z-10 flex flex-col gap-4 sm:gap-6">
+                  {/* Flash 1: ใช้โปรคู่ 590 สูงสุด 6 ตัว + countdown */}
+                  {phase === "flash1" && (
+                    <>
+                      {promoTimeLeft && (
+                        <div className="flex flex-col items-center gap-1.5 py-1 sm:py-3">
+                          <p className="text-[8px] sm:text-[9px] text-red-400/70 uppercase tracking-[0.4em] font-bold">
+                            Offer Ends In
+                          </p>
+                          <div className="flex items-center gap-1.5 sm:gap-4">
+                            {[
+                              { value: promoTimeLeft.d, label: "D" },
+                              { value: promoTimeLeft.h, label: "H" },
+                              { value: promoTimeLeft.m, label: "M" },
+                              { value: promoTimeLeft.s, label: "S" },
+                            ].map((unit, i) => (
+                              <div key={i} className="flex items-center gap-1.5 sm:gap-4">
+                                <div className="flex flex-col items-center bg-black/60 border border-red-500/30 px-2 py-1.5 sm:px-5 sm:py-3 min-w-[38px] sm:min-w-[64px] shadow-[0_0_14px_rgba(239,68,68,0.15)]">
+                                  <span
+                                    className={`text-xl sm:text-4xl font-black italic tabular-nums leading-none ${
+                                      i === 0 || i === 3 ? "text-red-400" : "text-white"
+                                    } drop-shadow-[0_0_12px_rgba(239,68,68,0.6)]`}
+                                  >
+                                    {String(unit.value).padStart(2, "0")}
+                                  </span>
+                                  <span className="text-[7px] sm:text-[8px] text-gray-500 uppercase tracking-widest mt-0.5">
+                                    {unit.label}
+                                  </span>
+                                </div>
+                                {i < 3 && (
+                                  <span className="text-red-500/60 font-black text-base sm:text-xl -mt-2 sm:-mt-3">
+                                    :
+                                  </span>
+                                )}
+                              </div>
+                            ))}
                           </div>
-                          {i < 3 && <span className="text-red-500/60 font-black text-base sm:text-xl -mt-2 sm:-mt-3">:</span>}
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                      )}
 
-                {/* Tiers */}
-                <div className="flex flex-col gap-2 sm:gap-3">
-                  <p className="text-[9px] sm:text-[10px] text-gray-400 tracking-[0.2em] uppercase font-bold px-1">Buy More, Save More (Max 6)</p>
-                  <div className="grid grid-cols-4 gap-1 sm:gap-2">
-                    <div className="flex flex-col justify-center items-center text-center border border-white/5 bg-white/[0.02] p-2 sm:p-4 hover:border-white/20 transition-colors">
-                      <span className="text-[8px] sm:text-[10px] font-bold tracking-widest text-gray-400 uppercase">1</span>
-                      <span className="text-sm sm:text-lg font-black text-white italic mt-0.5 sm:mt-1">329.-</span>
+                      <div className="flex flex-col gap-2 sm:gap-3">
+                        <p className="text-[9px] sm:text-[10px] text-gray-400 tracking-[0.2em] uppercase font-bold px-1">
+                          Buy More, Save More (Max 6)
+                        </p>
+                        <div className="grid grid-cols-4 gap-1 sm:gap-2">
+                          <div className="flex flex-col justify-center items-center text-center border border-white/5 bg-white/[0.02] p-2 sm:p-4 hover:border-white/20 transition-colors">
+                            <span className="text-[8px] sm:text-[10px] font-bold tracking-widest text-gray-400 uppercase">
+                              1
+                            </span>
+                            <span className="text-sm sm:text-lg font-black text-white italic mt-0.5 sm:mt-1">
+                              329.-
+                            </span>
+                          </div>
+                          <div className="flex flex-col justify-center items-center text-center border border-red-500/10 bg-red-500/[0.02] p-2 sm:p-4 hover:border-red-500/30 transition-colors">
+                            <span className="text-[8px] sm:text-[10px] font-bold tracking-widest text-gray-400 uppercase">
+                              2
+                            </span>
+                            <span className="text-sm sm:text-lg font-black text-white italic mt-0.5 sm:mt-1 bg-gradient-to-r from-red-400 to-white bg-clip-text text-transparent">
+                              590.-
+                            </span>
+                            <span className="text-[7px] sm:text-[9px] text-red-500 font-bold uppercase tracking-widest mt-0.5 sm:mt-1">
+                              -68
+                            </span>
+                          </div>
+                          <div className="flex flex-col justify-center items-center text-center border border-red-500/20 bg-red-500/[0.04] p-2 sm:p-4 hover:border-red-500/40 transition-colors">
+                            <span className="text-[8px] sm:text-[10px] font-bold tracking-widest text-gray-400 uppercase">
+                              4
+                            </span>
+                            <span className="text-sm sm:text-lg font-black text-white italic mt-0.5 sm:mt-1 bg-gradient-to-r from-red-500 to-white bg-clip-text text-transparent">
+                              1,180.-
+                            </span>
+                            <span className="text-[7px] sm:text-[9px] text-red-500 font-bold uppercase tracking-widest mt-0.5 sm:mt-1">
+                              -136
+                            </span>
+                          </div>
+                          <div className="flex flex-col justify-center items-center text-center border border-red-500/40 bg-red-500/[0.08] p-2 sm:p-4 relative overflow-hidden group hover:border-red-500 transition-colors cursor-default">
+                            <div className="absolute inset-0 bg-gradient-to-tr from-red-600/10 to-transparent group-hover:from-red-600/20 transition-all"></div>
+                            <span className="text-[8px] sm:text-[10px] font-bold tracking-widest text-red-300 uppercase relative z-10">
+                              6 MAX
+                            </span>
+                            <span className="text-sm sm:text-xl font-black text-white italic mt-0.5 sm:mt-1 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)] relative z-10">
+                              1,770.-
+                            </span>
+                            <span className="text-[7px] sm:text-[10px] text-white font-black bg-red-600 px-1 sm:px-2 mt-0.5 sm:mt-1 relative z-10">
+                              -204
+                            </span>
+                          </div>
+                        </div>
+                        <p className="text-[8px] text-red-500/60 font-bold tracking-[0.1em] uppercase text-right pt-0.5 opacity-70">
+                          *Mix & Match T-Shirt and Crop Allowed
+                        </p>
+                      </div>
+                    </>
+                  )}
+
+                  {/* Normal window: 329 flat */}
+                  {phase === "normal" && (
+                    <div className="space-y-3">
+                      <p className="text-[9px] sm:text-[10px] text-gray-300 tracking-[0.2em] uppercase font-bold px-1">
+                        Regular Price Window
+                      </p>
+                      <div className="flex items-center justify-between border border-white/10 bg-white/5 px-4 py-3">
+                        <span className="text-xs text-gray-400 tracking-[0.2em] uppercase">
+                          1–6 Units
+                        </span>
+                        <span className="text-2xl font-black italic text-white">329.- / pc</span>
+                      </div>
+                      <p className="text-[8px] text-gray-500 tracking-[0.2em] uppercase text-right">
+                        No bundle discount in this window
+                      </p>
                     </div>
-                    <div className="flex flex-col justify-center items-center text-center border border-red-500/10 bg-red-500/[0.02] p-2 sm:p-4 hover:border-red-500/30 transition-colors">
-                      <span className="text-[8px] sm:text-[10px] font-bold tracking-widest text-gray-400 uppercase">2</span>
-                      <span className="text-sm sm:text-lg font-black text-white italic mt-0.5 sm:mt-1 bg-gradient-to-r from-red-400 to-white bg-clip-text text-transparent">590.-</span>
-                      <span className="text-[7px] sm:text-[9px] text-red-500 font-bold uppercase tracking-widest mt-0.5 sm:mt-1">-68</span>
+                  )}
+
+                  {/* Flash 2: 299 flat */}
+                  {phase === "flash2" && (
+                    <div className="space-y-4">
+                      <p className="text-[9px] sm:text-[10px] text-emerald-100 tracking-[0.2em] uppercase font-bold px-1">
+                        Flash Sale Round II — Flat Price
+                      </p>
+                      <div className="flex flex-col sm:flex-row items-center justify-between border border-emerald-400/40 bg-emerald-500/10 px-4 py-4 gap-3 shadow-[0_0_25px_rgba(16,185,129,0.4)]">
+                        <div className="text-left">
+                          <p className="text-[9px] text-emerald-200 uppercase tracking-[0.25em]">
+                            Any Style / Any Size
+                          </p>
+                          <p className="text-xs text-emerald-100">
+                            Single flat price — no minimum, up to 6 units.
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-[10px] text-gray-400 uppercase tracking-[0.25em]">
+                            Now only
+                          </p>
+                          <p className="text-3xl sm:text-4xl font-black italic text-emerald-200 drop-shadow-[0_0_18px_rgba(16,185,129,0.8)]">
+                            299.-
+                          </p>
+                          <p className="text-[9px] text-emerald-300 tracking-[0.25em] uppercase">
+                            per piece
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex flex-col justify-center items-center text-center border border-red-500/20 bg-red-500/[0.04] p-2 sm:p-4 hover:border-red-500/40 transition-colors">
-                      <span className="text-[8px] sm:text-[10px] font-bold tracking-widest text-gray-400 uppercase">4</span>
-                      <span className="text-sm sm:text-lg font-black text-white italic mt-0.5 sm:mt-1 bg-gradient-to-r from-red-500 to-white bg-clip-text text-transparent">1,180.-</span>
-                      <span className="text-[7px] sm:text-[9px] text-red-500 font-bold uppercase tracking-widest mt-0.5 sm:mt-1">-136</span>
-                    </div>
-                    <div className="flex flex-col justify-center items-center text-center border border-red-500/40 bg-red-500/[0.08] p-2 sm:p-4 relative overflow-hidden group hover:border-red-500 transition-colors cursor-default">
-                      <div className="absolute inset-0 bg-gradient-to-tr from-red-600/10 to-transparent group-hover:from-red-600/20 transition-all"></div>
-                      <span className="text-[8px] sm:text-[10px] font-bold tracking-widest text-red-300 uppercase relative z-10">6 MAX</span>
-                      <span className="text-sm sm:text-xl font-black text-white italic mt-0.5 sm:mt-1 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)] relative z-10">1,770.-</span>
-                      <span className="text-[7px] sm:text-[10px] text-white font-black bg-red-600 px-1 sm:px-2 mt-0.5 sm:mt-1 relative z-10">-204</span>
-                    </div>
-                  </div>
-                  <p className="text-[8px] text-red-500/60 font-bold tracking-[0.1em] uppercase text-right pt-0.5 opacity-70">
-                    *Mix & Match T-Shirt and Crop Allowed
-                  </p>
+                  )}
                 </div>
               </div>
             </div>
-          </div>
+          )}
 
 
           {/* Style & Size */}
@@ -339,10 +436,23 @@ export default function ProductPage() {
             </div>
 
             <div className="space-y-2">
-              <button onClick={addToCart} className="w-full bg-white text-black py-5 font-black uppercase tracking-[0.3em] text-xs hover:bg-gray-200 transition-all">
-                + Add To Squad
+              <button
+                onClick={addToCart}
+                disabled={isClosed}
+                className={`w-full py-5 font-black uppercase tracking-[0.3em] text-xs transition-all ${
+                  isClosed
+                    ? "bg-gray-800 text-gray-500 cursor-not-allowed border border-gray-700"
+                    : "bg-white text-black hover:bg-gray-200"
+                }`}
+              >
+                {isClosed ? "PRE-ORDER CLOSED" : "+ Add To Squad"}
               </button>
-              {lastAddedItem && (
+              {isClosed && (
+                <p className="text-[10px] text-gray-400 uppercase tracking-[0.2em]">
+                  รอบพรีออเดอร์สิ้นสุดแล้ว ขอบคุณทุกการสนับสนุน
+                </p>
+              )}
+              {!isClosed && lastAddedItem && (
                 <p className="text-[10px] text-green-400 uppercase tracking-[0.2em]">
                   ✓ เพิ่มสินค้าแล้ว: <span className="text-white">{lastAddedItem}</span>
                 </p>
