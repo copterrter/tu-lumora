@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -24,6 +24,9 @@ export default function CheckoutPage() {
   const [submitAttempted, setSubmitAttempted] = useState(false);
 
   const [timeLeft, setTimeLeft] = useState(600);
+
+  const paymentSectionRef = useRef<HTMLDivElement | null>(null);
+  const mobilePayButtonRef = useRef<HTMLButtonElement | null>(null);
 
   // Session countdown
   useEffect(() => {
@@ -71,6 +74,9 @@ export default function CheckoutPage() {
     if (submitAttempted) {
       setFormErrors(prev => ({ ...prev, slipFile: "" }));
     }
+
+    // หลังอัปโหลดสลิปแล้ว พาลูกค้าไปยังส่วนสรุปยอด/ปุ่มจ่ายเงิน
+    paymentSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   // Validation logic
@@ -109,10 +115,36 @@ export default function CheckoutPage() {
   };
 
   const handleFieldChange = (field: string, value: string) => {
+    // พิเศษสำหรับช่องที่อยู่: ถ้ามีเลข 5 หลักท้าย (รหัสไปรษณีย์) ให้ดึงออกไปใส่ zipCode อัตโนมัติ
+    if (field === "address") {
+      const match = value.match(/(\d{5})(?!.*\d{5})/);
+      if (match) {
+        const postcode = match[1];
+        const cleanedAddress = value.replace(match[1], "").replace(/\s*,?\s*$/, "");
+        setFormData(prev => ({
+          ...prev,
+          address: cleanedAddress,
+          zipCode: postcode,
+        }));
+        if (submitAttempted) {
+          setFormErrors(prev => ({
+            ...prev,
+            address: "",
+            zipCode: "",
+          }));
+        }
+        return;
+      }
+    }
+
     setFormData(prev => ({ ...prev, [field]: value }));
     if (submitAttempted && formErrors[field]) {
       setFormErrors(prev => ({ ...prev, [field]: "" }));
     }
+  };
+
+  const scrollToPaymentSection = () => {
+    paymentSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   // Build the combined socialContact string for the order
@@ -376,7 +408,10 @@ export default function CheckoutPage() {
             </div>
 
             <div className="pt-10 border-t border-white/10 space-y-6">
-              <div className="bg-[#111] p-4 sm:p-8 flex flex-col items-center gap-6 border border-white/5 relative overflow-hidden">
+              <div
+                ref={paymentSectionRef}
+                className="bg-[#111] p-4 sm:p-8 flex flex-col items-center gap-6 border border-white/5 relative overflow-hidden"
+              >
                 <div className="text-center space-y-2 z-10 w-full">
                   <p className="text-gray-400 text-[10px] uppercase tracking-[0.4em]">Transfer Amount</p>
                   <p className="text-4xl sm:text-5xl font-black italic text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">฿{orderData.total}</p>
@@ -547,6 +582,17 @@ export default function CheckoutPage() {
             </button>
           </div>
         </div>
+      </div>
+
+      {/* Mobile helper: นำทางไปส่วนชำระเงิน */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 sm:hidden bg-gradient-to-t from-black via-black/90 to-transparent px-4 pt-3 pb-6">
+        <button
+          ref={mobilePayButtonRef}
+          onClick={scrollToPaymentSection}
+          className="w-full bg-white text-black border border-transparent hover:bg-gray-200 py-4 font-black uppercase tracking-[0.35em] text-[11px] transition-all active:scale-[0.98] shadow-[0_10px_30px_rgba(255,255,255,0.25)]"
+        >
+          เลื่อนไปสรุปยอด & จ่ายเงิน
+        </button>
       </div>
     </main>
   );
