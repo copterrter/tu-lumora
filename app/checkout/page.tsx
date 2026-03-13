@@ -26,7 +26,6 @@ export default function CheckoutPage() {
   const [timeLeft, setTimeLeft] = useState(600);
 
   const paymentSectionRef = useRef<HTMLDivElement | null>(null);
-  const mobilePayButtonRef = useRef<HTMLButtonElement | null>(null);
 
   // Session countdown
   useEffect(() => {
@@ -141,10 +140,6 @@ export default function CheckoutPage() {
     if (submitAttempted && formErrors[field]) {
       setFormErrors(prev => ({ ...prev, [field]: "" }));
     }
-  };
-
-  const scrollToPaymentSection = () => {
-    paymentSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   // Build the combined socialContact string for the order
@@ -584,16 +579,6 @@ export default function CheckoutPage() {
         </div>
       </div>
 
-      {/* Mobile helper: นำทางไปส่วนชำระเงิน */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 sm:hidden bg-gradient-to-t from-black via-black/90 to-transparent px-4 pt-3 pb-6">
-        <button
-          ref={mobilePayButtonRef}
-          onClick={scrollToPaymentSection}
-          className="w-full bg-white text-black border border-transparent hover:bg-gray-200 py-4 font-black uppercase tracking-[0.35em] text-[11px] transition-all active:scale-[0.98] shadow-[0_10px_30px_rgba(255,255,255,0.25)]"
-        >
-          เลื่อนไปสรุปยอด & จ่ายเงิน
-        </button>
-      </div>
     </main>
   );
 }
