@@ -1,6 +1,4 @@
-// stress.js
-const fs = require('fs');
-const path = require('path');
+// stress.js - run with: node __tests__/stress.js
 
 // Simulate 50 concurrent checkouts hitting the API
 const NUM_REQUESTS = 50;
@@ -32,7 +30,7 @@ async function runTest() {
     };
 
     // Prepare requests
-    const requests = Array.from({ length: NUM_REQUESTS }).map(async (_, i) => {
+    const requests = Array.from({ length: NUM_REQUESTS }).map(async () => {
       const form = new FormData();
       form.append("file", dummyBlob, "test-slip.jpg");
       form.append("orderData", JSON.stringify(orderData));

@@ -1,11 +1,10 @@
 "use client";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 
 export default function ThankYouPage() {
   const [isManual, setIsManual] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -23,7 +22,6 @@ export default function ThankYouPage() {
     if (file) {
       const reader = new FileReader();
       reader.onload = (event) => {
-        setSelectedImage(event.target?.result as string);
         generateBrandedImage(event.target?.result as string);
       };
       reader.readAsDataURL(file);

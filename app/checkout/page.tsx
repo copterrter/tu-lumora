@@ -3,9 +3,11 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
+type OrderData = { items: { quantity: number; style?: string; size?: string }[]; total: number };
+
 export default function CheckoutPage() {
   const router = useRouter();
-  const [orderData, setOrderData] = useState<any>(null);
+  const [orderData, setOrderData] = useState<OrderData | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [pdpaChecked, setPdpaChecked] = useState(false);
   const [noRefundChecked, setNoRefundChecked] = useState(false);
@@ -149,7 +151,7 @@ export default function CheckoutPage() {
     return `IG: ${formData.igContact} | LINE: ${formData.lineContact}`;
   };
 
-  const verifySlipWithRDCW = async (file: File, orderData: any, formData: any) => {
+  const verifySlipWithRDCW = async (file: File, orderData: OrderData, formData: Record<string, string | undefined>) => {
     const body = new FormData();
     body.append("file", file);
     body.append("orderData", JSON.stringify(orderData));
@@ -184,8 +186,8 @@ export default function CheckoutPage() {
       localStorage.removeItem('lumora_cart');
       const shouldGoManualThankyou = !!slipResult.manualFallback;
       router.push(shouldGoManualThankyou ? "/thankyou?manual=1" : "/thankyou");
-    } catch (err: any) {
-      alert("แจ้งเตือน: " + (err.message || "เกิดข้อผิดพลาด"));
+    } catch (err: unknown) {
+      alert("แจ้งเตือน: " + (err instanceof Error ? err.message : "เกิดข้อผิดพลาด"));
     } finally {
       setIsSubmitting(false);
     }
@@ -193,9 +195,8 @@ export default function CheckoutPage() {
 
   if (!orderData) return null;
 
-  const originalTotal = orderData.items.reduce((sum: number, item: any) => sum + (item.quantity * 329), 0);
+  const originalTotal = orderData.items.reduce((sum: number, item: { quantity: number }) => sum + (item.quantity * 329), 0);
   const discount = originalTotal - orderData.total;
-  const canSubmit = pdpaChecked && noRefundChecked && !isSubmitting;
 
   const inputClass = (field: string) =>
     `bg-transparent border p-4 text-xs tracking-widest focus:outline-none w-full transition-colors ${
@@ -486,7 +487,7 @@ export default function CheckoutPage() {
             </div>
 
             <div className="space-y-5">
-              {orderData.items.map((item: any, idx: number) => (
+              {orderData.items.map((item: OrderData["items"][number], idx: number) => (
                 <div key={idx} className="flex justify-between items-start">
                   <div>
                     <p className="font-black italic text-base uppercase leading-tight">[PRE-ORDER] TU LUMORA {item.style}</p>

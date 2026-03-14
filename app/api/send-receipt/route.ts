@@ -11,8 +11,8 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(result);
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Email route error:', err);
-    return NextResponse.json({ success: false, message: err.message }, { status: 500 });
+    return NextResponse.json({ success: false, message: err instanceof Error ? err.message : "Internal error" }, { status: 500 });
   }
 }

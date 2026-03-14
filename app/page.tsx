@@ -33,7 +33,9 @@ export default function Home() {
 
   useEffect(() => {
     // Detect mobile on mount — used to skip ReactLenis and heavy video on mobile
-    setIsMobile(window.innerWidth < 768);
+    const isNarrow = typeof window !== "undefined" && window.innerWidth < 768;
+    const id = requestAnimationFrame(() => setIsMobile(isNarrow));
+    return () => cancelAnimationFrame(id);
   }, []);
 
   useEffect(() => {

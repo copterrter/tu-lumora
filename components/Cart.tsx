@@ -52,7 +52,7 @@ export default function Cart() {
         <div className="p-6 border-t border-gray-800 bg-black">
           {isPairPromo && (
             <div className="mb-4 p-3 border border-green-500/30 bg-green-500/10 text-green-500 text-sm uppercase tracking-wider text-center font-bold">
-              👯‍♀️ ได้รับโปรโมชั่น "ซื้อคู่" จำนวน {pairs} คู่!
+              👯‍♀️ ได้รับโปรโมชั่น &quot;ซื้อคู่&quot; จำนวน {pairs} คู่!
             </div>
           )}
           

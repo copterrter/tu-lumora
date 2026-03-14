@@ -1,10 +1,17 @@
 import { Resend } from 'resend';
 
+interface OrderItem {
+  style?: string;
+  size?: string;
+  quantity?: number;
+  title?: string;
+}
+
 interface SendEmailParams {
   email: string;
   firstName: string;
   lastName: string;
-  items: any[];
+  items: OrderItem[];
   total: number;
   discount: number;
 }
@@ -12,7 +19,6 @@ interface SendEmailParams {
 export async function sendOrderReceipt({
   email,
   firstName,
-  lastName,
   items,
   total,
   discount
@@ -24,10 +30,10 @@ export async function sendOrderReceipt({
 
   const BASE_URL = 'https://www.tulumora.com';
   
-  const itemsParam = (items || []).map((i: any) => `${i.style || 'regular'}|${i.size || 'M'}|${i.quantity || 1}`).join(',');
+  const itemsParam = (items || []).map((i: OrderItem) => `${i.style || 'regular'}|${i.size || 'M'}|${i.quantity || 1}`).join(',');
   const downloadUrl = `${BASE_URL}/api/receipt-download?name=${encodeURIComponent(firstName || 'Customer')}&total=${total}&items=${encodeURIComponent(itemsParam)}`;
 
-  const itemsHtml = (items || []).map((item: any) => {
+  const itemsHtml = (items || []).map((item: OrderItem) => {
     const title = item.style || item.title || 'T-SHIRT';
     const size = item.size || '-';
     const qty = item.quantity || 1;
@@ -209,9 +215,9 @@ export async function sendOrderReceipt({
     }
 
     return { success: true, id: data?.id };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Email service error:', err);
-    return { success: false, message: err.message };
+    return { success: false, message: err instanceof Error ? err.message : String(err) };
   }
 }
 
@@ -321,9 +327,9 @@ export async function sendManualApprovalEmail({
     }
 
     return { success: true, id: data?.id };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Email service error:', err);
-    return { success: false, message: err.message };
+    return { success: false, message: err instanceof Error ? err.message : String(err) };
   }
 }
 
@@ -462,8 +468,8 @@ export async function sendTrackingEmail({
     }
 
     return { success: true, id: data?.id };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Email service error:', err);
-    return { success: false, message: err.message };
+    return { success: false, message: err instanceof Error ? err.message : String(err) };
   }
 }

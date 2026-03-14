@@ -1,16 +1,31 @@
 "use client";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { supabase } from "@/lib/supabase";
-import { 
+import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell,
-  BarChart, Bar, Legend
+  BarChart, Bar, Cell
 } from "recharts";
+
+type OrderRow = {
+  id: string;
+  created_at: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  zipCode?: string;
+  product_name?: string;
+  total_amount: number;
+  status?: string;
+  tracking_number?: string;
+  slip_image_url?: string;
+};
 
 export default function AdminDashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
-  const [orders, setOrders] = useState<any[]>([]);
+  const [orders, setOrders] = useState<OrderRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploadingTracking, setUploadingTracking] = useState(false);
   const [approvingId, setApprovingId] = useState<string | null>(null);
@@ -89,8 +104,8 @@ export default function AdminDashboard() {
 
       alert(`✅ สำเร็จ!\nจับคู่และอัปเดตไป ${data.details.matchCount} ออเดอร์\nส่งอีเมลสำเร็จ ${data.details.emailCount} ฉบับ`);
       fetchOrders(); // Refresh table
-    } catch (err: any) {
-      alert(`❌ ผิดพลาด: ${err.message}`);
+    } catch (err: unknown) {
+      alert(`❌ ผิดพลาด: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setUploadingTracking(false);
       e.target.value = ""; // reset input
@@ -114,8 +129,8 @@ export default function AdminDashboard() {
       }
       alert("✅ อนุมัติสลิปและอัปเดตสถานะออเดอร์เรียบร้อยแล้ว");
       fetchOrders();
-    } catch (err: any) {
-      alert(`❌ ผิดพลาด: ${err.message}`);
+    } catch (err: unknown) {
+      alert(`❌ ผิดพลาด: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setApprovingId(null);
     }
@@ -147,22 +162,7 @@ export default function AdminDashboard() {
     return sorted;
   }, [orders]);
 
-  // 2. ข้อมูลสำหรับกราฟโดนัท (Top Products / Sizes)
-  const productData = useMemo(() => {
-    if (orders.length === 0) return [{ name: 'N/A', value: 1 }];
-    const map: Record<string, number> = {};
-    orders.forEach(o => {
-      let name = o.product_name || "Unknown";
-      // ตัดชื่อให้สั้นลงเพื่อความเป็นระเบียบ (เอา "TU LUMORA" ออก)
-      name = name.replace(/TU LUMORA /i, "").trim();
-      map[name] = (map[name] || 0) + 1;
-    });
-    return Object.entries(map).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
-  }, [orders]);
-
-  const PIE_COLORS = ['#38bdf8', '#22c55e', '#f97316', '#e11d48', '#a855f7'];
-
-  // 3. ข้อมูลสำหรับกราฟแท่ง (Order Status)
+  // 2. ข้อมูลสำหรับกราฟแท่ง (Order Status)
   const statusData = useMemo(() => {
     if (orders.length === 0) return [{ status: 'N/A', count: 0 }];
     const map: Record<string, number> = {};

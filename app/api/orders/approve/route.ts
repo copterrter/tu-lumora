@@ -42,15 +42,15 @@ export async function POST(request: Request) {
       await sendManualApprovalEmail({
         email: order.email,
         firstName: order.firstName || 'Customer',
-      }).catch((e: any) =>
+      }).catch((e: unknown) =>
         console.warn('Manual approval email failed (non-blocking):', e)
       );
     }
 
     return NextResponse.json({ success: true, message: 'Order approved and email sent (if possible)' });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Approve order error:', err);
-    return NextResponse.json({ success: false, message: err.message || 'Internal error' }, { status: 500 });
+    return NextResponse.json({ success: false, message: err instanceof Error ? err.message : 'Internal error' }, { status: 500 });
   }
 }
 

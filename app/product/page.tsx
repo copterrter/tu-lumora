@@ -47,11 +47,13 @@ function FAQItem({ q, a }: { q: string; a: string }) {
   );
 }
 
+type CartItem = { id: string; title: string; style: string; size: string; quantity: number };
+
 export default function ProductPage() {
   const router = useRouter();
   const [selectedStyle, setSelectedStyle] = useState("T-SHIRT");
   const [selectedSize, setSelectedSize] = useState("L");
-  const [cart, setCart] = useState<any[]>([]);
+  const [cart, setCart] = useState<CartItem[]>([]);
   const [showSizeChart, setShowSizeChart] = useState(false);
   const [zoomedImg, setZoomedImg] = useState<string | null>(null);
   const [promoTimeLeft, setPromoTimeLeft] = useState<{ d: number, h: number, m: number, s: number } | null>(null);
@@ -103,20 +105,24 @@ export default function ProductPage() {
   const currentSizes = selectedStyle === "T-SHIRT" ? REGULAR_SIZES : CROP_SIZES;
 
   useEffect(() => {
-    const savedCart = localStorage.getItem('lumora_cart');
-    if (savedCart) setCart(JSON.parse(savedCart));
+    const savedCart = typeof window !== "undefined" ? localStorage.getItem("lumora_cart") : null;
+    if (savedCart) {
+      const id = requestAnimationFrame(() => setCart(JSON.parse(savedCart)));
+      return () => cancelAnimationFrame(id);
+    }
   }, []);
 
   useEffect(() => {
     if (!currentSizes.includes(selectedSize)) {
-      setSelectedSize("L");
+      const id = requestAnimationFrame(() => setSelectedSize("L"));
+      return () => cancelAnimationFrame(id);
     }
   }, [selectedStyle, currentSizes, selectedSize]);
 
   const phase = getCurrentPhase();
   const isClosed = phase === "closed";
 
-  const calculateCartTotal = (currentCart: any[]) => {
+  const calculateCartTotal = (currentCart: { quantity: number }[]) => {
     const { total } = calculateTotalForCart(currentCart);
     return total;
   };
@@ -129,7 +135,7 @@ export default function ProductPage() {
       size: selectedSize,
       quantity: 1
     };
-    let newCart = [...cart];
+    const newCart = [...cart];
     const existingIndex = newCart.findIndex(item => item.id === newItem.id);
     if (existingIndex > -1) newCart[existingIndex].quantity += 1;
     else newCart.push(newItem);

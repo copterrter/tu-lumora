@@ -33,19 +33,20 @@ export async function POST(request: Request) {
     }
 
     // 2. Prepare common order fields
-    const summaryItems = orderData.items.map((item: any) => `${item.quantity}x ${item.style} (${item.size})`).join(", ");
+    type Item = { quantity?: number; style?: string; size?: string };
+    const summaryItems = orderData.items.map((item: Item) => `${item.quantity ?? 0}x ${item.style ?? ""} (${item.size ?? ""})`).join(", ");
     
     // Map frontend full names back to Supabase enum constraints (regular, crop)
-    const styleStr = orderData.items.map((i: any) => {
+    const styleStr = orderData.items.map((i: Item) => {
       const itemStyle = String(i.style || "").toUpperCase();
       if (itemStyle.includes("BABY") || itemStyle.includes("CROP")) return "crop";
       return "regular";
     }).join(", ");
     
-    const sizeStr = orderData.items.map((i: any) => i.size).join(", ");
+    const sizeStr = orderData.items.map((i: Item) => i.size).join(", ");
 
     const insertOrder = async (status: string, slipTransRef?: string | null, slipImageUrl?: string | null) => {
-      const baseOrder: any = {
+      const baseOrder: Record<string, unknown> = {
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
@@ -54,7 +55,7 @@ export async function POST(request: Request) {
         zipCode: formData.zipCode,
         social_contact: formData.socialContact, 
         product_name: summaryItems,
-        quantity: orderData.items.reduce((sum: number, item: any) => sum + item.quantity, 0),
+        quantity: orderData.items.reduce((sum: number, item: Item) => sum + (item.quantity ?? 0), 0),
         style: styleStr,
         size: sizeStr,
         total_amount: expectedTotal,
@@ -77,7 +78,9 @@ export async function POST(request: Request) {
           insertError.message.includes("slip_trans_ref") ||
           insertError.message.includes("slip_image_url")
         ) {
-          const { slip_trans_ref, slip_image_url, ...withoutExtras } = baseOrder;
+          const withoutExtras = Object.fromEntries(
+            Object.entries(baseOrder).filter(([k]) => k !== "slip_trans_ref" && k !== "slip_image_url")
+          );
           const { error: retryError } = await supabase.from('orders').insert([withoutExtras]);
           if (retryError) throw retryError;
           console.warn("WARNING: Inserted order without some optional columns (slip_trans_ref / slip_image_url). Please ensure these columns exist in Supabase if you need them.");
@@ -191,13 +194,13 @@ export async function POST(request: Request) {
         items: orderData.items,
         total: expectedTotal,
         discount: discount > 0 ? discount : 0,
-      }).catch((e: any) => console.warn('Email send failed (non-blocking):', e));
+      }).catch((e: unknown) => console.warn('Email send failed (non-blocking):', e));
     }
 
     return NextResponse.json({ success: true, message: "สั่งซื้อสำเร็จ" });
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Checkout Verification Error:", error);
-    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, message: error instanceof Error ? error.message : "Internal error" }, { status: 500 });
   }
 }

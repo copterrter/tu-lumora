@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     const sheet = workbook.Sheets[sheetName];
     
     // Parse to JSON (array of arrays to handle dynamic column names)
-    const rawData: any[][] = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
+    const rawData = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" }) as (string | number)[][];
     if (rawData.length < 2) {
       return NextResponse.json({ error: "Excel file is empty or missing headers" }, { status: 400 });
     }
@@ -48,7 +48,7 @@ export async function POST(request: Request) {
     let trackIdx = -1;
 
     for (let i = 0; i < Math.min(10, rawData.length); i++) {
-      const row = rawData[i].map((h: any) => String(h).toLowerCase().trim());
+      const row = rawData[i].map((h: string | number) => String(h).toLowerCase().trim());
       phoneIdx = row.findIndex(h => h.includes("โทร") || h.includes("phone") || h.includes("tel"));
       nameIdx = row.findIndex(h => h.includes("ชื่อ") || h.includes("name") || h.includes("ผู้รับ"));
       trackIdx = row.findIndex(h => h.includes("track") || h.includes("เลข") || h.includes("พัสดุ"));
@@ -150,8 +150,8 @@ export async function POST(request: Request) {
       details: { totalRows: updates.length, matchCount, emailCount, errors }
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Upload tracking error:", error);
-    return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Internal Server Error" }, { status: 500 });
   }
 }
