@@ -68,7 +68,7 @@ export async function POST(request: Request) {
     for (let i = headerRowIdx + 1; i < rawData.length; i++) {
       const row = rawData[i];
       const phone = phoneIdx !== -1 ? cleanPhone(row[phoneIdx]) : "";
-      const name = nameIdx !== -1 ? cleanName(row[nameIdx]) : "";
+      const name = nameIdx !== -1 ? cleanName(String(row[nameIdx] ?? "")) : "";
       const track = trackIdx !== -1 ? String(row[trackIdx]).trim() : "";
 
       if (track && (phone || name)) {

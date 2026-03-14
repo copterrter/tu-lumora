@@ -178,10 +178,14 @@ export default function CheckoutPage() {
       }));
       return;
     }
+    if (!orderData || !slipFile) {
+      alert("ข้อมูลออเดอร์หรือสลิปไม่ครบ กรุณากลับไป chọnสินค้าและอัปโหลดสลิป");
+      return;
+    }
     setIsSubmitting(true);
     try {
       const enrichedFormData = { ...formData, socialContact: buildSocialContact() };
-      const slipResult = await verifySlipWithRDCW(slipFile!, orderData, enrichedFormData);
+      const slipResult = await verifySlipWithRDCW(slipFile, orderData, enrichedFormData);
       if (!slipResult.success) throw new Error(slipResult.message || "การสั่งซื้อไม่สำเร็จ โปรดลองอีกครั้ง");
       localStorage.removeItem('lumora_cart');
       const shouldGoManualThankyou = !!slipResult.manualFallback;
