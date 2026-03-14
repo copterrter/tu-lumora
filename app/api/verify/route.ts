@@ -32,6 +32,28 @@ export async function POST(request: Request) {
       );
     }
 
+    // 1.1 ไม่ให้ส่งออเดอร์ซ้ำ — ถ้ามีออเดอร์รอตรวจของเบอร์/อีเมลนี้อยู่แล้ว (ภายใน 20 นาที) ให้แจ้งรอ
+    const norm = (s: string) => String(s || "").replace(/\D/g, "");
+    const phoneNorm = norm(formData.phone);
+    const emailTrim = String(formData.email || "").trim();
+    const since = new Date(Date.now() - 20 * 60 * 1000).toISOString();
+    const { data: recentPending } = await supabase
+      .from("orders")
+      .select("id, phone, email")
+      .eq("status", "pending_manual_verify")
+      .gte("created_at", since);
+    const hasPending = (recentPending || []).some((o: { phone?: string; email?: string }) => {
+      if (phoneNorm && norm(o.phone || "") === phoneNorm) return true;
+      if (emailTrim && (o.email || "").trim().toLowerCase() === emailTrim.toLowerCase()) return true;
+      return false;
+    });
+    if (hasPending) {
+      return NextResponse.json(
+        { success: false, message: "คุณมีออเดอร์ที่รอตรวจสลิปอยู่แล้ว กรุณารอแอดมินตรวจก่อน หรือติดต่อแอดมินถ้าต้องการยกเลิกออเดอร์เดิม" },
+        { status: 400 }
+      );
+    }
+
     // 2. Prepare common order fields
     type Item = { quantity?: number; style?: string; size?: string };
     const summaryItems = orderData.items.map((item: Item) => `${item.quantity ?? 0}x ${item.style ?? ""} (${item.size ?? ""})`).join(", ");

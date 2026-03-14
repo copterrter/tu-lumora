@@ -30,6 +30,7 @@ export default function AdminDashboard() {
   const [uploadingTracking, setUploadingTracking] = useState(false);
   const [approvingId, setApprovingId] = useState<string | null>(null);
   const [updatingAmountId, setUpdatingAmountId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   // 🔒 รหัสผ่านเข้าหลังบ้าน (เปลี่ยนตรงนี้ได้ตามใจชอบ)
   const ADMIN_PIN = "LUMORA2026"; 
@@ -141,6 +142,31 @@ export default function AdminDashboard() {
       alert("❌ " + (err instanceof Error ? err.message : String(err)));
     } finally {
       setUpdatingAmountId(null);
+    }
+  };
+
+  const handleDeleteOrder = async (order: OrderRow) => {
+    const devPin = window.prompt("รหัส Dev (ลบออเดอร์):");
+    if (devPin === null) return;
+    if (devPin.trim() !== "dev101") {
+      alert("รหัส Dev ไม่ถูกต้อง");
+      return;
+    }
+    if (!window.confirm(`ยืนยันลบออเดอร์นี้?\n${order.firstName} ${order.lastName} — ฿${order.total_amount}`)) return;
+    setDeletingId(order.id);
+    try {
+      const res = await fetch("/api/orders/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: order.id, devPassword: devPin.trim() }),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message || "ลบไม่สำเร็จ");
+      fetchOrders();
+    } catch (err: unknown) {
+      alert("❌ " + (err instanceof Error ? err.message : String(err)));
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -577,6 +603,14 @@ export default function AdminDashboard() {
                             </button>
                           </div>
                         )}
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteOrder(order)}
+                          disabled={deletingId === order.id}
+                          className="mt-1 text-[9px] uppercase tracking-wider text-gray-500 hover:text-red-400 border border-white/10 hover:border-red-400/50 px-2 py-0.5 rounded transition-all disabled:opacity-50"
+                        >
+                          {deletingId === order.id ? "..." : "ลบออเดอร์"}
+                        </button>
                       </div>
                     </td>
                   </tr>
