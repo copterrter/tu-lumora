@@ -5,7 +5,7 @@ export const runtime = 'edge';
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const fullName = searchParams.get('name') || 'Customer';
-  const name = fullName.split(' ')[0]; // Use first name only
+  const name = fullName.split(' ')[0];
   const total = searchParams.get('total') || '0';
   const itemsRaw = searchParams.get('items') || '';
 

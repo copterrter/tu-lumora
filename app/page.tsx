@@ -29,15 +29,6 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showFloatingBtn, setShowFloatingBtn] = useState(false);
   const [comingSoon, setComingSoon] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    // Detect mobile on mount — used to skip ReactLenis and heavy video on mobile
-    const isNarrow = typeof window !== "undefined" && window.innerWidth < 768;
-    const id = requestAnimationFrame(() => setIsMobile(isNarrow));
-    return () => cancelAnimationFrame(id);
-  }, []);
-
   useEffect(() => {
     if (isLoading) {
       document.body.style.overflow = "hidden";

@@ -160,6 +160,11 @@ export default function ThankYouPage() {
             : "Your order has been received. Check your email for the receipt."
           }
         </p>
+        {!isManual && (
+          <p className="mt-3 text-gray-400 text-[10px] md:text-xs tracking-wide max-w-md mx-auto">
+            ใบเสร็จอยู่ในเมลที่คุณลงทะเบียนไว้ กรุณาเช็คทั้งกล่องขาเข้าและโฟลเดอร์สแปม (Spam)
+          </p>
+        )}
       </motion.div>
 
       <div className="max-w-2xl w-full flex flex-col items-center gap-12">
