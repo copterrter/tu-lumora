@@ -29,6 +29,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(false);
   const [uploadingTracking, setUploadingTracking] = useState(false);
   const [approvingId, setApprovingId] = useState<string | null>(null);
+  const [updatingAmountId, setUpdatingAmountId] = useState<string | null>(null);
 
   // 🔒 รหัสผ่านเข้าหลังบ้าน (เปลี่ยนตรงนี้ได้ตามใจชอบ)
   const ADMIN_PIN = "LUMORA2026"; 
@@ -109,6 +110,37 @@ export default function AdminDashboard() {
     } finally {
       setUploadingTracking(false);
       e.target.value = ""; // reset input
+    }
+  };
+
+  const handleEditAmount = async (order: OrderRow) => {
+    const devPin = window.prompt("รหัส Dev (แก้ยอด):");
+    if (devPin === null) return;
+    if (devPin.trim() !== "dev101") {
+      alert("รหัส Dev ไม่ถูกต้อง");
+      return;
+    }
+    const raw = window.prompt("แก้ยอด (บาท):", String(order.total_amount));
+    if (raw === null || raw.trim() === "") return;
+    const value = Number(raw.trim());
+    if (Number.isNaN(value) || value < 0) {
+      alert("กรุณาใส่ตัวเลขที่ถูกต้อง");
+      return;
+    }
+    setUpdatingAmountId(order.id);
+    try {
+      const res = await fetch("/api/orders/update-amount", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: order.id, total_amount: value, devPassword: devPin.trim() }),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message || "อัปเดตไม่สำเร็จ");
+      fetchOrders();
+    } catch (err: unknown) {
+      alert("❌ " + (err instanceof Error ? err.message : String(err)));
+    } finally {
+      setUpdatingAmountId(null);
     }
   };
 
@@ -490,7 +522,17 @@ export default function AdminDashboard() {
                     <td className="p-4 font-bold italic text-gray-100 max-w-xs whitespace-normal break-words">
                       {order.product_name}
                     </td>
-                    <td className="p-4 font-black text-emerald-200">฿{order.total_amount}</td>
+                    <td className="p-4">
+                      <span className="font-black text-emerald-200">฿{order.total_amount}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleEditAmount(order)}
+                        disabled={updatingAmountId === order.id}
+                        className="ml-2 text-[9px] uppercase tracking-wider text-gray-400 hover:text-amber-300 border border-white/10 hover:border-amber-400/50 px-2 py-0.5 rounded transition-all disabled:opacity-50"
+                      >
+                        {updatingAmountId === order.id ? "..." : "แก้ยอด"}
+                      </button>
+                    </td>
                     <td className="p-4">
                       <div className="flex flex-col gap-2 items-start">
                         <span
