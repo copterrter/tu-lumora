@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { getCurrentPhase } from "@/lib/pricing";
 
 type OrderData = { items: { quantity: number; style?: string; size?: string }[]; total: number };
 
@@ -24,6 +25,12 @@ export default function CheckoutPage() {
 
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [submitAttempted, setSubmitAttempted] = useState(false);
+
+  const [phase, setPhase] = useState<"flash1" | "normal" | "flash2" | "closed" | null>(null);
+  const [promoInput, setPromoInput] = useState("");
+  const [appliedPromo, setAppliedPromo] = useState<{ code: string; discountPercent: number } | null>(null);
+  const [promoError, setPromoError] = useState("");
+  const [isApplyingPromo, setIsApplyingPromo] = useState(false);
 
   const [timeLeft, setTimeLeft] = useState(600);
 
@@ -54,10 +61,49 @@ export default function CheckoutPage() {
     if (data) setOrderData(JSON.parse(data));
   }, []);
 
+  useEffect(() => {
+    setPhase(getCurrentPhase());
+  }, []);
+
+  const totalQty = orderData ? orderData.items.reduce((s, item) => s + item.quantity, 0) : 0;
+  useEffect(() => {
+    if (!orderData) return;
+    if (totalQty !== 1 || phase !== "normal") {
+      setAppliedPromo(null);
+      setPromoError("");
+    }
+  }, [orderData, totalQty, phase]);
+
   const copyToClipboard = () => {
     navigator.clipboard.writeText("0910792886");
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleApplyPromo = async () => {
+    const code = promoInput.trim().toUpperCase();
+    if (!code || !orderData) return;
+    setPromoError("");
+    setIsApplyingPromo(true);
+    try {
+      const res = await fetch("/api/booth/validate-promo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code, quantity: totalQty, items: orderData.items }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setAppliedPromo({ code: data.code ?? code, discountPercent: data.discountPercent });
+      } else {
+        setAppliedPromo(null);
+        setPromoError(data.message || "โค้ดไม่ถูกต้องหรือใช้ไปแล้ว");
+      }
+    } catch {
+      setAppliedPromo(null);
+      setPromoError("เกิดข้อผิดพลาด กรุณาลองใหม่");
+    } finally {
+      setIsApplyingPromo(false);
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -184,7 +230,7 @@ export default function CheckoutPage() {
     }
     setIsSubmitting(true);
     try {
-      const enrichedFormData = { ...formData, socialContact: buildSocialContact() };
+      const enrichedFormData = { ...formData, socialContact: buildSocialContact(), promoCode: appliedPromo?.code ?? "" };
       const slipResult = await verifySlipWithRDCW(slipFile, orderData, enrichedFormData);
       if (!slipResult.success) throw new Error(slipResult.message || "การสั่งซื้อไม่สำเร็จ โปรดลองอีกครั้ง");
       localStorage.removeItem('lumora_cart');
@@ -200,7 +246,10 @@ export default function CheckoutPage() {
   if (!orderData) return null;
 
   const originalTotal = orderData.items.reduce((sum: number, item: { quantity: number }) => sum + (item.quantity * 329), 0);
-  const discount = originalTotal - orderData.total;
+  const displayTotal = appliedPromo && totalQty === 1
+    ? 329 - Math.round(329 * appliedPromo.discountPercent / 100)
+    : orderData.total;
+  const discount = originalTotal - displayTotal;
 
   const inputClass = (field: string) =>
     `bg-transparent border p-4 text-xs tracking-widest focus:outline-none w-full transition-colors ${
@@ -414,7 +463,7 @@ export default function CheckoutPage() {
               >
                 <div className="text-center space-y-2 z-10 w-full">
                   <p className="text-gray-400 text-[10px] uppercase tracking-[0.4em]">Transfer Amount</p>
-                  <p className="text-4xl sm:text-5xl font-black italic text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">฿{orderData.total}</p>
+                  <p className="text-4xl sm:text-5xl font-black italic text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">฿{displayTotal}</p>
                   {discount > 0 && (
                     <p className="text-green-400 text-xs font-bold tracking-widest">You saved ฿{discount} with Squad Promo! 🎉</p>
                   )}
@@ -502,13 +551,39 @@ export default function CheckoutPage() {
               ))}
             </div>
 
+            {phase === "normal" && totalQty === 1 && (
+              <div className="pt-4 border-t border-white/10 space-y-2">
+                <label className="text-[10px] text-gray-500 uppercase font-black tracking-widest">โค้ดส่วนลดจากบูธ</label>
+                <div className="flex gap-2">
+                  <input
+                    value={promoInput}
+                    onChange={(e) => { setPromoInput(e.target.value.toUpperCase()); setPromoError(""); }}
+                    placeholder="LUMO10-XXXXX"
+                    className="flex-1 bg-transparent border border-white/20 p-3 text-xs tracking-widest focus:outline-none focus:border-white"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleApplyPromo}
+                    disabled={isApplyingPromo || !promoInput.trim()}
+                    className="px-6 py-3 bg-white text-black text-[10px] font-black uppercase tracking-widest hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    {isApplyingPromo ? "..." : "ใช้โค้ด"}
+                  </button>
+                </div>
+                {appliedPromo && (
+                  <p className="text-[10px] text-green-400 font-bold">ใช้โค้ดสำเร็จ ลด {appliedPromo.discountPercent}%</p>
+                )}
+                {promoError && <p className="text-[10px] text-red-400 font-bold">{promoError}</p>}
+              </div>
+            )}
+
             <div className="pt-6 border-t border-white/10 space-y-3 text-xs font-bold tracking-widest uppercase">
               <div className="flex justify-between text-gray-500">
                 <span>Subtotal</span><span>฿{originalTotal}</span>
               </div>
               {discount > 0 && (
                 <div className="flex justify-between text-green-400 bg-green-500/10 -mx-8 md:-mx-10 px-8 md:px-10 py-3 border-y border-green-500/10">
-                  <span>Squad Promo Saved 🎉</span>
+                  <span>{appliedPromo ? "ส่วนลดจากโค้ด" : "Squad Promo Saved 🎉"}</span>
                   <span className="italic font-black text-sm">-฿{discount}</span>
                 </div>
               )}
@@ -522,7 +597,7 @@ export default function CheckoutPage() {
             </div>
 
             <div className="flex justify-between font-black italic text-4xl tracking-tighter uppercase pt-4 border-t border-white/10">
-              <span className="opacity-20">Total</span><span>฿{orderData.total}</span>
+              <span className="opacity-20">Total</span><span>฿{displayTotal}</span>
             </div>
 
             {/* PDPA Checkbox 1 */}

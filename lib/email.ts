@@ -14,6 +14,8 @@ interface SendEmailParams {
   items: OrderItem[];
   total: number;
   discount: number;
+  /** ข้อความแถวส่วนลดในเมล (เช่น "Squad Promo" หรือ "ส่วนลดจากโค้ด") — ไม่ใส่ใช้ "Squad Promo" */
+  discountLabel?: string;
 }
 
 export async function sendOrderReceipt({
@@ -21,7 +23,8 @@ export async function sendOrderReceipt({
   firstName,
   items,
   total,
-  discount
+  discount,
+  discountLabel
 }: SendEmailParams) {
   if (!email) return { success: false, message: 'No email provided' };
   
@@ -57,9 +60,10 @@ export async function sendOrderReceipt({
     `;
   }).join('');
 
+  const discountRowLabel = discountLabel && discount > 0 ? discountLabel : (discount > 0 ? 'Squad Promo' : '');
   const discountHtml = discount > 0 ? `
     <tr>
-      <td colspan="3" style="padding:10px 0;font-size:9px;color:#4ade80;font-weight:900;letter-spacing:0.2em;text-transform:uppercase;">Squad Promo</td>
+      <td colspan="3" style="padding:10px 0;font-size:9px;color:#4ade80;font-weight:900;letter-spacing:0.2em;text-transform:uppercase;">${discountRowLabel}</td>
       <td style="padding:10px 0;text-align:right;font-weight:900;color:#4ade80;font-size:14px;">-&#3647;${discount}</td>
     </tr>` : '';
 

@@ -81,6 +81,7 @@ export async function POST(request: Request) {
         items,
         total,
         discount,
+        discountLabel: order.promo_code_used ? 'ส่วนลดจากโค้ด' : undefined,
       }).catch((e: unknown) =>
         console.warn('Receipt email failed (non-blocking):', e)
       );

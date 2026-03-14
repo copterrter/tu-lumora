@@ -1,0 +1,106 @@
+import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+import { getCurrentPhase } from '@/lib/pricing';
+import { createHash } from 'crypto';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+const RATE_LIMIT_SEC = 30;
+
+// ความน่าจะเป็น: 50% = 0.1%, 0% = 50%, ที่เหลือลดหลั่น 15% = 15%, 10% = 34.9%
+const PROBABILITY = [
+  { tier: 50 as const, p: 0.001 },
+  { tier: 15 as const, p: 0.15 },
+  { tier: 10 as const, p: 0.349 },
+  { tier: 0 as const, p: 0.5 },
+];
+
+function getClientIp(request: Request): string {
+  const xff = request.headers.get('x-forwarded-for');
+  if (xff) return xff.split(',')[0].trim();
+  const xri = request.headers.get('x-real-ip');
+  if (xri) return xri.trim();
+  return 'unknown';
+}
+
+function hashIp(ip: string): string {
+  return createHash('sha256').update(ip).digest('hex').substring(0, 32);
+}
+
+function pickTier(): 50 | 15 | 10 | 0 {
+  const r = Math.random();
+  let acc = 0;
+  for (const { tier, p } of PROBABILITY) {
+    acc += p;
+    if (r < acc) return tier;
+  }
+  return 0;
+}
+
+export async function POST(request: Request) {
+  try {
+    const phase = getCurrentPhase();
+    if (phase !== 'normal') {
+      return NextResponse.json(
+        { success: false, type: 'closed', message: 'กิจกรรมบูธเปิดเฉพาะช่วง Normal เท่านั้น' },
+        { status: 400 }
+      );
+    }
+
+    const ipHash = hashIp(getClientIp(request));
+    const since = new Date(Date.now() - RATE_LIMIT_SEC * 1000).toISOString();
+    const { data: lastSpin } = await supabase
+      .from('booth_spin_log')
+      .select('spun_at')
+      .eq('ip_hash', ipHash)
+      .gte('spun_at', since)
+      .order('spun_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (lastSpin?.spun_at) {
+      return NextResponse.json(
+        { success: false, message: 'กรุณารอสักครู่ก่อนสุ่มใหม่ (จำกัด 1 ครั้งต่อ 30 วินาที)' },
+        { status: 429 }
+      );
+    }
+
+    const tier = pickTier();
+
+    const logSpin = async () => {
+      await supabase.from('booth_spin_log').insert({ ip_hash: ipHash });
+    };
+
+    if (tier === 0) {
+      await logSpin();
+      return NextResponse.json({ success: true, type: '0', code: null, message: 'ลูโม่แอบกินส่วนลดของคุณไปแล้ว! 🐰' });
+    }
+
+    const { data: codeName, error: rpcError } = await supabase.rpc('claim_booth_promo_code', { p_tier: tier });
+
+    if (rpcError) {
+      console.error('Booth spin RPC error:', rpcError);
+      await logSpin();
+      return NextResponse.json({ success: false, type: '0', code: null, message: 'สร้างโค้ดไม่สำเร็จ ลองใหม่' }, { status: 500 });
+    }
+
+    if (codeName == null || codeName === '') {
+      await logSpin();
+      return NextResponse.json({ success: true, type: '0', code: null, message: 'โควต้าส่วนลด tier นี้หมดแล้ว ลองสุ่มใหม่ได้เลย' });
+    }
+
+    await logSpin();
+    return NextResponse.json({
+      success: true,
+      type: String(tier),
+      code: codeName,
+      discountPercent: tier,
+      message: `ยินดีด้วย! คุณได้ส่วนลด ${tier}%`,
+    });
+  } catch (err: unknown) {
+    console.error('Booth spin error:', err);
+    return NextResponse.json({ success: false, message: err instanceof Error ? err.message : 'Server error' }, { status: 500 });
+  }
+}

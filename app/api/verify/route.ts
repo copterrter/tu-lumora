@@ -24,12 +24,29 @@ export async function POST(request: Request) {
 
     // 1. Calculate expected total securely on the server (respect pricing phases)
     const { phase, total: expectedTotal, originalTotal } = calculateTotalForCart(orderData.items);
+    const totalQty = orderData.items.reduce((s: number, item: { quantity?: number }) => s + (item.quantity ?? 0), 0);
+    let finalTotal = expectedTotal;
+    let promoCodeUsed: string | null = null;
+    const promoCode = typeof formData.promoCode === "string" ? formData.promoCode.trim().toUpperCase() : "";
 
     if (phase === "closed") {
       return NextResponse.json(
         { success: false, message: "รอบพรีออเดอร์สิ้นสุดแล้ว" },
         { status: 400 }
       );
+    }
+
+    if (phase === "normal" && totalQty === 1 && promoCode) {
+      const { data: promo } = await supabase
+        .from("promo_codes")
+        .select("discount_percent")
+        .eq("code_name", promoCode)
+        .eq("is_used", false)
+        .single();
+      if (promo) {
+        finalTotal = 329 - Math.round(329 * (promo.discount_percent / 100));
+        promoCodeUsed = promoCode;
+      }
     }
 
     // 1.1 ไม่ให้ส่งออเดอร์ซ้ำ — ถ้ามีออเดอร์รอตรวจของเบอร์/อีเมลนี้อยู่แล้ว (ภายใน 20 นาที) ให้แจ้งรอ
@@ -80,9 +97,10 @@ export async function POST(request: Request) {
         quantity: orderData.items.reduce((sum: number, item: Item) => sum + (item.quantity ?? 0), 0),
         style: styleStr,
         size: sizeStr,
-        total_amount: expectedTotal,
+        total_amount: finalTotal,
         status
       };
+      if (promoCodeUsed) baseOrder.promo_code_used = promoCodeUsed;
 
       if (slipTransRef) {
         baseOrder.slip_trans_ref = slipTransRef;
@@ -171,14 +189,14 @@ export async function POST(request: Request) {
 
     // 5. Validate Amount
     const slipAmount = slipResult.data.amount;
-    if (Number(slipAmount) !== Number(expectedTotal)) {
+    if (Number(slipAmount) !== Number(finalTotal)) {
       // Fallback: ยอดไม่ตรง แต่ยังบันทึกให้ทีมงานตรวจมือ (ยังไม่ส่งอีเมลยืนยันจนกว่าจะอนุมัติจากหลังบ้าน)
       await insertOrder('pending_manual_verify', undefined, slipImageUrl);
 
       return NextResponse.json({ 
         success: true,
         manualFallback: true,
-        message: `ยอดเงินในสลิป ฿${slipAmount} ไม่ตรงกับยอดที่คำนวณ (฿${expectedTotal}) ระบบจะรอตรวจสอบด้วยมือ` 
+        message: `ยอดเงินในสลิป ฿${slipAmount} ไม่ตรงกับยอดที่คำนวณ (฿${finalTotal}) ระบบจะรอตรวจสอบด้วยมือ` 
       });
     }
     
@@ -204,18 +222,21 @@ export async function POST(request: Request) {
     // 7. Insert Order Securely
     await insertOrder('paid_and_verified', transRef, slipImageUrl);
 
-    // 6. Send Email Receipt
+    if (promoCodeUsed) {
+      await supabase.from("promo_codes").update({ is_used: true }).eq("code_name", promoCodeUsed);
+    }
+
+    // 8. Send Email Receipt
     if (formData.email) {
-      const discount = originalTotal - expectedTotal;
-      
-      // Call service directly instead of fetch to avoid environment variable issues and ensure delivery
+      const discount = originalTotal - finalTotal;
       await sendOrderReceipt({
         email: formData.email,
         firstName: formData.firstName,
         lastName: formData.lastName,
         items: orderData.items,
-        total: expectedTotal,
+        total: finalTotal,
         discount: discount > 0 ? discount : 0,
+        discountLabel: promoCodeUsed ? "ส่วนลดจากโค้ด" : undefined,
       }).catch((e: unknown) => console.warn('Email send failed (non-blocking):', e));
     }
 
