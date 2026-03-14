@@ -6,7 +6,7 @@ function makeBangkokInstant(iso: string) {
 }
 
 const PHASE_BOUNDARIES = {
-  flash1End: makeBangkokInstant("2026-03-14T23:59:59"),
+  flash1End: makeBangkokInstant("2026-03-14T23:59:59"), // Flash1 จบ 14 มี.ค. — Normal 15–18 มี.ค.
   normalEnd: makeBangkokInstant("2026-03-18T23:59:59"),
   flash2End: makeBangkokInstant("2026-03-20T23:59:59"),
 };

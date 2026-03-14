@@ -9,7 +9,9 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 const RATE_LIMIT_SEC = 30;
 
-// ความน่าจะเป็น: 50% = 0.1%, 0% = 50%, ที่เหลือลดหลั่น 15% = 15%, 10% = 34.9%
+const QUOTA: Record<number, number> = { 50: 2, 15: 20, 10: 50 };
+
+// ความน่าจะเป็นเดิม: 50% = 0.1%, 0% = 50%, 15% = 15%, 10% = 34.9%
 const PROBABILITY = [
   { tier: 50 as const, p: 0.001 },
   { tier: 15 as const, p: 0.15 },
@@ -29,14 +31,18 @@ function hashIp(ip: string): string {
   return createHash('sha256').update(ip).digest('hex').substring(0, 32);
 }
 
-function pickTier(): 50 | 15 | 10 | 0 {
-  const r = Math.random();
+/** สุ่ม tier จากรายการที่โคว้ายังไม่เต็ม (รวม 0%) */
+function pickTierFrom(available: { tier: 50 | 15 | 10 | 0; p: number }[]): 50 | 15 | 10 | 0 {
+  if (available.length === 0) return 0;
+  const sum = available.reduce((s, x) => s + x.p, 0);
+  if (sum <= 0) return 0;
+  const r = Math.random() * sum;
   let acc = 0;
-  for (const { tier, p } of PROBABILITY) {
+  for (const { tier, p } of available) {
     acc += p;
     if (r < acc) return tier;
   }
-  return 0;
+  return available[available.length - 1].tier;
 }
 
 export async function POST(request: Request) {
@@ -67,7 +73,23 @@ export async function POST(request: Request) {
       );
     }
 
-    const tier = pickTier();
+    const usedCounts: Record<number, number> = { 50: 0, 15: 0, 10: 0 };
+    for (const tier of [50, 15, 10]) {
+      const { count } = await supabase
+        .from('promo_codes')
+        .select('id', { count: 'exact', head: true })
+        .eq('discount_percent', tier)
+        .eq('is_used', true);
+      usedCounts[tier] = count ?? 0;
+    }
+
+    const available = PROBABILITY.filter(({ tier }) => {
+      if (tier === 0) return true;
+      const quota = QUOTA[tier];
+      return quota != null && (usedCounts[tier] ?? 0) < quota;
+    });
+
+    const tier = pickTierFrom(available);
 
     const logSpin = async () => {
       await supabase.from('booth_spin_log').insert({ ip_hash: ipHash });
@@ -88,7 +110,7 @@ export async function POST(request: Request) {
 
     if (codeName == null || codeName === '') {
       await logSpin();
-      return NextResponse.json({ success: true, type: '0', code: null, message: 'โควต้าส่วนลด tier นี้หมดแล้ว ลองสุ่มใหม่ได้เลย' });
+      return NextResponse.json({ success: false, type: '0', code: null, message: 'สร้างโค้ดไม่สำเร็จ ลองสุ่มใหม่ได้เลย' }, { status: 500 });
     }
 
     await logSpin();

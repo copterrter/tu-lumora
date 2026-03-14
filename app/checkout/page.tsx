@@ -62,7 +62,8 @@ export default function CheckoutPage() {
   }, []);
 
   useEffect(() => {
-    setPhase(getCurrentPhase());
+    const t = setTimeout(() => setPhase(getCurrentPhase()), 0);
+    return () => clearTimeout(t);
   }, []);
 
   const totalQty = orderData ? orderData.items.reduce((s, item) => s + item.quantity, 0) : 0;
@@ -551,7 +552,7 @@ export default function CheckoutPage() {
               ))}
             </div>
 
-            {phase === "normal" && totalQty === 1 && (
+            {(phase === "normal" || phase === null) && totalQty === 1 && (
               <div className="pt-4 border-t border-white/10 space-y-2">
                 <label className="text-[10px] text-gray-500 uppercase font-black tracking-widest">โค้ดส่วนลดจากบูธ</label>
                 <div className="flex gap-2">
@@ -575,6 +576,9 @@ export default function CheckoutPage() {
                 )}
                 {promoError && <p className="text-[10px] text-red-400 font-bold">{promoError}</p>}
               </div>
+            )}
+            {phase === "normal" && totalQty > 1 && (
+              <p className="text-[10px] text-white/40 pt-2">โค้ดส่วนลดจากบูธใช้ได้เมื่อซื้อ 1 ตัวเท่านั้น</p>
             )}
 
             <div className="pt-6 border-t border-white/10 space-y-3 text-xs font-bold tracking-widest uppercase">

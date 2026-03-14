@@ -138,19 +138,36 @@ export default function BoothPage() {
   };
 
   return (
-    <main className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6 relative overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(120,0,0,0.15),transparent)] pointer-events-none" />
-      <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
+    <main className="min-h-screen bg-[#0a0a0a] text-white flex flex-col items-center justify-center p-6 relative overflow-hidden">
+      {/* พื้นหลังชั้น 1: gradient โทนแดง/ดำ */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_120%_80%_at_50%_-10%,rgba(180,0,20,0.25),transparent_50%)] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_120%,rgba(120,40,0,0.12),transparent)] pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/60 pointer-events-none" />
+      {/* ตาข่าย / grid เบาๆ */}
+      <div
+        className="absolute inset-0 opacity-[0.03] pointer-events-none"
+        style={{
+          backgroundImage: `linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)`,
+          backgroundSize: "24px 24px",
+        }}
+      />
+      {/* เส้นมุมแบบสตรีท */}
+      <div className="absolute top-6 left-6 w-16 h-16 border-l-2 border-t-2 border-white/20 pointer-events-none" />
+      <div className="absolute top-6 right-6 w-16 h-16 border-r-2 border-t-2 border-white/20 pointer-events-none" />
+      <div className="absolute bottom-6 left-6 w-16 h-16 border-l-2 border-b-2 border-white/20 pointer-events-none" />
+      <div className="absolute bottom-6 right-6 w-16 h-16 border-r-2 border-b-2 border-white/20 pointer-events-none" />
+
       <div className="relative z-10 w-full max-w-md flex flex-col items-center gap-6 md:gap-8">
         <Link href="/" className="text-[10px] tracking-[0.35em] text-white/40 uppercase hover:text-white transition-colors">
           [ BACK TO HOME ]
         </Link>
 
-        <div className="flex flex-col items-center gap-2">
-          <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden ring-2 ring-white/10 bg-black">
-            <Image src="/icon.png" alt="TU LUMORA" fill className="object-contain p-1" sizes="96px" priority />
+        <div className="flex flex-col items-center gap-3">
+          <div className="relative w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden ring-2 ring-white/20 bg-black shadow-[0_0_30px_rgba(255,255,255,0.08)]">
+            <Image src="/icon.png" alt="TU LUMORA" fill className="object-contain p-2" sizes="112px" priority />
           </div>
-          <span className="text-[9px] tracking-[0.4em] text-white/50 uppercase font-medium">TU LUMORA</span>
+          <span className="text-[9px] tracking-[0.5em] text-white/60 uppercase font-medium">TU LUMORA</span>
+          <span className="text-[8px] tracking-[0.6em] text-white/30 uppercase">BOOTH</span>
         </div>
 
         {phase === null ? (
@@ -168,16 +185,19 @@ export default function BoothPage() {
           </div>
         ) : (
           <>
-            <p className="text-[9px] tracking-[0.5em] text-white/40 uppercase">Booth — สุ่มรางวัล</p>
-            <h2 className="text-xl md:text-2xl font-black uppercase tracking-tighter text-white italic">ลูโม่รออยู่</h2>
+            <div className="text-center">
+              <p className="text-[8px] tracking-[0.6em] text-white/40 uppercase">สแกนที่บูธ</p>
+              <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tighter text-white italic mt-1">ลูโม่รออยู่</h2>
+              <p className="text-[9px] tracking-widest text-white/35 mt-1 uppercase">สุ่มรางวัลส่วนลด</p>
+            </div>
 
-            <div className="relative flex items-center justify-center py-2">
+            <div className="relative flex items-center justify-center py-4 px-4 rounded-2xl border border-white/10 bg-black/40 shadow-[inset_0_0_60px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.05)]">
               <div
-                className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-0.5 z-10 w-0 h-0 border-l-[16px] border-r-[16px] border-t-[24px] border-l-transparent border-r-transparent border-t-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
+                className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-0.5 z-10 w-0 h-0 border-l-[18px] border-r-[18px] border-t-[28px] border-l-transparent border-r-transparent border-t-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)]"
                 aria-hidden
               />
               <motion.div
-                className="w-[280px] h-[280px] md:w-[320px] md:h-[320px] rounded-full border-[3px] border-white/25 overflow-hidden shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_20px 50px_-20px_rgba(0,0,0,0.7)]"
+                className="w-[280px] h-[280px] md:w-[320px] md:h-[320px] rounded-full border-[3px] border-white/30 overflow-hidden shadow-[0_0_0_1px_rgba(255,255,255,0.1),0_25px 60px_-15px_rgba(0,0,0,0.8),0_0_40px_rgba(255,255,255,0.03)]"
                 style={{ rotate: rotation, willChange: "transform" }}
               >
                 <svg viewBox="0 0 100 100" className="w-full h-full" aria-hidden>
@@ -225,7 +245,7 @@ export default function BoothPage() {
             <button
               onClick={runSpin}
               disabled={loading || showShareUnlock}
-              className="w-full max-w-xs py-5 bg-white text-black border-0 font-black uppercase tracking-[0.3em] text-[10px] hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+              className="w-full max-w-xs py-5 bg-white text-black border-0 font-black uppercase tracking-[0.35em] text-[10px] hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-[0_0_20px_rgba(255,255,255,0.15),0_4px_0_0_rgba(0,0,0,0.2)] hover:shadow-[0_0_30px_rgba(255,255,255,0.25)] active:shadow-[0_0_10px_rgba(255,255,255,0.1)]"
             >
               {loading ? "กำลังสุ่ม..." : showShareUnlock ? `สุ่มใหม่ได้ใน ${countdown} วินาที` : "สุ่มรางวัล"}
             </button>
@@ -235,7 +255,7 @@ export default function BoothPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                className="w-full border border-white/15 bg-white/[0.04] p-6 text-center space-y-4"
+                className="w-full border border-white/20 border-t-white/30 bg-gradient-to-b from-white/[0.08] to-white/[0.02] p-6 text-center space-y-4 shadow-[0_20px 40px_-20px_rgba(0,0,0,0.5)]"
               >
                 <p className="text-base font-black uppercase tracking-wider text-emerald-400/95 italic">Congratulations!</p>
                 <p className="text-2xl font-mono font-bold tracking-[0.2em] text-white">{result.code}</p>
@@ -264,7 +284,7 @@ export default function BoothPage() {
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="w-full border border-amber-500/25 bg-amber-950/15 p-6 text-center space-y-4"
+                className="w-full border border-amber-500/30 bg-gradient-to-b from-amber-950/25 to-amber-950/10 p-6 text-center space-y-4 shadow-[0_20px 40px_-20px_rgba(0,0,0,0.4)]"
               >
                 <p className="text-xl font-black text-amber-200/95 uppercase italic">ลูโม่แอบกินส่วนลดของคุณไปแล้ว! 🐰</p>
                 <p className="text-[10px] text-white/70 tracking-widest">แชร์ IG Story เพื่อปลดล็อกสิทธิ์สุ่มใหม่ (หรือรอ {countdown} วินาที)</p>
@@ -278,20 +298,21 @@ export default function BoothPage() {
               <p className="text-[10px] text-red-300/90 text-center tracking-widest">{result.message}</p>
             )}
 
-            <div className="flex flex-col sm:flex-row gap-3 w-full max-w-xs pt-2">
+            <div className="flex flex-col sm:flex-row gap-3 w-full max-w-xs pt-4">
               <Link
                 href="/product"
-                className="flex-1 text-center py-4 bg-white text-black font-black uppercase tracking-[0.3em] text-[10px] hover:bg-gray-100 transition-colors"
+                className="flex-1 text-center py-4 bg-white text-black font-black uppercase tracking-[0.3em] text-[10px] hover:bg-gray-100 transition-all border border-transparent hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]"
               >
                 🛒 Shop Now
               </Link>
               <Link
                 href="/"
-                className="flex-1 text-center py-4 border border-white/20 font-black uppercase tracking-[0.3em] text-[10px] hover:bg-white hover:text-black transition-colors"
+                className="flex-1 text-center py-4 border border-white/25 font-black uppercase tracking-[0.3em] text-[10px] hover:bg-white hover:text-black transition-all hover:shadow-[0_0_15px_rgba(255,255,255,0.1)]"
               >
                 🏠 Back to Home
               </Link>
             </div>
+            <p className="text-[8px] text-white/30 tracking-[0.4em] uppercase pt-2">#TULUMORA BOOTH</p>
           </>
         )}
       </div>

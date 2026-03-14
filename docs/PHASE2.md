@@ -55,7 +55,8 @@
   Supabase Dashboard → SQL Editor → รันตามลำดับ:  
   1) `supabase/migrations/20260315000000_promo_codes.sql`  
   2) `supabase/migrations/20260315000001_orders_promo_code.sql`  
-  3) `supabase/migrations/20260316000000_booth_atomic_quota_and_ratelimit.sql` (RPC โควต้า + ตาราง rate limit)
+  3) `supabase/migrations/20260316000000_booth_atomic_quota_and_ratelimit.sql` (RPC + rate limit)  
+  4) `supabase/migrations/20260317000000_booth_quota_by_usage.sql` (โควต้านับจากการถูกใช้)
 
 ### 2. หน้า Booth (`/booth`)
 - หน้า Mobile-first สำหรับสแกน QR ที่บูธ
