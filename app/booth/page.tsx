@@ -8,11 +8,12 @@ import { getCurrentPhase } from "@/lib/pricing";
 
 type SpinResult = { success: boolean; type: string; code: string | null; discountPercent?: number; message?: string };
 
+// สีวงล้อให้เข้าธีมแดง/ดำ/อำพัน
 const SEGMENTS = [
-  { label: "0%", color: "rgba(245,158,11,0.92)", type: "0" },
-  { label: "10%", color: "rgba(34,197,94,0.92)", type: "10" },
-  { label: "15%", color: "rgba(16,185,129,0.92)", type: "15" },
-  { label: "50%", color: "rgba(234,179,8,0.95)", type: "50" },
+  { label: "0%", color: "rgba(28,28,28,0.98)", type: "0" },
+  { label: "10%", color: "rgba(100,28,28,0.95)", type: "10" },
+  { label: "15%", color: "rgba(150,75,25,0.92)", type: "15" },
+  { label: "50%", color: "rgba(180,50,35,0.95)", type: "50" },
 ] as const;
 
 // ลูกศรอยู่ด้านบน (top). Segment i อยู่ที่มุม start = (i*90)-90 ถึง start+90. ให้ segment นั้นอยู่ใต้ลูกศร = ต้องหมุนจนจุดกลาง segment อยู่ที่บน (-90°).
@@ -31,6 +32,8 @@ export default function BoothPage() {
   const [result, setResult] = useState<SpinResult | null>(null);
   const [showShareUnlock, setShowShareUnlock] = useState(false);
   const [countdown, setCountdown] = useState(0);
+  const [rateLimitSec, setRateLimitSec] = useState(0);
+  const [rateLimitKey, setRateLimitKey] = useState(0);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const rotation = useMotionValue(0);
   const spinController = useRef<ReturnType<typeof animate> | null>(null);
@@ -40,6 +43,15 @@ export default function BoothPage() {
     return () => clearTimeout(t);
   }, []);
 
+  useEffect(() => {
+    if (rateLimitSec <= 0 || rateLimitKey === 0) return;
+    const id = setInterval(() => {
+      setRateLimitSec((s) => (s <= 1 ? 0 : s - 1));
+    }, 1000);
+    return () => clearInterval(id);
+  // ต้องการรันเมื่อได้ 429 (rateLimitKey เปลี่ยน) เท่านั้น ไม่ใส่ rateLimitSec เพื่อไม่ให้ interval ถูกสร้างใหม่ทุกวินาที
+  }, [rateLimitKey]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const runSpin = useCallback(async () => {
     if (getCurrentPhase() !== "normal") {
       setResult({ success: false, type: "closed", code: null, message: "กิจกรรมบูธเปิดเฉพาะช่วง Normal เท่านั้น" });
@@ -47,29 +59,30 @@ export default function BoothPage() {
     }
     setLoading(true);
     setResult(null);
+    setRateLimitSec(0);
     if (spinController.current) spinController.current.stop();
     rotation.set(0);
-
-    const SPIN_UP_DURATION = 1.2;
-    const SPIN_UP_TURNS = 3;
-    spinController.current = animate(rotation, 360 * SPIN_UP_TURNS, {
-      duration: SPIN_UP_DURATION,
-      ease: "linear",
-    });
 
     try {
       const res = await fetch("/api/booth/spin", { method: "POST" });
       const data = await res.json();
 
-      const current = rotation.get();
+      if (res.status === 429) {
+        setLoading(false);
+        setResult(data);
+        const sec = typeof data.retryAfterSeconds === "number" ? Math.max(0, data.retryAfterSeconds) : 30;
+        setRateLimitSec(sec);
+        setRateLimitKey((k) => k + 1);
+        return;
+      }
+
       const fullTurns = 360 * 6;
       const segmentAngle = getSegmentAngle(String(data.type));
-      const target = current + fullTurns + segmentAngle;
+      const target = fullTurns + segmentAngle;
 
-      if (spinController.current) spinController.current.stop();
       spinController.current = animate(rotation, target, {
-        duration: 2.8,
-        ease: [0.17, 0.67, 0.24, 0.99],
+        duration: 3.2,
+        ease: [0.12, 0.6, 0.3, 1],
         onComplete: () => {
           setResult(data);
           setLoading(false);
@@ -138,7 +151,7 @@ export default function BoothPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#0a0a0a] text-white flex flex-col items-center justify-center p-6 relative overflow-hidden">
+    <main className="min-h-screen bg-[#0a0a0a] text-white flex flex-col items-center justify-start md:justify-center p-4 sm:p-6 relative overflow-x-hidden overflow-y-auto pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))] pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))]">
       {/* พื้นหลังชั้น 1: gradient โทนแดง/ดำ */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_120%_80%_at_50%_-10%,rgba(180,0,20,0.25),transparent_50%)] pointer-events-none" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_120%,rgba(120,40,0,0.12),transparent)] pointer-events-none" />
@@ -151,13 +164,13 @@ export default function BoothPage() {
           backgroundSize: "24px 24px",
         }}
       />
-      {/* เส้นมุมแบบสตรีท */}
-      <div className="absolute top-6 left-6 w-16 h-16 border-l-2 border-t-2 border-white/20 pointer-events-none" />
-      <div className="absolute top-6 right-6 w-16 h-16 border-r-2 border-t-2 border-white/20 pointer-events-none" />
-      <div className="absolute bottom-6 left-6 w-16 h-16 border-l-2 border-b-2 border-white/20 pointer-events-none" />
-      <div className="absolute bottom-6 right-6 w-16 h-16 border-r-2 border-b-2 border-white/20 pointer-events-none" />
+      {/* เส้นมุมแบบสตรีท — เล็กบนมือถือ */}
+      <div className="absolute top-4 left-4 sm:top-6 sm:left-6 w-12 h-12 sm:w-16 sm:h-16 border-l-2 border-t-2 border-white/20 pointer-events-none" />
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 w-12 h-12 sm:w-16 sm:h-16 border-r-2 border-t-2 border-white/20 pointer-events-none" />
+      <div className="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 w-12 h-12 sm:w-16 sm:h-16 border-l-2 border-b-2 border-white/20 pointer-events-none" />
+      <div className="absolute bottom-4 right-4 sm:bottom-6 sm:right-6 w-12 h-12 sm:w-16 sm:h-16 border-r-2 border-b-2 border-white/20 pointer-events-none" />
 
-      <div className="relative z-10 w-full max-w-md flex flex-col items-center gap-6 md:gap-8">
+      <div className="relative z-10 w-full max-w-md flex flex-col items-center gap-5 sm:gap-6 md:gap-8 py-4 md:py-0">
         <Link href="/" className="text-[10px] tracking-[0.35em] text-white/40 uppercase hover:text-white transition-colors">
           [ BACK TO HOME ]
         </Link>
@@ -191,13 +204,13 @@ export default function BoothPage() {
               <p className="text-[9px] tracking-widest text-white/35 mt-1 uppercase">สุ่มรางวัลส่วนลด</p>
             </div>
 
-            <div className="relative flex items-center justify-center py-4 px-4 rounded-2xl border border-white/10 bg-black/40 shadow-[inset_0_0_60px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.05)]">
+            <div className="relative flex items-center justify-center py-3 sm:py-4 px-3 sm:px-4 rounded-2xl border border-white/10 bg-black/40 shadow-[inset_0_0_60px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.05)]">
               <div
-                className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-0.5 z-10 w-0 h-0 border-l-[18px] border-r-[18px] border-t-[28px] border-l-transparent border-r-transparent border-t-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)]"
+                className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-0.5 z-10 w-0 h-0 border-l-[14px] border-r-[14px] border-t-[22px] sm:border-l-[18px] sm:border-r-[18px] sm:border-t-[28px] border-l-transparent border-r-transparent border-t-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)]"
                 aria-hidden
               />
               <motion.div
-                className="w-[280px] h-[280px] md:w-[320px] md:h-[320px] rounded-full border-[3px] border-white/30 overflow-hidden shadow-[0_0_0_1px_rgba(255,255,255,0.1),0_25px 60px_-15px_rgba(0,0,0,0.8),0_0_40px_rgba(255,255,255,0.03)]"
+                className="w-[min(280px,82vw)] h-[min(280px,82vw)] sm:w-[280px] sm:h-[280px] md:w-[320px] md:h-[320px] rounded-full border-[3px] border-white/30 overflow-hidden shadow-[0_0_0_1px_rgba(255,255,255,0.1),0_25px 60px_-15px_rgba(0,0,0,0.8),0_0_40px_rgba(255,255,255,0.03)]"
                 style={{ rotate: rotation, willChange: "transform" }}
               >
                 <svg viewBox="0 0 100 100" className="w-full h-full" aria-hidden>
@@ -225,7 +238,7 @@ export default function BoothPage() {
                           y={50 + 34 * Math.sin(rad(start + 45))}
                           textAnchor="middle"
                           dominantBaseline="middle"
-                          fill="rgba(0,0,0,0.9)"
+                          fill={i === 0 ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.9)"}
                           fontSize="9"
                           fontWeight="bold"
                         >
@@ -244,32 +257,41 @@ export default function BoothPage() {
 
             <button
               onClick={runSpin}
-              disabled={loading || showShareUnlock}
-              className="w-full max-w-xs py-5 bg-white text-black border-0 font-black uppercase tracking-[0.35em] text-[10px] hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-[0_0_20px_rgba(255,255,255,0.15),0_4px_0_0_rgba(0,0,0,0.2)] hover:shadow-[0_0_30px_rgba(255,255,255,0.25)] active:shadow-[0_0_10px_rgba(255,255,255,0.1)]"
+              disabled={loading || showShareUnlock || rateLimitSec > 0}
+              className="w-full max-w-xs py-3.5 sm:py-4 min-h-[44px] border-2 border-white bg-transparent text-white font-black uppercase tracking-[0.35em] sm:tracking-[0.4em] text-[10px] hover:bg-white hover:text-black disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/50 active:scale-[0.98]"
             >
-              {loading ? "กำลังสุ่ม..." : showShareUnlock ? `สุ่มใหม่ได้ใน ${countdown} วินาที` : "สุ่มรางวัล"}
+              {loading
+                ? "กำลังสุ่ม..."
+                : rateLimitSec > 0
+                  ? `รอ ${rateLimitSec} วินาที`
+                  : showShareUnlock
+                    ? `สุ่มใหม่ได้ใน ${countdown} วินาที`
+                    : "สุ่มรางวัล"}
             </button>
+            {rateLimitSec > 0 && (
+              <p className="text-[9px] text-white/50 tracking-widest uppercase">จำกัด 1 ครั้งต่อ 15 วินาที</p>
+            )}
 
             {result && result.type !== "0" && result.code && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                className="w-full border border-white/20 border-t-white/30 bg-gradient-to-b from-white/[0.08] to-white/[0.02] p-6 text-center space-y-4 shadow-[0_20px 40px_-20px_rgba(0,0,0,0.5)]"
+                className="w-full border border-white/20 border-t-white/30 bg-gradient-to-b from-white/[0.08] to-white/[0.02] p-4 sm:p-6 text-center space-y-4 shadow-[0_20px 40px_-20px_rgba(0,0,0,0.5)]"
               >
                 <p className="text-base font-black uppercase tracking-wider text-emerald-400/95 italic">Congratulations!</p>
-                <p className="text-2xl font-mono font-bold tracking-[0.2em] text-white">{result.code}</p>
+                <p className="text-xl sm:text-2xl font-mono font-bold tracking-[0.15em] sm:tracking-[0.2em] text-white break-all">{result.code}</p>
                 <p className="text-[10px] text-white/50 tracking-widest uppercase">ส่วนลด {result.discountPercent}% — ใช้ได้ 1 ตัวที่ Checkout</p>
-                <div className="flex gap-3 justify-center flex-wrap">
+                <div className="flex gap-2 sm:gap-3 justify-center flex-wrap">
                   <button
                     onClick={copyCode}
-                    className="px-6 py-3 bg-white text-black font-black uppercase tracking-wider text-[10px] hover:bg-gray-100 transition-colors"
+                    className="min-h-[44px] px-4 sm:px-6 py-3 bg-white text-black font-black uppercase tracking-wider text-[10px] hover:bg-gray-100 transition-colors"
                   >
                     Copy Code
                   </button>
                   <button
                     onClick={saveAsImage}
-                    className="px-6 py-3 border border-white/25 font-black uppercase tracking-wider text-[10px] hover:bg-white/5 transition-colors"
+                    className="min-h-[44px] px-4 sm:px-6 py-3 border border-white/25 font-black uppercase tracking-wider text-[10px] hover:bg-white/5 transition-colors"
                   >
                     Save to Camera Roll
                   </button>
@@ -284,9 +306,9 @@ export default function BoothPage() {
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="w-full border border-amber-500/30 bg-gradient-to-b from-amber-950/25 to-amber-950/10 p-6 text-center space-y-4 shadow-[0_20px 40px_-20px_rgba(0,0,0,0.4)]"
+                className="w-full border border-amber-500/30 bg-gradient-to-b from-amber-950/25 to-amber-950/10 p-4 sm:p-6 text-center space-y-4 shadow-[0_20px 40px_-20px_rgba(0,0,0,0.4)]"
               >
-                <p className="text-xl font-black text-amber-200/95 uppercase italic">ลูโม่แอบกินส่วนลดของคุณไปแล้ว! 🐰</p>
+                <p className="text-lg sm:text-xl font-black text-amber-200/95 uppercase italic">ลูโม่แอบกินส่วนลดของคุณไปแล้ว! 🐰</p>
                 <p className="text-[10px] text-white/70 tracking-widest">แชร์ IG Story เพื่อปลดล็อกสิทธิ์สุ่มใหม่ (หรือรอ {countdown} วินาที)</p>
               </motion.div>
             )}
@@ -298,18 +320,18 @@ export default function BoothPage() {
               <p className="text-[10px] text-red-300/90 text-center tracking-widest">{result.message}</p>
             )}
 
-            <div className="flex flex-col sm:flex-row gap-3 w-full max-w-xs pt-4">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full max-w-xs pt-4">
               <Link
                 href="/product"
-                className="flex-1 text-center py-4 bg-white text-black font-black uppercase tracking-[0.3em] text-[10px] hover:bg-gray-100 transition-all border border-transparent hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]"
+                className="flex-1 text-center min-h-[44px] flex items-center justify-center py-3 border border-white/30 font-black uppercase tracking-[0.3em] sm:tracking-[0.35em] text-[10px] text-white hover:bg-white hover:text-black transition-all"
               >
-                🛒 Shop Now
+                [ SHOP NOW ]
               </Link>
               <Link
                 href="/"
-                className="flex-1 text-center py-4 border border-white/25 font-black uppercase tracking-[0.3em] text-[10px] hover:bg-white hover:text-black transition-all hover:shadow-[0_0_15px_rgba(255,255,255,0.1)]"
+                className="flex-1 text-center min-h-[44px] flex items-center justify-center py-3 border border-white/30 font-black uppercase tracking-[0.3em] sm:tracking-[0.35em] text-[10px] text-white hover:bg-white hover:text-black transition-all"
               >
-                🏠 Back to Home
+                [ BACK TO HOME ]
               </Link>
             </div>
             <p className="text-[8px] text-white/30 tracking-[0.4em] uppercase pt-2">#TULUMORA BOOTH</p>

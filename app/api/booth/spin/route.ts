@@ -7,7 +7,7 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-const RATE_LIMIT_SEC = 30;
+const RATE_LIMIT_SEC = 15;
 
 const QUOTA: Record<number, number> = { 50: 2, 15: 20, 10: 50 };
 
@@ -67,8 +67,15 @@ export async function POST(request: Request) {
       .single();
 
     if (lastSpin?.spun_at) {
+      const spunAt = new Date(lastSpin.spun_at).getTime();
+      const retryAt = spunAt + RATE_LIMIT_SEC * 1000;
+      const retryAfterSeconds = Math.max(0, Math.ceil((retryAt - Date.now()) / 1000));
       return NextResponse.json(
-        { success: false, message: 'กรุณารอสักครู่ก่อนสุ่มใหม่ (จำกัด 1 ครั้งต่อ 30 วินาที)' },
+        {
+          success: false,
+          message: `กรุณารอสักครู่ก่อนสุ่มใหม่ (จำกัด 1 ครั้งต่อ ${RATE_LIMIT_SEC} วินาที)`,
+          retryAfterSeconds: Math.min(retryAfterSeconds, RATE_LIMIT_SEC),
+        },
         { status: 429 }
       );
     }
