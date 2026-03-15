@@ -99,11 +99,25 @@ export default function BoothPage() {
     idleController.current = null;
     if (spinController.current) spinController.current.stop();
 
+    const startRotation = rotation.get();
+    const spinStartTime = Date.now();
+    // ความเร็วเชิงมุม (deg/s) ให้รอบแรกและรอบสองเท่ากัน = รู้สึกเป็นรอบเดียว
+    const initialSpinDeg = 360 * 4;
+    const initialDuration = 2.2;
+    const angularVelocity = initialSpinDeg / initialDuration;
+
+    spinController.current = animate(rotation, startRotation + initialSpinDeg, {
+      duration: initialDuration,
+      ease: "linear",
+      onStop: () => {},
+    });
+
     try {
       const res = await fetch("/api/booth/spin", { method: "POST" });
       const data = await res.json();
 
       if (res.status === 429) {
+        spinController.current?.stop();
         setLoading(false);
         setResult(data);
         const sec = typeof data.retryAfterSeconds === "number" ? Math.max(0, data.retryAfterSeconds) : 30;
@@ -114,22 +128,27 @@ export default function BoothPage() {
 
       const fullTurns = 360 * 6;
       const segmentAngle = getSegmentAngle(String(data.type));
-      const target = fullTurns + 360 + segmentAngle;
+      const baseTarget = fullTurns + 360 + segmentAngle;
 
-      // ตั้งค่า rotation ก่อนเริ่มหมุนและเริ่มแอนิเมชันในเฟรมถัดไป เพื่อให้ idle หยุดและ DOM อัปเดตแล้ว
-      rotation.set(0);
-      requestAnimationFrame(() => {
-        spinController.current = animate(rotation, target, {
-          duration: 6,
-          ease: [0.05, 0.35, 0.2, 1],
-          onComplete: () => {
-            setResult(data);
-            setLoading(false);
-          },
-        });
+      spinController.current?.stop();
+      const current = rotation.get();
+      const elapsed = (Date.now() - spinStartTime) / 1000;
+      const remainingDuration = Math.max(1.5, 6 - elapsed);
+      // ระยะที่ต้องหมุนต่อด้วยความเร็วเดิม = รู้สึกเป็นรอบเดียวไม่สะดุด
+      const desiredDistance = angularVelocity * remainingDuration;
+      const m = Math.round((current + desiredDistance - baseTarget) / 360);
+      const finalTarget = baseTarget + 360 * m;
+
+      spinController.current = animate(rotation, finalTarget, {
+        duration: remainingDuration,
+        ease: "linear",
+        onComplete: () => {
+          setResult(data);
+          setLoading(false);
+        },
       });
     } catch {
-      if (spinController.current) spinController.current.stop();
+      spinController.current?.stop();
       setResult({ success: false, type: "error", code: null, message: "เชื่อมต่อไม่สำเร็จ ลองใหม่" });
       setLoading(false);
     }

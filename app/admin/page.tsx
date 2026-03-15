@@ -170,6 +170,33 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleResendReceipt = async (order: OrderRow) => {
+    const devPin = window.prompt("รหัส Dev (ส่งเมลใบเสร็จอีกครั้ง):");
+    if (devPin === null) return;
+    if (devPin.trim() !== "dev101") {
+      alert("รหัส Dev ไม่ถูกต้อง");
+      return;
+    }
+    if (!order.email) {
+      alert("ออเดอร์นี้ไม่มีอีเมลในระบบ");
+      return;
+    }
+    try {
+      const res = await fetch("/api/orders/resend-receipt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: order.id, devPassword: devPin.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || "ส่งเมลไม่สำเร็จ");
+      }
+      alert("✅ ส่งเมลใบเสร็จให้ลูกค้าอีกครั้งแล้ว");
+    } catch (err: unknown) {
+      alert("❌ " + (err instanceof Error ? err.message : String(err)));
+    }
+  };
+
   const handleApproveOrder = async (orderId: string) => {
     if (!confirm("ยืนยันการอนุมัติสลิปนี้และเปลี่ยนสถานะออเดอร์เป็นชำระเงินสำเร็จ?")) {
       return;
@@ -602,6 +629,15 @@ export default function AdminDashboard() {
                               {approvingId === order.id ? "Approving..." : "Mark as Paid"}
                             </button>
                           </div>
+                        )}
+                        {order.email && (
+                          <button
+                            type="button"
+                            onClick={() => handleResendReceipt(order)}
+                            className="mt-1 text-[9px] uppercase tracking-[0.2em] text-sky-300 hover:text-sky-100 border border-sky-500/40 hover:border-sky-300 px-2 py-0.5 rounded-full transition-all"
+                          >
+                            Resend receipt email
+                          </button>
                         )}
                         <button
                           type="button"
