@@ -1,4 +1,9 @@
 @import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap");
+
+:root {
+  --font-sarabun: "Sarabun", ui-sans-serif, sans-serif;
+}
 
 html {
   /* Removed global scroll-behavior: smooth; as it conflicts with ReactLenis on desktop and causes heavy lag */

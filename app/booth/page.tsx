@@ -196,11 +196,14 @@ export default function BoothPage() {
           [ BACK TO HOME ]
         </Link>
 
-        <div className="flex flex-col items-center gap-3">
+        <div className="flex flex-col items-center gap-3 font-[var(--font-sarabun)]">
           <div className="relative w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden ring-2 ring-white/20 bg-black shadow-[0_0_30px_rgba(255,255,255,0.08)]">
             <Image src="/icon.png" alt="LUMO888" fill className="object-contain p-2" sizes="112px" priority fetchPriority="high" />
           </div>
-          <span className="text-[9px] tracking-[0.5em] text-white/60 uppercase font-medium">LUMO888 สล็อตเว็บตรง ยูสใหม่แตกง่าย รับล้าน(หัว)ทุกวัน</span>
+          <div className="text-center">
+            <div className="text-2xl md:text-3xl font-bold tracking-wide text-white">LUMO888</div>
+            <div className="text-sm md:text-base text-white/80 mt-0.5 tracking-normal">สล็อตเว็บตรง ยูสใหม่แตกง่าย รับล้าน(หัว)ทุกวัน</div>
+          </div>
         </div>
 
         {phase === null ? (
@@ -218,10 +221,10 @@ export default function BoothPage() {
           </div>
         ) : (
           <>
-            <div className="text-center">
-              <p className="text-[8px] tracking-[0.6em] text-white/40 uppercase">สแกนที่บูธ</p>
-              <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tighter text-white italic mt-1">เรียนเชิญ ผู้ชื่นชอบการเสี่ยงโชค</h2>
-              <p className="text-[9px] tracking-widest text-white/35 mt-1 uppercase">สุ่มรางวัลส่วนลด</p>
+            <div className="text-center font-[var(--font-sarabun)]">
+              <p className="text-[10px] tracking-wide text-white/50">สแกนที่บูธ</p>
+              <h2 className="text-xl md:text-2xl font-bold text-white mt-1 tracking-normal">เรียนเชิญ ผู้ชื่นชอบการเสี่ยงโชค</h2>
+              <p className="text-sm text-white/40 mt-1 tracking-normal">สุ่มรางวัลส่วนลด</p>
             </div>
 
             <div className="relative flex items-center justify-center py-3 sm:py-4 px-3 sm:px-4 rounded-2xl border border-white/10 bg-black/40 shadow-[inset_0_0_60px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.05)]">
@@ -364,7 +367,10 @@ export default function BoothPage() {
                 [ BACK TO HOME ]
               </Link>
             </div>
-            <p className="text-[8px] text-white/30 tracking-[0.4em] uppercase pt-2">LUMO888 สล็อตเว็บตรง ยูสใหม่แตกง่าย รับล้าน(หัว)ทุกวัน</p>
+            <div className="font-[var(--font-sarabun)] text-center pt-2">
+              <div className="text-lg font-bold text-white/90">LUMO888</div>
+              <div className="text-[10px] text-white/40 tracking-normal">สล็อตเว็บตรง ยูสใหม่แตกง่าย รับล้าน(หัว)ทุกวัน</div>
+            </div>
           </>
         )}
       </div>
