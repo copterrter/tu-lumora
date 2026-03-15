@@ -359,6 +359,7 @@ export default function BoothPage() {
               </Link>
             </div>
             <p className="text-[8px] text-white/30 tracking-[0.4em] uppercase pt-2">#TULUMORA BOOTH</p>
+            <p className="text-[8px] text-white/25 tracking-[0.35em] uppercase pt-1">lumo 888</p>
           </>
         )}
       </div>

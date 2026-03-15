@@ -399,6 +399,7 @@ export default function Home() {
             <div className="text-center space-y-2">
               <p className="text-gray-600 tracking-[1em] uppercase text-[10px]">Established 2026</p>
               <h2 className="text-xl sm:text-2xl md:text-4xl font-black tracking-tighter uppercase text-white italic">TU LUMORA</h2>
+              <p className="text-[10px] text-white/40 tracking-[0.5em] uppercase">lumo 888</p>
             </div>
 
             <div className="pt-8 border-t border-white/10 w-full max-w-sm text-center flex flex-col gap-6">
