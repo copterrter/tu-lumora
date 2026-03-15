@@ -41,13 +41,11 @@ export default function BoothPage() {
   const [phase, setPhase] = useState<ReturnType<typeof getCurrentPhase> | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<SpinResult | null>(null);
-  const [showShareUnlock, setShowShareUnlock] = useState(false);
-  const [countdown, setCountdown] = useState(0);
   const [rateLimitSec, setRateLimitSec] = useState(0);
   const [rateLimitKey, setRateLimitKey] = useState(0);
-  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const rotation = useMotionValue(0);
   const spinController = useRef<ReturnType<typeof animate> | null>(null);
+  const idleController = useRef<ReturnType<typeof animate> | null>(null);
 
   useEffect(() => {
     const t = setTimeout(() => setPhase(getCurrentPhase()), 0);
@@ -60,8 +58,34 @@ export default function BoothPage() {
       setRateLimitSec((s) => (s <= 1 ? 0 : s - 1));
     }, 1000);
     return () => clearInterval(id);
-  // ต้องการรันเมื่อได้ 429 (rateLimitKey เปลี่ยน) เท่านั้น ไม่ใส่ rateLimitSec เพื่อไม่ให้ interval ถูกสร้างใหม่ทุกวินาที
   }, [rateLimitKey]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // วงล้อหมุนช้าๆ ตลอดเมื่อไม่ได้กด (รอ user หรือไม่ได้ใช้)
+  useEffect(() => {
+    if (phase !== "normal" || loading) {
+      idleController.current?.stop();
+      idleController.current = null;
+      return;
+    }
+    const duration = 24;
+    const runIdle = () => {
+      const from = rotation.get();
+      idleController.current = animate(rotation, from + 360, {
+        duration,
+        ease: "linear",
+        onComplete: () => {
+          if (idleController.current == null) return;
+          runIdle();
+        },
+        onStop: () => { idleController.current = null; },
+      });
+    };
+    runIdle();
+    return () => {
+      idleController.current?.stop();
+      idleController.current = null;
+    };
+  }, [phase, loading, rotation]);
 
   const runSpin = useCallback(async () => {
     if (getCurrentPhase() !== "normal") {
@@ -71,6 +95,8 @@ export default function BoothPage() {
     setLoading(true);
     setResult(null);
     setRateLimitSec(0);
+    idleController.current?.stop();
+    idleController.current = null;
     if (spinController.current) spinController.current.stop();
     rotation.set(0);
 
@@ -89,7 +115,6 @@ export default function BoothPage() {
 
       const fullTurns = 360 * 6;
       const segmentAngle = getSegmentAngle(String(data.type));
-      // หมุนเกินอีก 1 รอบแล้วค่อยช้าลงทีละน้อย (เหมือนเกือบได้อันดีๆ แต่ดันไปอีกอัน)
       const target = fullTurns + 360 + segmentAngle;
 
       spinController.current = animate(rotation, target, {
@@ -98,27 +123,8 @@ export default function BoothPage() {
         onComplete: () => {
           setResult(data);
           setLoading(false);
-          if (data.type === "0" && data.message?.includes("ลูโม่")) {
-            setShowShareUnlock(true);
-            setCountdown(5);
-            if (countdownRef.current) clearInterval(countdownRef.current);
-            countdownRef.current = setInterval(() => {
-              setCountdown((c) => {
-                if (c <= 1) {
-                  if (countdownRef.current) clearInterval(countdownRef.current);
-                  countdownRef.current = null;
-                  setShowShareUnlock(false);
-                  return 0;
-                }
-                return c - 1;
-              });
-            }, 1000);
-          }
         },
       });
-      if (data.type !== "0" || !data.message?.includes("ลูโม่")) {
-        setResult(data);
-      }
     } catch {
       if (spinController.current) spinController.current.stop();
       setResult({ success: false, type: "error", code: null, message: "เชื่อมต่อไม่สำเร็จ ลองใหม่" });
@@ -268,21 +274,19 @@ export default function BoothPage() {
                   </text>
                 </svg>
               </motion.div>
+              <button
+                type="button"
+                onClick={runSpin}
+                disabled={loading || rateLimitSec > 0}
+                aria-label="สุ่มรางวัล"
+                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 w-[min(78px,22vw)] h-[min(78px,22vw)] sm:w-[78px] sm:h-[78px] rounded-full bg-[#0a0a0a] border-2 border-white/30 flex items-center justify-center hover:border-white/50 hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 active:scale-95"
+              >
+                <span className="text-[7px] sm:text-[8px] font-black uppercase tracking-wider text-white/90 text-center leading-tight px-0.5">
+                  {loading ? "..." : rateLimitSec > 0 ? rateLimitSec : "SPIN"}
+                </span>
+              </button>
             </div>
 
-            <button
-              onClick={runSpin}
-              disabled={loading || showShareUnlock || rateLimitSec > 0}
-              className="w-full max-w-xs py-3.5 sm:py-4 min-h-[44px] border-2 border-white bg-transparent text-white font-black uppercase tracking-[0.35em] sm:tracking-[0.4em] text-[10px] hover:bg-white hover:text-black disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/50 active:scale-[0.98]"
-            >
-              {loading
-                ? "กำลังสุ่ม..."
-                : rateLimitSec > 0
-                  ? `รอ ${rateLimitSec} วินาที`
-                  : showShareUnlock
-                    ? `สุ่มใหม่ได้ใน ${countdown} วินาที`
-                    : "สุ่มรางวัล"}
-            </button>
             {rateLimitSec > 0 && (
               <p className="text-[9px] text-white/50 tracking-widest uppercase">จำกัด 1 ครั้งต่อ 15 วินาที</p>
             )}
@@ -333,7 +337,7 @@ export default function BoothPage() {
                 className="w-full border border-amber-500/30 bg-gradient-to-b from-amber-950/25 to-amber-950/10 p-4 sm:p-6 text-center space-y-4 shadow-[0_20px 40px_-20px_rgba(0,0,0,0.4)]"
               >
                 <p className="text-lg sm:text-xl font-black text-amber-200/95 uppercase italic">ลูโม่แอบกินส่วนลดของคุณไปแล้ว! 🐰</p>
-                <p className="text-[10px] text-white/70 tracking-widest">แชร์ IG Story เพื่อปลดล็อกสิทธิ์สุ่มใหม่ (หรือรอ {countdown} วินาที)</p>
+                <p className="text-[10px] text-white/70 tracking-widest">สุ่มใหม่ได้เมื่อครบ 15 วินาที</p>
               </motion.div>
             )}
 
