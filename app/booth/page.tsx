@@ -8,22 +8,33 @@ import { getCurrentPhase } from "@/lib/pricing";
 
 type SpinResult = { success: boolean; type: string; code: string | null; discountPercent?: number; message?: string };
 
-// สีวงล้อให้เข้าธีมแดง/ดำ/อำพัน
+// สีวงล้อให้เข้าธีมแดง/ดำ/อำพัน | ช่องใหญ่เล็กไม่เท่ากัน (0% ใหญ่, โปรเล็ก)
 const SEGMENTS = [
-  { label: "0%", color: "rgba(28,28,28,0.98)", type: "0" },
-  { label: "10%", color: "rgba(100,28,28,0.95)", type: "10" },
-  { label: "15%", color: "rgba(150,75,25,0.92)", type: "15" },
-  { label: "50%", color: "rgba(180,50,35,0.95)", type: "50" },
+  { label: "0%", color: "rgba(28,28,28,0.98)", type: "0", degrees: 130 },
+  { label: "10%", color: "rgba(100,28,28,0.95)", type: "10", degrees: 80 },
+  { label: "15%", color: "rgba(150,75,25,0.92)", type: "15", degrees: 75 },
+  { label: "50%", color: "rgba(180,50,35,0.95)", type: "50", degrees: 75 },
 ] as const;
 
-// ลูกศรอยู่ด้านบน (top). Segment i อยู่ที่มุม start = (i*90)-90 ถึง start+90. ให้ segment นั้นอยู่ใต้ลูกศร = ต้องหมุนจนจุดกลาง segment อยู่ที่บน (-90°).
-// จุดกลาง segment i = (i*90)-90+45 = i*90-45. ต้องการ center + rotation ≡ -90 (mod 360) => rotation = -90 - (i*90-45) = -90 - i*90 + 45 = -45 - i*90.
-// i=0: -45; i=1: -135=225; i=2: -225=135; i=3: -315=45.
+const SEGMENT_STARTS: number[] = (() => {
+  let acc = -90;
+  const out: number[] = [];
+  for (let i = 0; i < SEGMENTS.length; i++) {
+    out.push(acc);
+    acc += SEGMENTS[i].degrees;
+  }
+  return out;
+})();
+
+// ลูกศรอยู่ด้านบน (top). หมุนจนจุดกลาง segment อยู่ที่บน (-90°) => rotation = -90 - centerDeg.
 function getSegmentAngle(type: string): number {
   const i = SEGMENTS.findIndex((s) => s.type === type);
   if (i < 0) return 0;
-  const base = (-45 - i * 90) % 360;
-  return base < 0 ? base + 360 : base;
+  const start = SEGMENT_STARTS[i];
+  const centerDeg = start + SEGMENTS[i].degrees / 2;
+  let base = (-90 - centerDeg) % 360;
+  if (base < 0) base += 360;
+  return base;
 }
 
 export default function BoothPage() {
@@ -172,13 +183,13 @@ export default function BoothPage() {
       <div className="absolute bottom-4 right-4 sm:bottom-6 sm:right-6 w-12 h-12 sm:w-16 sm:h-16 border-r-2 border-b-2 border-white/20 pointer-events-none" />
 
       <div className="relative z-10 w-full max-w-md flex flex-col items-center gap-5 sm:gap-6 md:gap-8 py-4 md:py-0">
-        <Link href="/" className="text-[10px] tracking-[0.35em] text-white/40 uppercase hover:text-white transition-colors">
+        <Link href="/" className="text-[10px] tracking-[0.35em] text-white/40 uppercase hover:text-white transition-colors whitespace-nowrap">
           [ BACK TO HOME ]
         </Link>
 
         <div className="flex flex-col items-center gap-3">
           <div className="relative w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden ring-2 ring-white/20 bg-black shadow-[0_0_30px_rgba(255,255,255,0.08)]">
-            <Image src="/icon.png" alt="TU LUMORA" fill className="object-contain p-2" sizes="112px" priority />
+            <Image src="/icon.png" alt="TU LUMORA" fill className="object-contain p-2" sizes="112px" priority fetchPriority="high" />
           </div>
           <span className="text-[9px] tracking-[0.5em] text-white/60 uppercase font-medium">TU LUMORA</span>
           <span className="text-[8px] tracking-[0.6em] text-white/30 uppercase">BOOTH</span>
@@ -212,7 +223,7 @@ export default function BoothPage() {
               />
               <motion.div
                 className="w-[min(280px,82vw)] h-[min(280px,82vw)] sm:w-[280px] sm:h-[280px] md:w-[320px] md:h-[320px] rounded-full border-[3px] border-white/30 overflow-hidden shadow-[0_0_0_1px_rgba(255,255,255,0.1),0_25px 60px_-15px_rgba(0,0,0,0.8),0_0_40px_rgba(255,255,255,0.03)]"
-                style={{ rotate: rotation, willChange: "transform" }}
+                style={{ rotate: rotation, willChange: loading ? "transform" : undefined }}
               >
                 <svg viewBox="0 0 100 100" className="w-full h-full" aria-hidden>
                   <defs>
@@ -224,19 +235,22 @@ export default function BoothPage() {
                     ))}
                   </defs>
                   {SEGMENTS.map((s, i) => {
-                    const start = (i * 90) - 90;
+                    const start = SEGMENT_STARTS[i];
+                    const span = s.degrees;
                     const rad = (deg: number) => (deg * Math.PI) / 180;
+                    const end = start + span;
+                    const largeArc = span > 180 ? 1 : 0;
                     return (
                       <g key={s.type}>
                         <path
-                          d={`M 50 50 L ${50 + 50 * Math.cos(rad(start))} ${50 + 50 * Math.sin(rad(start))} A 50 50 0 0 1 ${50 + 50 * Math.cos(rad(start + 90))} ${50 + 50 * Math.sin(rad(start + 90))} Z`}
+                          d={`M 50 50 L ${50 + 50 * Math.cos(rad(start))} ${50 + 50 * Math.sin(rad(start))} A 50 50 0 ${largeArc} 1 ${50 + 50 * Math.cos(rad(end))} ${50 + 50 * Math.sin(rad(end))} Z`}
                           fill={`url(#seg-${i})`}
                           stroke="rgba(255,255,255,0.12)"
                           strokeWidth="0.6"
                         />
                         <text
-                          x={50 + 34 * Math.cos(rad(start + 45))}
-                          y={50 + 34 * Math.sin(rad(start + 45))}
+                          x={50 + 34 * Math.cos(rad(start + span / 2))}
+                          y={50 + 34 * Math.sin(rad(start + span / 2))}
                           textAnchor="middle"
                           dominantBaseline="middle"
                           fill={i === 0 ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.9)"}
@@ -333,13 +347,13 @@ export default function BoothPage() {
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full max-w-xs pt-4">
               <Link
                 href="/product"
-                className="flex-1 text-center min-h-[44px] flex items-center justify-center py-3 border border-white/30 font-black uppercase tracking-[0.3em] sm:tracking-[0.35em] text-[10px] text-white hover:bg-white hover:text-black transition-all"
+                className="flex-1 text-center min-h-[44px] flex items-center justify-center py-3 border border-white/30 font-black uppercase tracking-[0.3em] sm:tracking-[0.35em] text-[10px] text-white hover:bg-white hover:text-black transition-all whitespace-nowrap"
               >
                 [ SHOP NOW ]
               </Link>
               <Link
                 href="/"
-                className="flex-1 text-center min-h-[44px] flex items-center justify-center py-3 border border-white/30 font-black uppercase tracking-[0.3em] sm:tracking-[0.35em] text-[10px] text-white hover:bg-white hover:text-black transition-all"
+                className="flex-1 text-center min-h-[44px] flex items-center justify-center py-3 border border-white/30 font-black uppercase tracking-[0.3em] sm:tracking-[0.35em] text-[10px] text-white hover:bg-white hover:text-black transition-all whitespace-nowrap"
               >
                 [ BACK TO HOME ]
               </Link>
