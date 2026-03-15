@@ -46,6 +46,7 @@ export default function BoothPage() {
   const rotation = useMotionValue(0);
   const spinController = useRef<ReturnType<typeof animate> | null>(null);
   const idleController = useRef<ReturnType<typeof animate> | null>(null);
+  const phase2Ref = useRef<{ data: SpinResult; finalTarget: number } | null>(null);
 
   useEffect(() => {
     const t = setTimeout(() => setPhase(getCurrentPhase()), 0);
@@ -101,14 +102,30 @@ export default function BoothPage() {
 
     const startRotation = rotation.get();
     const spinStartTime = Date.now();
-    // ความเร็วเชิงมุม (deg/s) ให้รอบแรกและรอบสองเท่ากัน = รู้สึกเป็นรอบเดียว
-    const initialSpinDeg = 360 * 4;
-    const initialDuration = 2.2;
-    const angularVelocity = initialSpinDeg / initialDuration;
+    const phase1Deg = 360 * 4;
+    const phase1Duration = 2.2;
+    const phase1EndRotation = startRotation + phase1Deg;
+    const phase2Duration = 6 - phase1Duration; // ~3.8s ช้าลงจนหยุด
+    phase2Ref.current = null;
 
-    spinController.current = animate(rotation, startRotation + initialSpinDeg, {
-      duration: initialDuration,
+    const startPhase2 = (data: SpinResult, finalTarget: number) => {
+      spinController.current = animate(rotation, finalTarget, {
+        duration: phase2Duration,
+        ease: [0.12, 0.12, 0.4, 1],
+        onComplete: () => {
+          setResult(data);
+          setLoading(false);
+        },
+      });
+    };
+
+    spinController.current = animate(rotation, phase1EndRotation, {
+      duration: phase1Duration,
       ease: "linear",
+      onComplete: () => {
+        const pending = phase2Ref.current;
+        if (pending) startPhase2(pending.data, pending.finalTarget);
+      },
       onStop: () => {},
     });
 
@@ -129,24 +146,17 @@ export default function BoothPage() {
       const fullTurns = 360 * 6;
       const segmentAngle = getSegmentAngle(String(data.type));
       const baseTarget = fullTurns + 360 + segmentAngle;
-
-      spinController.current?.stop();
-      const current = rotation.get();
-      const elapsed = (Date.now() - spinStartTime) / 1000;
-      const remainingDuration = Math.max(1.5, 6 - elapsed);
-      // ระยะที่ต้องหมุนต่อด้วยความเร็วเดิม = รู้สึกเป็นรอบเดียวไม่สะดุด
-      const desiredDistance = angularVelocity * remainingDuration;
-      const m = Math.round((current + desiredDistance - baseTarget) / 360);
+      const m = Math.ceil((phase1EndRotation - baseTarget) / 360);
       const finalTarget = baseTarget + 360 * m;
 
-      spinController.current = animate(rotation, finalTarget, {
-        duration: remainingDuration,
-        ease: "linear",
-        onComplete: () => {
-          setResult(data);
-          setLoading(false);
-        },
-      });
+      const elapsed = (Date.now() - spinStartTime) / 1000;
+      const resultData: SpinResult = { success: true, type: String(data.type), code: data.code ?? null, discountPercent: data.discountPercent, message: data.message };
+      if (elapsed >= phase1Duration) {
+        spinController.current?.stop();
+        startPhase2(resultData, finalTarget);
+      } else {
+        phase2Ref.current = { data: resultData, finalTarget };
+      }
     } catch {
       spinController.current?.stop();
       setResult({ success: false, type: "error", code: null, message: "เชื่อมต่อไม่สำเร็จ ลองใหม่" });
