@@ -555,24 +555,16 @@ export default function CheckoutPage() {
             {(phase === "normal" || phase === null) && totalQty === 1 && (
               <div className="pt-4 border-t border-white/10 space-y-2">
                 <label className="text-[10px] text-gray-500 uppercase font-black tracking-widest">โค้ดส่วนลดจากบูธ</label>
-                <div className="flex gap-2">
-                  <input
-                    value={promoInput}
-                    onChange={(e) => { setPromoInput(e.target.value.toUpperCase()); setPromoError(""); }}
-                    placeholder="LUMO10-XXXXX"
-                    className="flex-1 bg-transparent border border-white/20 p-3 text-xs tracking-widest focus:outline-none focus:border-white"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleApplyPromo}
-                    disabled={isApplyingPromo || !promoInput.trim()}
-                    className="px-6 py-3 bg-white text-black text-[10px] font-black uppercase tracking-widest hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    {isApplyingPromo ? "..." : "ใช้โค้ด"}
-                  </button>
-                </div>
+                <input
+                  value={promoInput}
+                  onChange={(e) => { setPromoInput(e.target.value.toUpperCase()); setPromoError(""); }}
+                  onBlur={() => promoInput.trim() && handleApplyPromo()}
+                  onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), promoInput.trim() && handleApplyPromo())}
+                  placeholder={isApplyingPromo ? "กำลังตรวจสอบ..." : "ใส่โค้ดแล้วกด Enter หรือคลิกออกจากช่อง"}
+                  className="w-full bg-transparent border border-white/20 p-3 text-xs tracking-widest focus:outline-none focus:border-white"
+                />
                 {appliedPromo && (
-                  <p className="text-[10px] text-green-400 font-bold">ใช้โค้ดสำเร็จ ลด {appliedPromo.discountPercent}%</p>
+                  <p className="text-[10px] text-green-400 font-bold">ใช้โค้ดสำเร็จ ลด {appliedPromo.discountPercent}% (จะหักเมื่อจ่ายเงินจริง)</p>
                 )}
                 {promoError && <p className="text-[10px] text-red-400 font-bold">{promoError}</p>}
               </div>

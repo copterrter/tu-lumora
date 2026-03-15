@@ -195,6 +195,7 @@ export default function AdminDashboard() {
   };
 
   // 1. ข้อมูลสำหรับกราฟเส้น (Sales vs Orders) — ใช้เฉพาะออเดอร์ที่ชำระแล้ว / ส่งแล้ว
+  // ใช้วันที่ตามเวลาไทย (Asia/Bangkok) เพื่อให้กราฟตรงกับวันที่ที่ลูกค้าสั่ง
   const chartData = useMemo(() => {
     const dataMap: Record<string, { rawDate: string, date: string, sales: number, orders: number }> = {};
     orders.forEach(order => {
@@ -203,8 +204,7 @@ export default function AdminDashboard() {
       if (status !== "paid_and_verified" && status !== "shipped") return;
 
       const d = new Date(order.created_at);
-      const rawDate = d.toISOString().split('T')[0];
-      // แสดงวันที่แบบละเอียดในรูปแบบ YYYY-MM-DD เช่น 2026-03-11
+      const rawDate = d.toLocaleDateString("en-CA", { timeZone: "Asia/Bangkok" }); // YYYY-MM-DD ตามเวลาไทย
       const displayDate = rawDate;
       
       if (!dataMap[rawDate]) {

@@ -78,11 +78,12 @@ export default function BoothPage() {
 
       const fullTurns = 360 * 6;
       const segmentAngle = getSegmentAngle(String(data.type));
-      const target = fullTurns + segmentAngle;
+      // หมุนเกินอีก 1 รอบแล้วค่อยช้าลงทีละน้อย (เหมือนเกือบได้อันดีๆ แต่ดันไปอีกอัน)
+      const target = fullTurns + 360 + segmentAngle;
 
       spinController.current = animate(rotation, target, {
-        duration: 3.2,
-        ease: [0.12, 0.6, 0.3, 1],
+        duration: 6,
+        ease: [0.05, 0.35, 0.2, 1],
         onComplete: () => {
           setResult(data);
           setLoading(false);
@@ -151,7 +152,7 @@ export default function BoothPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#0a0a0a] text-white flex flex-col items-center justify-start md:justify-center p-4 sm:p-6 relative overflow-x-hidden overflow-y-auto pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))] pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))]">
+    <main className="min-h-screen bg-[#0a0a0a] text-white flex flex-col items-center justify-start md:justify-center p-4 sm:p-6 relative overflow-x-hidden overflow-y-auto pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))] pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] font-[var(--font-geist-sans)]">
       {/* พื้นหลังชั้น 1: gradient โทนแดง/ดำ */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_120%_80%_at_50%_-10%,rgba(180,0,20,0.25),transparent_50%)] pointer-events-none" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_120%,rgba(120,40,0,0.12),transparent)] pointer-events-none" />
@@ -299,6 +300,15 @@ export default function BoothPage() {
                 <p className="text-[9px] text-amber-300/90 font-bold mt-4 tracking-widest uppercase">
                   💡 นำโค้ดไปกรอกที่ช่อง Promo Code ในหน้าชำระเงิน (Checkout)
                 </p>
+                <p className="text-[11px] text-white/80 font-bold mt-4 uppercase tracking-wider">
+                  ไปหน้าสั่งซื้อเลยมั้ย?
+                </p>
+                <Link
+                  href="/product"
+                  className="inline-block min-h-[44px] px-6 py-3 bg-emerald-500/20 border border-emerald-400/50 text-emerald-200 font-black uppercase tracking-wider text-[10px] hover:bg-emerald-500/30 transition-colors"
+                >
+                  ไปเลือกสินค้าและสั่งซื้อ
+                </Link>
               </motion.div>
             )}
 
