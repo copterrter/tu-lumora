@@ -102,24 +102,46 @@ export default function BoothPage() {
 
     const startRotation = rotation.get();
     const spinStartTime = Date.now();
-    // สไตล์ Wheel of Names: หมุนเร็วแล้วค่อยช้าลงแบบฟิสิกส์ (แรงเสียดทาน)
     const phase1Turns = 6;
     const phase1Deg = 360 * phase1Turns;
     const phase1Duration = 2.5;
     const phase1EndRotation = startRotation + phase1Deg;
-    const totalDuration = 8;
-    const phase2Duration = Math.max(3, totalDuration - phase1Duration);
+    const angularVelocity = phase1Deg / phase1Duration;
+    const brakeDeg = 280;
+    const brakeDuration = 1.8;
     phase2Ref.current = null;
 
-    const startPhase2 = (data: SpinResult, finalTarget: number) => {
-      spinController.current = animate(rotation, finalTarget, {
-        duration: phase2Duration,
-        ease: [0.22, 0.22, 0.38, 1],
-        onComplete: () => {
-          setResult(data);
-          setLoading(false);
-        },
-      });
+    const startPhase2 = (data: SpinResult, finalTarget: number, fromRotation?: number) => {
+      const from = fromRotation ?? phase1EndRotation;
+      const coastTarget = finalTarget - brakeDeg;
+      const coastDistance = coastTarget - from;
+      const coastDuration = coastDistance / angularVelocity;
+
+      if (coastDuration > 0.25) {
+        spinController.current = animate(rotation, coastTarget, {
+          duration: coastDuration,
+          ease: "linear",
+          onComplete: () => {
+            spinController.current = animate(rotation, finalTarget, {
+              duration: brakeDuration,
+              ease: [0.33, 0, 0.2, 1],
+              onComplete: () => {
+                setResult(data);
+                setLoading(false);
+              },
+            });
+          },
+        });
+      } else {
+        spinController.current = animate(rotation, finalTarget, {
+          duration: brakeDuration + 0.5,
+          ease: [0.33, 0, 0.2, 1],
+          onComplete: () => {
+            setResult(data);
+            setLoading(false);
+          },
+        });
+      }
     };
 
     spinController.current = animate(rotation, phase1EndRotation, {
@@ -156,7 +178,7 @@ export default function BoothPage() {
       const resultData: SpinResult = { success: true, type: String(data.type), code: data.code ?? null, discountPercent: data.discountPercent, message: data.message };
       if (elapsed >= phase1Duration) {
         spinController.current?.stop();
-        startPhase2(resultData, finalTarget);
+        startPhase2(resultData, finalTarget, rotation.get());
       } else {
         phase2Ref.current = { data: resultData, finalTarget };
       }
