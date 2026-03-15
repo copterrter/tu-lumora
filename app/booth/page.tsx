@@ -8,12 +8,12 @@ import { getCurrentPhase } from "@/lib/pricing";
 
 type SpinResult = { success: boolean; type: string; code: string | null; discountPercent?: number; message?: string };
 
-// สีวงล้อให้เข้าธีมแดง/ดำ/อำพัน | ช่องใหญ่เล็กไม่เท่ากัน (0% ใหญ่, โปรเล็ก)
+// สีวงล้อคู่สีน่าเล่น โทนสดใส | ช่องใหญ่เล็กไม่เท่ากัน (0% ใหญ่, โปรเล็ก)
 const SEGMENTS = [
-  { label: "0%", color: "rgba(28,28,28,0.98)", type: "0", degrees: 130 },
-  { label: "10%", color: "rgba(100,28,28,0.95)", type: "10", degrees: 80 },
-  { label: "15%", color: "rgba(150,75,25,0.92)", type: "15", degrees: 75 },
-  { label: "50%", color: "rgba(180,50,35,0.95)", type: "50", degrees: 75 },
+  { label: "0%", color: "rgba(45,45,55,0.98)", type: "0", degrees: 130 },
+  { label: "10%", color: "rgba(255,107,107,0.95)", type: "10", degrees: 80 },
+  { label: "15%", color: "rgba(255,195,77,0.95)", type: "15", degrees: 75 },
+  { label: "50%", color: "rgba(120,220,120,0.95)", type: "50", degrees: 75 },
 ] as const;
 
 const SEGMENT_STARTS: number[] = (() => {
@@ -98,7 +98,6 @@ export default function BoothPage() {
     idleController.current?.stop();
     idleController.current = null;
     if (spinController.current) spinController.current.stop();
-    rotation.set(0);
 
     try {
       const res = await fetch("/api/booth/spin", { method: "POST" });
@@ -117,13 +116,17 @@ export default function BoothPage() {
       const segmentAngle = getSegmentAngle(String(data.type));
       const target = fullTurns + 360 + segmentAngle;
 
-      spinController.current = animate(rotation, target, {
-        duration: 6,
-        ease: [0.05, 0.35, 0.2, 1],
-        onComplete: () => {
-          setResult(data);
-          setLoading(false);
-        },
+      // ตั้งค่า rotation ก่อนเริ่มหมุนและเริ่มแอนิเมชันในเฟรมถัดไป เพื่อให้ idle หยุดและ DOM อัปเดตแล้ว
+      rotation.set(0);
+      requestAnimationFrame(() => {
+        spinController.current = animate(rotation, target, {
+          duration: 6,
+          ease: [0.05, 0.35, 0.2, 1],
+          onComplete: () => {
+            setResult(data);
+            setLoading(false);
+          },
+        });
       });
     } catch {
       if (spinController.current) spinController.current.stop();
@@ -155,7 +158,7 @@ export default function BoothPage() {
     ctx.fillStyle = "#fff";
     ctx.font = "bold 14px sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText("TU LUMORA — โค้ดส่วนลดจากบูธ", w / 2, 80);
+    ctx.fillText("LUMO888 สล็อตเว็บตรง ยูสใหม่แตกง่าย รับล้าน(หัว)ทุกวัน", w / 2, 80);
     ctx.font = "bold 32px monospace";
     ctx.fillStyle = "#4ade80";
     ctx.fillText(result.code, w / 2, 160);
@@ -170,9 +173,9 @@ export default function BoothPage() {
 
   return (
     <main className="min-h-screen bg-[#0a0a0a] text-white flex flex-col items-center justify-start md:justify-center p-4 sm:p-6 relative overflow-x-hidden overflow-y-auto pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))] pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] font-[var(--font-geist-sans)]">
-      {/* พื้นหลังชั้น 1: gradient โทนแดง/ดำ */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_120%_80%_at_50%_-10%,rgba(180,0,20,0.25),transparent_50%)] pointer-events-none" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_120%,rgba(120,40,0,0.12),transparent)] pointer-events-none" />
+      {/* พื้นหลังชั้น 1: gradient โทนส้ม/ชมพู/เขียว น่าเล่น */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_120%_80%_at_50%_-10%,rgba(255,120,100,0.28),transparent_50%)] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_120%,rgba(100,200,180,0.15),transparent)] pointer-events-none" />
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/60 pointer-events-none" />
       {/* ตาข่าย / grid เบาๆ */}
       <div
@@ -195,10 +198,9 @@ export default function BoothPage() {
 
         <div className="flex flex-col items-center gap-3">
           <div className="relative w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden ring-2 ring-white/20 bg-black shadow-[0_0_30px_rgba(255,255,255,0.08)]">
-            <Image src="/icon.png" alt="TU LUMORA" fill className="object-contain p-2" sizes="112px" priority fetchPriority="high" />
+            <Image src="/icon.png" alt="LUMO888" fill className="object-contain p-2" sizes="112px" priority fetchPriority="high" />
           </div>
-          <span className="text-[9px] tracking-[0.5em] text-white/60 uppercase font-medium">TU LUMORA</span>
-          <span className="text-[8px] tracking-[0.6em] text-white/30 uppercase">BOOTH</span>
+          <span className="text-[9px] tracking-[0.5em] text-white/60 uppercase font-medium">LUMO888 สล็อตเว็บตรง ยูสใหม่แตกง่าย รับล้าน(หัว)ทุกวัน</span>
         </div>
 
         {phase === null ? (
@@ -218,7 +220,7 @@ export default function BoothPage() {
           <>
             <div className="text-center">
               <p className="text-[8px] tracking-[0.6em] text-white/40 uppercase">สแกนที่บูธ</p>
-              <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tighter text-white italic mt-1">ลูโม่รออยู่</h2>
+              <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tighter text-white italic mt-1">เรียนเชิญ ผู้ชื่นชอบการเสี่ยงโชค</h2>
               <p className="text-[9px] tracking-widest text-white/35 mt-1 uppercase">สุ่มรางวัลส่วนลด</p>
             </div>
 
@@ -362,8 +364,7 @@ export default function BoothPage() {
                 [ BACK TO HOME ]
               </Link>
             </div>
-            <p className="text-[8px] text-white/30 tracking-[0.4em] uppercase pt-2">#TULUMORA BOOTH</p>
-            <p className="text-[8px] text-white/25 tracking-[0.35em] uppercase pt-1">lumo 888</p>
+            <p className="text-[8px] text-white/30 tracking-[0.4em] uppercase pt-2">LUMO888 สล็อตเว็บตรง ยูสใหม่แตกง่าย รับล้าน(หัว)ทุกวัน</p>
           </>
         )}
       </div>
