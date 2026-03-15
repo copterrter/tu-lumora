@@ -102,16 +102,19 @@ export default function BoothPage() {
 
     const startRotation = rotation.get();
     const spinStartTime = Date.now();
-    const phase1Deg = 360 * 4;
-    const phase1Duration = 2.2;
+    // สไตล์ Wheel of Names: หมุนเร็วแล้วค่อยช้าลงแบบฟิสิกส์ (แรงเสียดทาน)
+    const phase1Turns = 6;
+    const phase1Deg = 360 * phase1Turns;
+    const phase1Duration = 2.5;
     const phase1EndRotation = startRotation + phase1Deg;
-    const phase2Duration = 6 - phase1Duration; // ~3.8s ช้าลงจนหยุด
+    const totalDuration = 8;
+    const phase2Duration = Math.max(3, totalDuration - phase1Duration);
     phase2Ref.current = null;
 
     const startPhase2 = (data: SpinResult, finalTarget: number) => {
       spinController.current = animate(rotation, finalTarget, {
         duration: phase2Duration,
-        ease: [0.12, 0.12, 0.4, 1],
+        ease: [0.22, 0.22, 0.38, 1],
         onComplete: () => {
           setResult(data);
           setLoading(false);
