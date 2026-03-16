@@ -297,12 +297,17 @@ export default function BoothPage() {
                 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 w-[min(78px,22vw)] h-[min(78px,22vw)] sm:w-[78px] sm:h-[78px] rounded-full bg-[#0a0a0a] border-2 border-white/30 flex items-center justify-center hover:border-white/50 hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 active:scale-95"
               >
                 <span className="text-[7px] sm:text-[8px] font-black uppercase tracking-wider text-white/90 text-center leading-tight px-0.5">
-                  {loading ? "กำลังเริ่มหมุน..." : rateLimitSec > 0 ? rateLimitSec : "SPIN"}
+                  {rateLimitSec > 0 ? rateLimitSec : "SPIN"}
                 </span>
               </button>
             </div>
 
-            {rateLimitSec > 0 && (
+            {loading && (
+              <p className="text-[9px] text-emerald-300 tracking-widest uppercase mt-1">
+                วงล้อกำลังหมุน กรุณารอจนหยุด
+              </p>
+            )}
+            {!loading && rateLimitSec > 0 && (
               <p className="text-[9px] text-white/50 tracking-widest uppercase">จำกัด 1 ครั้งต่อ 15 วินาที</p>
             )}
 
