@@ -11,9 +11,10 @@ type SpinResult = { success: boolean; type: string; code: string | null; discoun
 // สีวงล้อคู่สีน่าเล่น โทนสดใส | ช่องใหญ่เล็กไม่เท่ากัน (0% ใหญ่, โปรเล็ก)
 const SEGMENTS = [
   { label: "0%", color: "rgba(45,45,55,0.98)", type: "0", degrees: 130 },
-  { label: "10%", color: "rgba(255,107,107,0.95)", type: "10", degrees: 80 },
-  { label: "15%", color: "rgba(255,195,77,0.95)", type: "15", degrees: 75 },
-  { label: "50%", color: "rgba(120,220,120,0.95)", type: "50", degrees: 75 },
+  { label: "5%", color: "rgba(120,190,255,0.95)", type: "5", degrees: 60 },
+  { label: "10%", color: "rgba(255,107,107,0.95)", type: "10", degrees: 60 },
+  { label: "15%", color: "rgba(255,195,77,0.95)", type: "15", degrees: 60 },
+  { label: "50%", color: "rgba(120,220,120,0.95)", type: "50", degrees: 50 },
 ] as const;
 
 const SEGMENT_STARTS: number[] = (() => {
@@ -46,7 +47,6 @@ export default function BoothPage() {
   const rotation = useMotionValue(0);
   const spinController = useRef<ReturnType<typeof animate> | null>(null);
   const idleController = useRef<ReturnType<typeof animate> | null>(null);
-  const phase2Ref = useRef<{ data: SpinResult; finalTarget: number } | null>(null);
 
   useEffect(() => {
     const t = setTimeout(() => setPhase(getCurrentPhase()), 0);

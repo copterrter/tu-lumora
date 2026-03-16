@@ -9,14 +9,23 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 const RATE_LIMIT_SEC = 15;
 
-const QUOTA: Record<number, number> = { 50: 2, 15: 20, 10: 50 };
+const QUOTA: Record<number, number> = {
+  50: 2,
+  15: 20,
+  10: 50,
+  5: 80, // โควต้า 5% เพิ่มเป็นชั้นใหม่
+};
 
-// Base probability (ใช้สำหรับ tier อื่น ๆ และสำหรับ 50% เฉพาะกรณีที่ไม่ได้ใช้ pretty rate)
+// ความน่าจะเป็นฐาน:
+// - 50%   ~ 1%
+// - 5/10/15% เท่ากัน (แบ่งเท่าๆ กันจาก pool เดียวกัน)
+// - ที่เหลือเป็น 0%
 const PROBABILITY = [
-  { tier: 50 as const, p: 0.001 },
-  { tier: 15 as const, p: 0.15 },
-  { tier: 10 as const, p: 0.349 },
-  { tier: 0 as const, p: 0.5 },
+  { tier: 50 as const, p: 0.01 },
+  { tier: 15 as const, p: 0.163 },
+  { tier: 10 as const, p: 0.163 },
+  { tier: 5 as const, p: 0.163 },
+  { tier: 0 as const, p: 0.501 },
 ];
 
 function getClientIp(request: Request): string {
@@ -32,7 +41,7 @@ function hashIp(ip: string): string {
 }
 
 /** สุ่ม tier จากรายการที่โคว้ายังไม่เต็ม (รวม 0%) */
-function pickTierFrom(available: { tier: 50 | 15 | 10 | 0; p: number }[]): 50 | 15 | 10 | 0 {
+function pickTierFrom(available: { tier: 50 | 15 | 10 | 5 | 0; p: number }[]): 50 | 15 | 10 | 5 | 0 {
   if (available.length === 0) return 0;
   const sum = available.reduce((s, x) => s + x.p, 0);
   if (sum <= 0) return 0;
@@ -80,8 +89,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const usedCounts: Record<number, number> = { 50: 0, 15: 0, 10: 0 };
-    for (const tier of [50, 15, 10]) {
+    const usedCounts: Record<number, number> = { 50: 0, 15: 0, 10: 0, 5: 0 };
+    for (const tier of [50, 15, 10, 5]) {
       const { count } = await supabase
         .from('promo_codes')
         .select('id', { count: 'exact', head: true })
@@ -103,7 +112,7 @@ export async function POST(request: Request) {
     // - spin ถัดไป = totalSpins + 1
     // - ถ้า spin ถัดไปเป็นเลขหาร 50 ลงตัว และ quota 50 ยังเหลือ -> บังคับ tier = 50
     // - สปินอื่น ๆ ใน block 50 นั้น ตัด tier 50 ออกจาก PROBABILITY เพื่อไม่ให้เกิน 1 ใบต่อ 50 สปิน
-    let tier: 50 | 15 | 10 | 0;
+    let tier: 50 | 15 | 10 | 5 | 0;
     const quota50Left = (QUOTA[50] ?? 0) - (usedCounts[50] ?? 0);
 
     if (quota50Left > 0) {
