@@ -245,8 +245,6 @@ export default function BoothPage() {
               <motion.div
                 className="w-[min(280px,82vw)] h-[min(280px,82vw)] sm:w-[280px] sm:h-[280px] md:w-[320px] md:h-[320px] rounded-full border-[3px] border-white/30 overflow-hidden shadow-[0_0_0_1px_rgba(255,255,255,0.1),0_25px 60px_-15px_rgba(0,0,0,0.8),0_0_40px_rgba(255,255,255,0.03)]"
                 style={{ rotate: rotation, willChange: loading ? "transform" : undefined }}
-                animate={loading ? { scale: [1, 1.03, 1] } : { scale: 1 }}
-                transition={loading ? { duration: 0.35 } : undefined}
               >
                 <svg viewBox="0 0 100 100" className="w-full h-full" aria-hidden>
                   <defs>
@@ -291,19 +289,17 @@ export default function BoothPage() {
                   </text>
                 </svg>
               </motion.div>
-              <motion.button
+              <button
                 type="button"
                 onClick={runSpin}
                 disabled={loading || rateLimitSec > 0}
                 aria-label="สุ่มรางวัล"
                 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 w-[min(78px,22vw)] h-[min(78px,22vw)] sm:w-[78px] sm:h-[78px] rounded-full bg-[#0a0a0a] border-2 border-white/30 flex items-center justify-center hover:border-white/50 hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 active:scale-95"
-                animate={loading ? { scale: 0.96 } : { scale: 1 }}
-                transition={{ type: "spring", stiffness: 260, damping: 18 }}
               >
                 <span className="text-[7px] sm:text-[8px] font-black uppercase tracking-wider text-white/90 text-center leading-tight px-0.5">
                   {loading ? "กำลังเริ่มหมุน..." : rateLimitSec > 0 ? rateLimitSec : "SPIN"}
                 </span>
-              </motion.button>
+              </button>
             </div>
 
             {rateLimitSec > 0 && (
