@@ -8,13 +8,12 @@ import { getCurrentPhase } from "@/lib/pricing";
 
 type SpinResult = { success: boolean; type: string; code: string | null; discountPercent?: number; message?: string };
 
-// สีวงล้อคู่สีน่าเล่น โทนสดใส | ช่องใหญ่เล็กไม่เท่ากัน (0% ใหญ่, โปรเล็ก)
+// สีวงล้อคู่สีน่าเล่น โทนสดใส
 const SEGMENTS = [
-  { label: "0%", color: "rgba(45,45,55,0.98)", type: "0", degrees: 130 },
-  { label: "5%", color: "rgba(120,190,255,0.95)", type: "5", degrees: 60 },
-  { label: "10%", color: "rgba(255,107,107,0.95)", type: "10", degrees: 60 },
-  { label: "15%", color: "rgba(255,195,77,0.95)", type: "15", degrees: 60 },
-  { label: "50%", color: "rgba(120,220,120,0.95)", type: "50", degrees: 50 },
+  { label: "5%", color: "rgba(120,190,255,0.95)", type: "5", degrees: 90 },
+  { label: "10%", color: "rgba(255,107,107,0.95)", type: "10", degrees: 90 },
+  { label: "15%", color: "rgba(255,195,77,0.95)", type: "15", degrees: 90 },
+  { label: "50%", color: "rgba(120,220,120,0.95)", type: "50", degrees: 90 },
 ] as const;
 
 const SEGMENT_STARTS: number[] = (() => {
@@ -317,7 +316,7 @@ export default function BoothPage() {
               <p className="text-[9px] text-white/50 tracking-widest uppercase">จำกัด 1 ครั้งต่อ 15 วินาที</p>
             )}
 
-            {result && result.type !== "0" && result.code && (
+            {result && result.code && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -356,21 +355,7 @@ export default function BoothPage() {
               </motion.div>
             )}
 
-            {result && result.type === "0" && result.message?.includes("ลูโม่") && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="w-full border border-amber-500/30 bg-gradient-to-b from-amber-950/25 to-amber-950/10 p-4 sm:p-6 text-center space-y-4 shadow-[0_20px 40px_-20px_rgba(0,0,0,0.4)]"
-              >
-                <p className="text-lg sm:text-xl font-black text-amber-200/95 uppercase italic">ลูโม่แอบกินส่วนลดของคุณไปแล้ว! 🐰</p>
-                <p className="text-[10px] text-white/70 tracking-widest">สุ่มใหม่ได้เมื่อครบ 15 วินาที</p>
-              </motion.div>
-            )}
-
-            {result && result.type === "0" && result.message && !result.message.includes("ลูโม่") && (
-              <p className="text-[10px] text-white/60 text-center tracking-widest uppercase">{result.message}</p>
-            )}
-            {result && !result.success && result.message && result.type !== "0" && (
+            {result && !result.success && result.message && (
               <p className="text-[10px] text-red-300/90 text-center tracking-widest">{result.message}</p>
             )}
 

@@ -40,7 +40,7 @@ function hashIp(ip: string): string {
   return createHash('sha256').update(ip).digest('hex').substring(0, 32);
 }
 
-/** สุ่ม tier จากรายการที่โคว้ายังไม่เต็ม (รวม 0%) */
+/** สุ่ม tier จากรายการที่โคว้ายังไม่เต็ม */
 function pickTierFrom(available: { tier: 50 | 15 | 10 | 5 | 0; p: number }[]): 50 | 15 | 10 | 5 | 0 {
   if (available.length === 0) return 0;
   const sum = available.reduce((s, x) => s + x.p, 0);
@@ -100,10 +100,17 @@ export async function POST(request: Request) {
     }
 
     const available = PROBABILITY.filter(({ tier }) => {
-      if (tier === 0) return true;
+      if (tier === 0) return false;
       const quota = QUOTA[tier];
       return quota != null && (usedCounts[tier] ?? 0) < quota;
     });
+
+    if (available.length === 0) {
+      return NextResponse.json(
+        { success: false, type: 'closed', message: 'สิทธิ์ส่วนลดจากกิจกรรมหมดแล้ว ขอบคุณที่ร่วมสนุกนะครับ' },
+        { status: 400 },
+      );
+    }
 
     // --- Pretty rate สำหรับ 50% ---
     // เงื่อนไข: ทุก ๆ 50 ครั้ง ให้มีสิทธิ์ 50% 1 ใบ (ถ้า quota 50% ยังเหลือ)
@@ -127,7 +134,7 @@ export async function POST(request: Request) {
         tier = 50;
       } else {
         // ใน block 50 นี้ แต่ยังไม่ถึงสปินที่หาร 50 ลงตัว -> ไม่ให้ 50% ออกก่อน
-        const availableWithout50 = available.filter(({ tier }) => tier !== 50);
+      const availableWithout50 = available.filter(({ tier }) => tier !== 50);
         tier = pickTierFrom(availableWithout50);
       }
     } else {
