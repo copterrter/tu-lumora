@@ -102,64 +102,12 @@ export default function BoothPage() {
 
     const startRotation = rotation.get();
     const spinStartTime = Date.now();
-    const phase1Turns = 6;
-    const phase1Deg = 360 * phase1Turns;
-    const phase1Duration = 2.5;
-    const phase1EndRotation = startRotation + phase1Deg;
-    const angularVelocity = phase1Deg / phase1Duration;
-    const brakeDeg = 280;
-    const brakeDuration = 1.8;
-    phase2Ref.current = null;
-
-    const startPhase2 = (data: SpinResult, finalTarget: number, fromRotation?: number) => {
-      const from = fromRotation ?? phase1EndRotation;
-      const coastTarget = finalTarget - brakeDeg;
-      const coastDistance = coastTarget - from;
-      const coastDuration = coastDistance / angularVelocity;
-
-      if (coastDuration > 0.25) {
-        spinController.current = animate(rotation, coastTarget, {
-          duration: coastDuration,
-          ease: "linear",
-          onComplete: () => {
-            spinController.current = animate(rotation, finalTarget, {
-              duration: brakeDuration,
-              ease: [0.33, 0, 0.2, 1],
-              onComplete: () => {
-                setResult(data);
-                setLoading(false);
-              },
-            });
-          },
-        });
-      } else {
-        spinController.current = animate(rotation, finalTarget, {
-          duration: brakeDuration + 0.5,
-          ease: [0.33, 0, 0.2, 1],
-          onComplete: () => {
-            setResult(data);
-            setLoading(false);
-          },
-        });
-      }
-    };
-
-    spinController.current = animate(rotation, phase1EndRotation, {
-      duration: phase1Duration,
-      ease: "linear",
-      onComplete: () => {
-        const pending = phase2Ref.current;
-        if (pending) startPhase2(pending.data, pending.finalTarget);
-      },
-      onStop: () => {},
-    });
 
     try {
       const res = await fetch("/api/booth/spin", { method: "POST" });
       const data = await res.json();
 
       if (res.status === 429) {
-        spinController.current?.stop();
         setLoading(false);
         setResult(data);
         const sec = typeof data.retryAfterSeconds === "number" ? Math.max(0, data.retryAfterSeconds) : 30;
@@ -171,19 +119,27 @@ export default function BoothPage() {
       const fullTurns = 360 * 6;
       const segmentAngle = getSegmentAngle(String(data.type));
       const baseTarget = fullTurns + 360 + segmentAngle;
-      const m = Math.ceil((phase1EndRotation - baseTarget) / 360);
-      const finalTarget = baseTarget + 360 * m;
+      const now = rotation.get();
+      const current = Number.isFinite(now) ? now : startRotation;
+      const extraTurns = 4;
+      const adjustedTarget = baseTarget + 360 * extraTurns;
+      const k = current > adjustedTarget ? Math.ceil((current - adjustedTarget) / 360) + 1 : 0;
+      const finalTarget = adjustedTarget + 360 * k;
 
       const elapsed = (Date.now() - spinStartTime) / 1000;
-      const resultData: SpinResult = { success: true, type: String(data.type), code: data.code ?? null, discountPercent: data.discountPercent, message: data.message };
-      if (elapsed >= phase1Duration) {
-        spinController.current?.stop();
-        startPhase2(resultData, finalTarget, rotation.get());
-      } else {
-        phase2Ref.current = { data: resultData, finalTarget };
-      }
+      const minDuration = 6;
+      const maxDuration = 7.5;
+      const duration = Math.max(minDuration, Math.min(maxDuration, maxDuration - elapsed));
+
+      spinController.current = animate(rotation, finalTarget, {
+        duration,
+        ease: [0.22, 0.2, 0.1, 1],
+        onComplete: () => {
+          setResult(data);
+          setLoading(false);
+        },
+      });
     } catch {
-      spinController.current?.stop();
       setResult({ success: false, type: "error", code: null, message: "เชื่อมต่อไม่สำเร็จ ลองใหม่" });
       setLoading(false);
     }
@@ -289,6 +245,8 @@ export default function BoothPage() {
               <motion.div
                 className="w-[min(280px,82vw)] h-[min(280px,82vw)] sm:w-[280px] sm:h-[280px] md:w-[320px] md:h-[320px] rounded-full border-[3px] border-white/30 overflow-hidden shadow-[0_0_0_1px_rgba(255,255,255,0.1),0_25px 60px_-15px_rgba(0,0,0,0.8),0_0_40px_rgba(255,255,255,0.03)]"
                 style={{ rotate: rotation, willChange: loading ? "transform" : undefined }}
+                animate={loading ? { scale: [1, 1.03, 1] } : { scale: 1 }}
+                transition={loading ? { duration: 0.35 } : undefined}
               >
                 <svg viewBox="0 0 100 100" className="w-full h-full" aria-hidden>
                   <defs>
@@ -333,17 +291,19 @@ export default function BoothPage() {
                   </text>
                 </svg>
               </motion.div>
-              <button
+              <motion.button
                 type="button"
                 onClick={runSpin}
                 disabled={loading || rateLimitSec > 0}
                 aria-label="สุ่มรางวัล"
                 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 w-[min(78px,22vw)] h-[min(78px,22vw)] sm:w-[78px] sm:h-[78px] rounded-full bg-[#0a0a0a] border-2 border-white/30 flex items-center justify-center hover:border-white/50 hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 active:scale-95"
+                animate={loading ? { scale: 0.96 } : { scale: 1 }}
+                transition={{ type: "spring", stiffness: 260, damping: 18 }}
               >
                 <span className="text-[7px] sm:text-[8px] font-black uppercase tracking-wider text-white/90 text-center leading-tight px-0.5">
-                  {loading ? "..." : rateLimitSec > 0 ? rateLimitSec : "SPIN"}
+                  {loading ? "กำลังเริ่มหมุน..." : rateLimitSec > 0 ? rateLimitSec : "SPIN"}
                 </span>
-              </button>
+              </motion.button>
             </div>
 
             {rateLimitSec > 0 && (

@@ -11,7 +11,7 @@ const RATE_LIMIT_SEC = 15;
 
 const QUOTA: Record<number, number> = { 50: 2, 15: 20, 10: 50 };
 
-// ความน่าจะเป็นเดิม: 50% = 0.1%, 0% = 50%, 15% = 15%, 10% = 34.9%
+// Base probability (ใช้สำหรับ tier อื่น ๆ และสำหรับ 50% เฉพาะกรณีที่ไม่ได้ใช้ pretty rate)
 const PROBABILITY = [
   { tier: 50 as const, p: 0.001 },
   { tier: 15 as const, p: 0.15 },
@@ -96,7 +96,36 @@ export async function POST(request: Request) {
       return quota != null && (usedCounts[tier] ?? 0) < quota;
     });
 
-    const tier = pickTierFrom(available);
+    // --- Pretty rate สำหรับ 50% ---
+    // เงื่อนไข: ทุก ๆ 50 ครั้ง ให้มีสิทธิ์ 50% 1 ใบ (ถ้า quota 50% ยังเหลือ)
+    // วิธีทำ:
+    // - นับจำนวนแถวใน booth_spin_log = จำนวนสปินที่ผ่านมา
+    // - spin ถัดไป = totalSpins + 1
+    // - ถ้า spin ถัดไปเป็นเลขหาร 50 ลงตัว และ quota 50 ยังเหลือ -> บังคับ tier = 50
+    // - สปินอื่น ๆ ใน block 50 นั้น ตัด tier 50 ออกจาก PROBABILITY เพื่อไม่ให้เกิน 1 ใบต่อ 50 สปิน
+    let tier: 50 | 15 | 10 | 0;
+    const quota50Left = (QUOTA[50] ?? 0) - (usedCounts[50] ?? 0);
+
+    if (quota50Left > 0) {
+      const { count: totalSpins } = await supabase
+        .from('booth_spin_log')
+        .select('id', { count: 'exact', head: true });
+
+      const nextSpinNumber = (totalSpins ?? 0) + 1;
+
+      if (nextSpinNumber % 50 === 0) {
+        // สปินที่ 50, 100, 150, ... และ quota 50 ยังเหลือ -> การันตี 50%
+        tier = 50;
+      } else {
+        // ใน block 50 นี้ แต่ยังไม่ถึงสปินที่หาร 50 ลงตัว -> ไม่ให้ 50% ออกก่อน
+        const availableWithout50 = available.filter(({ tier }) => tier !== 50);
+        tier = pickTierFrom(availableWithout50);
+      }
+    } else {
+      // quota 50% หมดแล้ว -> ตัด 50% ทิ้งจากตัวเลือก
+      const availableNo50 = available.filter(({ tier }) => tier !== 50);
+      tier = pickTierFrom(availableNo50);
+    }
 
     const logSpin = async () => {
       await supabase.from('booth_spin_log').insert({ ip_hash: ipHash });
