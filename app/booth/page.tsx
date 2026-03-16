@@ -116,20 +116,26 @@ export default function BoothPage() {
         return;
       }
 
-      const fullTurns = 360 * 6;
       const segmentAngle = getSegmentAngle(String(data.type));
-      const baseTarget = fullTurns + 360 + segmentAngle;
       const now = rotation.get();
       const current = Number.isFinite(now) ? now : startRotation;
-      const extraTurns = 4;
-      const adjustedTarget = baseTarget + 360 * extraTurns;
-      const k = current > adjustedTarget ? Math.ceil((current - adjustedTarget) / 360) + 1 : 0;
-      const finalTarget = adjustedTarget + 360 * k;
+      const currentMod = ((current % 360) + 360) % 360;
 
+      // หมุนอย่างน้อย baseTurns รอบ + ปรับมุมให้ไปลงตรง segment ตาม API
+      const baseTurns = 8;
+      const baseDistance = 360 * baseTurns;
+      const diffToSegment = ((segmentAngle - currentMod) + 360) % 360;
+      const distance = baseDistance + diffToSegment;
+      const finalTarget = current + distance;
+
+      // ความเร็วเชิงมุมคงที่คร่าว ๆ เพื่อให้รอบสั้น/ยาวรู้สึกเร็วเท่ากัน
+      const angularVelocity = 720; // deg/s
+      const idealDuration = distance / angularVelocity;
       const elapsed = (Date.now() - spinStartTime) / 1000;
-      const minDuration = 6;
-      const maxDuration = 7.5;
-      const duration = Math.max(minDuration, Math.min(maxDuration, maxDuration - elapsed));
+      const minDuration = 5;
+      const maxDuration = 8;
+      const clamped = Math.max(minDuration, Math.min(maxDuration, idealDuration));
+      const duration = Math.max(minDuration, Math.min(maxDuration, clamped - elapsed));
 
       spinController.current = animate(rotation, finalTarget, {
         duration,
