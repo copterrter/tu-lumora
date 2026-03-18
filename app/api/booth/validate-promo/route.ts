@@ -40,6 +40,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, message: 'โค้ดไม่ถูกต้องหรือถูกใช้ไปแล้ว' }, { status: 400 });
     }
 
+    // คุมโควต้าที่ "ใช้จริง" ต่อ tier
+    const tier = row.discount_percent as number;
+    const QUOTA: Record<number, number> = { 50: 3, 15: 20, 10: 50, 5: 80 };
+    const quota = QUOTA[tier];
+    if (quota != null) {
+      const { count } = await supabase
+        .from('promo_codes')
+        .select('id', { count: 'exact', head: true })
+        .eq('discount_percent', tier)
+        .eq('is_used', true)
+        .gte('created_at', NORMAL_EVENT_START);
+      if ((count ?? 0) >= quota) {
+        return NextResponse.json({ success: false, message: 'โควต้าส่วนลดนี้เต็มแล้ว ไม่สามารถใช้โค้ดนี้ได้' }, { status: 400 });
+      }
+    }
+
     return NextResponse.json({
       success: true,
       discountPercent: row.discount_percent,

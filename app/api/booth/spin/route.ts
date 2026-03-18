@@ -90,20 +90,21 @@ export async function POST(request: Request) {
       );
     }
 
-    // นับ "จำนวนโค้ดที่ออกแล้ว" ต่อ tier (รวมทั้ง used และ unused) เฉพาะรอบกิจกรรมนี้
-    const issuedCounts: Record<number, number> = { 50: 0, 15: 0, 10: 0, 5: 0 };
+    // คุมโควต้าที่ "ใช้จริง" (is_used=true) เฉพาะรอบกิจกรรมนี้
+    const usedCounts: Record<number, number> = { 50: 0, 15: 0, 10: 0, 5: 0 };
     for (const tier of [50, 15, 10, 5]) {
       const { count } = await supabase
         .from('promo_codes')
         .select('id', { count: 'exact', head: true })
         .eq('discount_percent', tier)
+        .eq('is_used', true)
         .gte('created_at', NORMAL_EVENT_START);
-      issuedCounts[tier] = count ?? 0;
+      usedCounts[tier] = count ?? 0;
     }
 
     const available = PROBABILITY.filter(({ tier }) => {
       const quota = QUOTA[tier];
-      return quota != null && (issuedCounts[tier] ?? 0) < quota;
+      return quota != null && (usedCounts[tier] ?? 0) < quota;
     });
 
     if (available.length === 0) {
@@ -121,7 +122,7 @@ export async function POST(request: Request) {
     // - ถ้า spin ถัดไปเป็นเลขหาร 50 ลงตัว และ quota 50 ยังเหลือ -> บังคับ tier = 50
     // - สปินอื่น ๆ ใน block 50 นั้น ตัด tier 50 ออกจาก PROBABILITY เพื่อไม่ให้เกิน 1 ใบต่อ 50 สปิน
     let tier: 50 | 15 | 10 | 5;
-    const quota50Left = (QUOTA[50] ?? 0) - (issuedCounts[50] ?? 0);
+    const quota50Left = (QUOTA[50] ?? 0) - (usedCounts[50] ?? 0);
 
     if (quota50Left > 0) {
       const { count: totalSpins } = await supabase

@@ -41,8 +41,8 @@ export async function GET() {
 
     const remaining: Record<number, number> = {};
     for (const tier of [50, 15, 10, 5]) {
-      // เหลือโควต้า "ที่ยังออกโค้ดได้อีก" (อิงจำนวนโค้ดที่ออกไปแล้ว ไม่ใช่ used)
-      remaining[tier] = Math.max(0, (QUOTA[tier] ?? 0) - (issuedCounts[tier] ?? 0));
+      // เหลือโควต้า "ที่ยังใช้ได้อีก" (คุมตาม used จริง)
+      remaining[tier] = Math.max(0, (QUOTA[tier] ?? 0) - (usedCounts[tier] ?? 0));
     }
 
     return NextResponse.json({
