@@ -10,22 +10,20 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 const RATE_LIMIT_SEC = 15;
 
 const QUOTA: Record<number, number> = {
-  50: 2,
+  50: 3,
   15: 20,
   10: 50,
   5: 80, // โควต้า 5% เพิ่มเป็นชั้นใหม่
 };
 
 // ความน่าจะเป็นฐาน:
-// - 50%   ~ 1%
-// - 5/10/15% เท่ากัน (แบ่งเท่าๆ กันจาก pool เดียวกัน)
-// - ที่เหลือเป็น 0%
+// - 50% ~ 1%
+// - 5/10/15% เท่ากัน
 const PROBABILITY = [
   { tier: 50 as const, p: 0.01 },
   { tier: 15 as const, p: 0.163 },
   { tier: 10 as const, p: 0.163 },
   { tier: 5 as const, p: 0.163 },
-  { tier: 0 as const, p: 0.501 },
 ];
 
 function getClientIp(request: Request): string {
@@ -41,10 +39,10 @@ function hashIp(ip: string): string {
 }
 
 /** สุ่ม tier จากรายการที่โคว้ายังไม่เต็ม */
-function pickTierFrom(available: { tier: 50 | 15 | 10 | 5 | 0; p: number }[]): 50 | 15 | 10 | 5 | 0 {
-  if (available.length === 0) return 0;
+function pickTierFrom(available: { tier: 50 | 15 | 10 | 5; p: number }[]): 50 | 15 | 10 | 5 {
+  if (available.length === 0) return 5;
   const sum = available.reduce((s, x) => s + x.p, 0);
-  if (sum <= 0) return 0;
+  if (sum <= 0) return available[0].tier;
   const r = Math.random() * sum;
   let acc = 0;
   for (const { tier, p } of available) {
@@ -100,7 +98,6 @@ export async function POST(request: Request) {
     }
 
     const available = PROBABILITY.filter(({ tier }) => {
-      if (tier === 0) return false;
       const quota = QUOTA[tier];
       return quota != null && (usedCounts[tier] ?? 0) < quota;
     });
@@ -119,7 +116,7 @@ export async function POST(request: Request) {
     // - spin ถัดไป = totalSpins + 1
     // - ถ้า spin ถัดไปเป็นเลขหาร 50 ลงตัว และ quota 50 ยังเหลือ -> บังคับ tier = 50
     // - สปินอื่น ๆ ใน block 50 นั้น ตัด tier 50 ออกจาก PROBABILITY เพื่อไม่ให้เกิน 1 ใบต่อ 50 สปิน
-    let tier: 50 | 15 | 10 | 5 | 0;
+    let tier: 50 | 15 | 10 | 5;
     const quota50Left = (QUOTA[50] ?? 0) - (usedCounts[50] ?? 0);
 
     if (quota50Left > 0) {
@@ -134,12 +131,19 @@ export async function POST(request: Request) {
         tier = 50;
       } else {
         // ใน block 50 นี้ แต่ยังไม่ถึงสปินที่หาร 50 ลงตัว -> ไม่ให้ 50% ออกก่อน
-      const availableWithout50 = available.filter(({ tier }) => tier !== 50);
-        tier = pickTierFrom(availableWithout50);
+        const availableWithout50 = available.filter(({ tier }) => tier !== 50);
+        // ถ้าตอนนี้เหลือแต่ 50% จริง ๆ (tier อื่นหมด) ก็ปล่อยให้สุ่มได้ 50% ต่อเนื่องไปจน quota หมด
+        tier = availableWithout50.length > 0 ? pickTierFrom(availableWithout50) : 50;
       }
     } else {
       // quota 50% หมดแล้ว -> ตัด 50% ทิ้งจากตัวเลือก
       const availableNo50 = available.filter(({ tier }) => tier !== 50);
+      if (availableNo50.length === 0) {
+        return NextResponse.json(
+          { success: false, type: 'closed', message: 'สิทธิ์ส่วนลดจากกิจกรรมหมดแล้ว ขอบคุณที่ร่วมสนุกนะครับ' },
+          { status: 400 },
+        );
+      }
       tier = pickTierFrom(availableNo50);
     }
 
@@ -147,22 +151,17 @@ export async function POST(request: Request) {
       await supabase.from('booth_spin_log').insert({ ip_hash: ipHash });
     };
 
-    if (tier === 0) {
-      await logSpin();
-      return NextResponse.json({ success: true, type: '0', code: null, message: 'ลูโม่แอบกินส่วนลดของคุณไปแล้ว! 🐰' });
-    }
-
     const { data: codeName, error: rpcError } = await supabase.rpc('claim_booth_promo_code', { p_tier: tier });
 
     if (rpcError) {
       console.error('Booth spin RPC error:', rpcError);
       await logSpin();
-      return NextResponse.json({ success: false, type: '0', code: null, message: 'สร้างโค้ดไม่สำเร็จ ลองใหม่' }, { status: 500 });
+      return NextResponse.json({ success: false, type: 'error', code: null, message: 'สร้างโค้ดไม่สำเร็จ ลองใหม่' }, { status: 500 });
     }
 
     if (codeName == null || codeName === '') {
       await logSpin();
-      return NextResponse.json({ success: false, type: '0', code: null, message: 'สร้างโค้ดไม่สำเร็จ ลองสุ่มใหม่ได้เลย' }, { status: 500 });
+      return NextResponse.json({ success: false, type: 'error', code: null, message: 'สร้างโค้ดไม่สำเร็จ ลองสุ่มใหม่ได้เลย' }, { status: 500 });
     }
 
     await logSpin();
