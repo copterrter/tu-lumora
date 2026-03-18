@@ -302,7 +302,7 @@ export default function BoothPage() {
                 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 w-[min(78px,22vw)] h-[min(78px,22vw)] sm:w-[78px] sm:h-[78px] rounded-full bg-[#0a0a0a] border-2 border-white/30 flex items-center justify-center hover:border-white/50 hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 active:scale-95"
               >
                 <span className="text-[7px] sm:text-[8px] font-black uppercase tracking-wider text-white/90 text-center leading-tight px-0.5">
-                  {rateLimitSec > 0 ? rateLimitSec : "SPIN"}
+                  {rateLimitSec > 0 ? `รอ ${rateLimitSec} วิ` : "SPIN"}
                 </span>
               </button>
             </div>
