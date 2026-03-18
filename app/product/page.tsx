@@ -287,7 +287,12 @@ export default function ProductPage() {
                     </span>
                   </div>
                   {phase !== "normal" && (
-                    <span className="text-[9px] font-bold text-red-200 uppercase tracking-widest sm:shrink-0 hidden sm:block">
+                    <span
+                      className={
+                        "text-[9px] font-bold uppercase tracking-widest sm:shrink-0 " +
+                        (phase === "flash2" ? "text-emerald-200" : "text-red-200")
+                      }
+                    >
                       Limited Time Only
                     </span>
                   )}
