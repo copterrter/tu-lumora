@@ -579,7 +579,13 @@ export default function CheckoutPage() {
               </div>
               {discount > 0 && (
                 <div className="flex justify-between text-green-400 bg-green-500/10 -mx-8 md:-mx-10 px-8 md:px-10 py-3 border-y border-green-500/10">
-                  <span>{appliedPromo ? "ส่วนลดจากโค้ด" : "Squad Promo Saved 🎉"}</span>
+                  <span>
+                    {appliedPromo
+                      ? "ส่วนลดจากโค้ด"
+                      : phase === "flash2"
+                        ? "Flash Deal Discount"
+                        : "Squad Promo Saved 🎉"}
+                  </span>
                   <span className="italic font-black text-sm">-฿{discount}</span>
                 </div>
               )}
