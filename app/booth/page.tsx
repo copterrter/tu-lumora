@@ -46,6 +46,7 @@ export default function BoothPage() {
   const rotation = useMotionValue(0);
   const spinController = useRef<ReturnType<typeof animate> | null>(null);
   const idleController = useRef<ReturnType<typeof animate> | null>(null);
+  const waitSpinController = useRef<ReturnType<typeof animate> | null>(null);
 
   useEffect(() => {
     const t = setTimeout(() => setPhase(getCurrentPhase()), 0);
@@ -97,7 +98,17 @@ export default function BoothPage() {
     setRateLimitSec(0);
     idleController.current?.stop();
     idleController.current = null;
-    if (spinController.current) spinController.current.stop();
+    spinController.current?.stop();
+    waitSpinController.current?.stop();
+    waitSpinController.current = null;
+
+    // หมุนทันทีระหว่างรอ backend เพื่อไม่ให้ user รู้สึกค้าง
+    const waitFrom = rotation.get();
+    waitSpinController.current = animate(rotation, waitFrom + 360, {
+      duration: 0.85,
+      ease: "linear",
+      repeat: Infinity,
+    });
 
     const startRotation = rotation.get();
     const spinStartTime = Date.now();
@@ -107,6 +118,8 @@ export default function BoothPage() {
       const data = await res.json();
 
       if (res.status === 429) {
+        waitSpinController.current?.stop();
+        waitSpinController.current = null;
         setLoading(false);
         setResult(data);
         const sec = typeof data.retryAfterSeconds === "number" ? Math.max(0, data.retryAfterSeconds) : 30;
@@ -114,6 +127,10 @@ export default function BoothPage() {
         setRateLimitKey((k) => k + 1);
         return;
       }
+
+      // ปิด wait-spin แล้วไหลต่อไปสปินจริงในเฟรมถัดไป (ลดอาการสะดุด)
+      waitSpinController.current?.stop();
+      waitSpinController.current = null;
 
       const segmentAngle = getSegmentAngle(String(data.type));
       const now = rotation.get();
@@ -145,6 +162,8 @@ export default function BoothPage() {
         },
       });
     } catch {
+      waitSpinController.current?.stop();
+      waitSpinController.current = null;
       setResult({ success: false, type: "error", code: null, message: "เชื่อมต่อไม่สำเร็จ ลองใหม่" });
       setLoading(false);
     }
