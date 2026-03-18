@@ -100,7 +100,7 @@ export async function POST(request: Request) {
     
     const sizeStr = orderData.items.map((i: Item) => i.size).join(", ");
 
-    const insertOrder = async (status: string, slipTransRef?: string | null, slipImageUrl?: string | null) => {
+    const insertOrder = async (status: string, slipTransRef?: string | null, slipImageUrl?: string | null): Promise<string | null> => {
       const baseOrder: Record<string, unknown> = {
         firstName: formData.firstName,
         lastName: formData.lastName,
@@ -125,7 +125,7 @@ export async function POST(request: Request) {
         baseOrder.slip_image_url = slipImageUrl;
       }
 
-      const { error: insertError } = await supabase.from('orders').insert([baseOrder]);
+      const { data: inserted, error: insertError } = await supabase.from('orders').insert([baseOrder]).select('id').single();
 
       if (insertError) {
         // Graceful degradation if slip_trans_ref column doesn't exist yet
@@ -137,13 +137,15 @@ export async function POST(request: Request) {
           const withoutExtras = Object.fromEntries(
             Object.entries(baseOrder).filter(([k]) => k !== "slip_trans_ref" && k !== "slip_image_url")
           );
-          const { error: retryError } = await supabase.from('orders').insert([withoutExtras]);
+          const { data: inserted2, error: retryError } = await supabase.from('orders').insert([withoutExtras]).select('id').single();
           if (retryError) throw retryError;
           console.warn("WARNING: Inserted order without some optional columns (slip_trans_ref / slip_image_url). Please ensure these columns exist in Supabase if you need them.");
+          return inserted2?.id ?? null;
         } else {
           throw insertError;
         }
       }
+      return inserted?.id ?? null;
     };
 
     // 3. Auto verify flow with RDCW API (มี fallback ไปตรวจมือในทุกเคสที่อ่านสลิปไม่ได้/ยอดไม่ตรง)
@@ -236,10 +238,13 @@ export async function POST(request: Request) {
     }
 
     // 7. Insert Order Securely
-    await insertOrder('paid_and_verified', transRef, slipImageUrl);
+    const orderId = await insertOrder('paid_and_verified', transRef, slipImageUrl);
 
     if (promoCodeUsed) {
-      await supabase.from("promo_codes").update({ is_used: true }).eq("code_name", promoCodeUsed);
+      await supabase
+        .from("promo_codes")
+        .update({ is_used: true, used_at: new Date().toISOString(), used_order_id: orderId })
+        .eq("code_name", promoCodeUsed);
     }
 
     // 8. Send Email Receipt
