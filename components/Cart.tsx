@@ -12,8 +12,8 @@ export default function Cart() {
   const pairs = Math.floor(totalQty / 2); // หาจำนวนคู่ (เช่น ซื้อ 3 ได้ 1 คู่)
   const singles = totalQty % 2; // หาเศษตัวเดียว (เช่น ซื้อ 3 เหลือเศษ 1 ตัว)
   
-  // คำนวณราคา: (จำนวนคู่ * 570) + (จำนวนเศษ * 299)
-  const totalPrice = (pairs * 570) + (singles * 299);
+  // คำนวณราคา: (จำนวนคู่ * 570) + (จำนวนเศษ * 289)
+  const totalPrice = (pairs * 570) + (singles * 289);
   const isPairPromo = pairs > 0;
 
   return (
@@ -40,7 +40,7 @@ export default function Cart() {
                   <p className="text-sm text-gray-400 tracking-wider">Style: {item.style} | Size: {item.size}</p>
                   <p className="text-sm text-gray-400">Qty: {item.quantity}</p>
                   <div className="text-white font-bold mt-1">
-                    <span className="text-green-500">฿299 <span className="line-through text-gray-600 text-xs ml-1">฿329</span></span>
+                    <span className="text-green-500">฿289 <span className="line-through text-gray-600 text-xs ml-1">฿329</span></span>
                   </div>
                 </div>
                 <button onClick={() => removeItem(item.id)} className="text-gray-500 hover:text-red-500 transition"><Trash2 size={20} /></button>

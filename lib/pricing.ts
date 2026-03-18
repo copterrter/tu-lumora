@@ -32,7 +32,7 @@ export function calculateTotalForCart(items: CartItemLike[]): {
   const totalQty = items.reduce((s, i) => s + (i.quantity || 0), 0);
 
   const BASE_PRICE = 329;
-  const FLASH2_PRICE = 299;
+  const FLASH2_PRICE = 289;
   const PROMO_PAIR_PRICE = 590;
 
   let total = 0;

@@ -37,6 +37,8 @@ export async function POST(request: Request) {
     }
 
     const QUOTA: Record<number, number> = { 50: 4, 15: 20, 10: 50, 5: 80 };
+    // นับโควต้าที่ "ใช้จริง" เฉพาะช่วง Normal รอบกิจกรรมนี้
+    const NORMAL_EVENT_START = new Date('2026-03-15T00:00:00+07:00').toISOString();
     if (phase === "normal" && totalQty === 1 && promoCode) {
       const { data: promo } = await supabase
         .from("promo_codes")

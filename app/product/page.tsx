@@ -256,7 +256,7 @@ export default function ProductPage() {
                     <span className="text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] sm:tracking-[0.4em] text-white">
                       {phase === "flash1" && "⚡ FLASH DEAL — ROUND I"}
                       {phase === "normal" && "STANDARD PRICE WINDOW"}
-                      {phase === "flash2" && "⚡ FLASH DEAL — ROUND II (299.-)"}
+                      {phase === "flash2" && "⚡ FLASH DEAL — ROUND II (289.-)"}
                     </span>
                   </div>
                   {phase !== "normal" && (
@@ -379,7 +379,7 @@ export default function ProductPage() {
                     </div>
                   )}
 
-                  {/* Flash 2: 299 flat */}
+                  {/* Flash 2: 289 flat */}
                   {phase === "flash2" && (
                     <div className="space-y-4">
                       <p className="text-[9px] sm:text-[10px] text-emerald-100 tracking-[0.2em] uppercase font-bold px-1">
@@ -399,7 +399,7 @@ export default function ProductPage() {
                             Now only
                           </p>
                           <p className="text-3xl sm:text-4xl font-black italic text-emerald-200 drop-shadow-[0_0_18px_rgba(16,185,129,0.8)]">
-                            299.-
+                            289.-
                           </p>
                           <p className="text-[9px] text-emerald-300 tracking-[0.25em] uppercase">
                             per piece
