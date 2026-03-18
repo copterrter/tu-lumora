@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { getCurrentPhase } from '@/lib/pricing';
-import { createHash, randomBytes } from 'crypto';
+import { createHash } from 'crypto';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -151,36 +151,10 @@ export async function POST(request: Request) {
       await supabase.from('booth_spin_log').insert({ ip_hash: ipHash });
     };
 
-    const makeCode = () => {
-      const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-      const bytes = randomBytes(8);
-      let out = '';
-      for (let i = 0; i < 8; i++) out += alphabet[bytes[i] % alphabet.length];
-      return `LUMO-${out}`;
-    };
-
-    // สร้างโค้ด + insert ลง promo_codes (กันชน unique ด้วยการ retry)
-    let codeName: string | null = null;
-    let lastErr: unknown = null;
-    for (let attempt = 0; attempt < 6; attempt++) {
-      const candidate = makeCode();
-      const { error } = await supabase.from('promo_codes').insert({
-        code_name: candidate,
-        discount_percent: tier,
-        is_used: false,
-      });
-      if (!error) {
-        codeName = candidate;
-        break;
-      }
-      // 23505 = unique violation (ชน code_name) -> ลองใหม่
-      if ((error as { code?: string }).code === '23505') continue;
-      lastErr = error;
-      break;
-    }
-
-    if (!codeName) {
-      console.error('Booth spin code insert error:', lastErr);
+    // สร้างโค้ดใน DB (SECURITY DEFINER) เพื่อไม่พึ่ง service role key
+    const { data: codeName, error: rpcError } = await supabase.rpc('create_booth_promo_code', { p_tier: tier });
+    if (rpcError || !codeName) {
+      console.error('Booth spin create code RPC error:', rpcError);
       await logSpin();
       return NextResponse.json({ success: false, type: 'error', code: null, message: 'สร้างโค้ดไม่สำเร็จ ลองใหม่' }, { status: 500 });
     }
