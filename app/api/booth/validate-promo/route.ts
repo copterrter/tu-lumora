@@ -7,6 +7,7 @@ const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PU
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // โควต้าถูกคุมตอน "ออกโค้ด" แล้ว จึงไม่ต้อง re-check ที่ validate
+const NORMAL_EVENT_START = new Date('2026-03-15T00:00:00+07:00').toISOString();
 
 export async function POST(request: Request) {
   try {
@@ -29,9 +30,10 @@ export async function POST(request: Request) {
 
     const { data: row, error } = await supabase
       .from('promo_codes')
-      .select('id, discount_percent')
+      .select('id, discount_percent, created_at')
       .eq('code_name', code)
       .eq('is_used', false)
+      .gte('created_at', NORMAL_EVENT_START)
       .single();
 
     if (error || !row) {

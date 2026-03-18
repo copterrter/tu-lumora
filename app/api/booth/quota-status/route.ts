@@ -7,6 +7,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 // ต้อง sync กับ QUOTA ใน /api/booth/spin
 const QUOTA: Record<number, number> = { 50: 3, 15: 20, 10: 50, 5: 80 };
+const NORMAL_EVENT_START = new Date('2026-03-15T00:00:00+07:00').toISOString();
 
 export async function GET() {
   try {
@@ -17,21 +18,24 @@ export async function GET() {
       const { count: issued } = await supabase
         .from("promo_codes")
         .select("id", { count: "exact", head: true })
-        .eq("discount_percent", tier);
+        .eq("discount_percent", tier)
+        .gte("created_at", NORMAL_EVENT_START);
       issuedCounts[tier] = issued ?? 0;
 
       const { count } = await supabase
         .from("promo_codes")
         .select("id", { count: "exact", head: true })
         .eq("discount_percent", tier)
-        .eq("is_used", true);
+        .eq("is_used", true)
+        .gte("created_at", NORMAL_EVENT_START);
       usedCounts[tier] = count ?? 0;
 
       const { count: available } = await supabase
         .from("promo_codes")
         .select("id", { count: "exact", head: true })
         .eq("discount_percent", tier)
-        .eq("is_used", false);
+        .eq("is_used", false)
+        .gte("created_at", NORMAL_EVENT_START);
       availableCounts[tier] = available ?? 0;
     }
 

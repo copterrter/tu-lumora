@@ -9,6 +9,9 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 const RATE_LIMIT_SEC = 15;
 
+// นับโควต้าเฉพาะโค้ดที่ออกในช่วง Normal รอบนี้ (กันโค้ดเก่าทำให้ tier อื่น "เต็ม" แล้วเหลือแต่ 5%)
+const NORMAL_EVENT_START = new Date('2026-03-15T00:00:00+07:00').toISOString();
+
 const QUOTA: Record<number, number> = {
   50: 3,
   15: 20,
@@ -87,13 +90,14 @@ export async function POST(request: Request) {
       );
     }
 
-    // นับ "จำนวนโค้ดที่ออกแล้ว" ต่อ tier (รวมทั้ง used และ unused) เพื่อกันแจกเกิน QUOTA
+    // นับ "จำนวนโค้ดที่ออกแล้ว" ต่อ tier (รวมทั้ง used และ unused) เฉพาะรอบกิจกรรมนี้
     const issuedCounts: Record<number, number> = { 50: 0, 15: 0, 10: 0, 5: 0 };
     for (const tier of [50, 15, 10, 5]) {
       const { count } = await supabase
         .from('promo_codes')
         .select('id', { count: 'exact', head: true })
         .eq('discount_percent', tier)
+        .gte('created_at', NORMAL_EVENT_START);
       issuedCounts[tier] = count ?? 0;
     }
 
