@@ -409,25 +409,24 @@ export default function ProductPage() {
                   {/* Flash 2: 289 flat */}
                   {phase === "flash2" && (
                     <div className="space-y-4">
-                      <p className="text-[9px] sm:text-[10px] text-emerald-100 tracking-[0.2em] uppercase font-bold px-1">
-                        FLASH DEAL: ทุกแบบ ทุกไซส์ ราคาเดียว! — FLAT PRICE
-                      </p>
                       <div className="flex flex-col sm:flex-row items-center justify-between border border-emerald-400/40 bg-emerald-500/10 px-4 py-4 gap-3 shadow-[0_0_25px_rgba(16,185,129,0.4)]">
                         <div className="text-left">
                           <p className="text-[9px] text-emerald-200 uppercase tracking-[0.25em]">
-                            ทุกแบบ ทุกไซส์
+                            ANY STYLE / ANY SIZE
                           </p>
-                          <p className="text-xs text-emerald-100">ราคาเดียวแบบ FLAT PRICE ไม่มีขั้นต่ำ (สูงสุด 6 ชิ้น)</p>
+                          <p className="text-xs text-emerald-100">
+                            Single flat price — no minimum, up to 6 units.
+                          </p>
                         </div>
                         <div className="text-right">
                           <p className="text-[10px] text-gray-400 uppercase tracking-[0.25em]">
-                            FLAT PRICE
+                            NOW ONLY
                           </p>
                           <p className="text-3xl sm:text-4xl font-black italic text-emerald-200 drop-shadow-[0_0_18px_rgba(16,185,129,0.8)]">
                             289.-
                           </p>
                           <p className="text-[9px] text-emerald-300 tracking-[0.25em] uppercase">
-                            — FLAT PRICE
+                            PER PIECE
                           </p>
                         </div>
                       </div>
