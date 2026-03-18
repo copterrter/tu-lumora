@@ -283,7 +283,7 @@ export default function ProductPage() {
                     <span className="text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] sm:tracking-[0.4em] text-white">
                       {phase === "flash1" && "⚡ FLASH DEAL — ROUND I"}
                       {phase === "normal" && "STANDARD PRICE WINDOW"}
-                      {phase === "flash2" && "⚡ FLASH DEAL ก่อนปิดพรี (289.-)"}
+                      {phase === "flash2" && "⚡ Flash Deal: โค้งสุดท้ายก่อนปิดพรีออเดอร์ (289.-)"}
                     </span>
                   </div>
                   {phase !== "normal" && (
@@ -410,7 +410,7 @@ export default function ProductPage() {
                   {phase === "flash2" && (
                     <div className="space-y-4">
                       <p className="text-[9px] sm:text-[10px] text-emerald-100 tracking-[0.2em] uppercase font-bold px-1">
-                        Flash Deal ก่อนปิดพรีออเดอร์ — Flat Price
+                        Flash Deal: โค้งสุดท้ายก่อนปิดพรีออเดอร์ — Flat Price
                       </p>
                       <div className="flex flex-col sm:flex-row items-center justify-between border border-emerald-400/40 bg-emerald-500/10 px-4 py-4 gap-3 shadow-[0_0_25px_rgba(16,185,129,0.4)]">
                         <div className="text-left">
