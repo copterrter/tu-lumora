@@ -13,7 +13,7 @@ const RATE_LIMIT_SEC = 15;
 const NORMAL_EVENT_START = new Date('2026-03-15T00:00:00+07:00').toISOString();
 
 const QUOTA: Record<number, number> = {
-  50: 3,
+  50: 4,
   15: 20,
   10: 50,
   5: 80, // โควต้า 5% เพิ่มเป็นชั้นใหม่
