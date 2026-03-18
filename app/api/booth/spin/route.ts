@@ -21,9 +21,9 @@ const QUOTA: Record<number, number> = {
 // - 5/10/15% เท่ากัน
 const PROBABILITY = [
   { tier: 50 as const, p: 0.01 },
-  { tier: 15 as const, p: 0.163 },
-  { tier: 10 as const, p: 0.163 },
-  { tier: 5 as const, p: 0.163 },
+  { tier: 15 as const, p: 0.33 },
+  { tier: 10 as const, p: 0.33 },
+  { tier: 5 as const, p: 0.33 },
 ];
 
 function getClientIp(request: Request): string {

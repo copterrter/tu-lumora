@@ -61,6 +61,13 @@ export default function BoothPage() {
     return () => clearInterval(id);
   }, [rateLimitKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const startCooldown = (sec: number) => {
+    const s = Math.max(0, Math.floor(sec));
+    if (s <= 0) return;
+    setRateLimitSec(s);
+    setRateLimitKey((k) => k + 1);
+  };
+
   // วงล้อหมุนช้าๆ ตลอดเมื่อไม่ได้กด (รอ user หรือไม่ได้ใช้)
   useEffect(() => {
     if (phase !== "normal" || loading) {
@@ -89,6 +96,8 @@ export default function BoothPage() {
   }, [phase, loading, rotation]);
 
   const runSpin = useCallback(async () => {
+    // กันกดซ้ำระหว่างหมุน/คูลดาวน์
+    if (loading || rateLimitSec > 0) return;
     if (getCurrentPhase() !== "normal") {
       setResult({ success: false, type: "closed", code: null, message: "กิจกรรมบูธเปิดเฉพาะช่วง Normal เท่านั้น" });
       return;
@@ -123,8 +132,7 @@ export default function BoothPage() {
         setLoading(false);
         setResult(data);
         const sec = typeof data.retryAfterSeconds === "number" ? Math.max(0, data.retryAfterSeconds) : 30;
-        setRateLimitSec(sec);
-        setRateLimitKey((k) => k + 1);
+        startCooldown(sec);
         return;
       }
 
@@ -159,6 +167,8 @@ export default function BoothPage() {
         onComplete: () => {
           setResult(data);
           setLoading(false);
+          // เริ่มคูลดาวน์หลังหมุนจบทุกครั้ง (กัน user กดรัว)
+          startCooldown(15);
         },
       });
     } catch {
@@ -167,7 +177,7 @@ export default function BoothPage() {
       setResult({ success: false, type: "error", code: null, message: "เชื่อมต่อไม่สำเร็จ ลองใหม่" });
       setLoading(false);
     }
-  }, [rotation]);
+  }, [loading, rateLimitSec, rotation]);
 
   const normal = phase === "normal";
 
@@ -308,9 +318,6 @@ export default function BoothPage() {
                     );
                   })}
                   <circle cx="50" cy="50" r="14" fill="#0a0a0a" stroke="rgba(255,255,255,0.25)" strokeWidth="1.2" />
-                  <text x="50" y="50" textAnchor="middle" dominantBaseline="middle" fill="rgba(255,255,255,0.9)" fontSize="4.5" fontWeight="bold">
-                    LUMORA
-                  </text>
                 </svg>
               </motion.div>
               <button
