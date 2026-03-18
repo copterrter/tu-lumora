@@ -283,7 +283,7 @@ export default function ProductPage() {
                     <span className="text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] sm:tracking-[0.4em] text-white">
                       {phase === "flash1" && "⚡ FLASH DEAL — ROUND I"}
                       {phase === "normal" && "STANDARD PRICE WINDOW"}
-                      {phase === "flash2" && "⚡ Flash Deal: โค้งสุดท้ายก่อนปิดพรีออเดอร์ (289.-)"}
+                      {phase === "flash2" && "⚡ LIMITED TIME OFFER: โค้งสุดท้าย (289.-)"}
                     </span>
                   </div>
                   {phase !== "normal" && (
@@ -410,26 +410,24 @@ export default function ProductPage() {
                   {phase === "flash2" && (
                     <div className="space-y-4">
                       <p className="text-[9px] sm:text-[10px] text-emerald-100 tracking-[0.2em] uppercase font-bold px-1">
-                        Flash Deal: โค้งสุดท้ายก่อนปิดพรีออเดอร์ — Flat Price
+                        FLASH DEAL: ทุกแบบ ทุกไซส์ ราคาเดียว! — FLAT PRICE
                       </p>
                       <div className="flex flex-col sm:flex-row items-center justify-between border border-emerald-400/40 bg-emerald-500/10 px-4 py-4 gap-3 shadow-[0_0_25px_rgba(16,185,129,0.4)]">
                         <div className="text-left">
                           <p className="text-[9px] text-emerald-200 uppercase tracking-[0.25em]">
-                            Any Style / Any Size
+                            ทุกแบบ ทุกไซส์
                           </p>
-                          <p className="text-xs text-emerald-100">
-                            Single flat price — no minimum, up to 6 units.
-                          </p>
+                          <p className="text-xs text-emerald-100">ราคาเดียวแบบ FLAT PRICE ไม่มีขั้นต่ำ (สูงสุด 6 ชิ้น)</p>
                         </div>
                         <div className="text-right">
                           <p className="text-[10px] text-gray-400 uppercase tracking-[0.25em]">
-                            Now only
+                            FLAT PRICE
                           </p>
                           <p className="text-3xl sm:text-4xl font-black italic text-emerald-200 drop-shadow-[0_0_18px_rgba(16,185,129,0.8)]">
                             289.-
                           </p>
                           <p className="text-[9px] text-emerald-300 tracking-[0.25em] uppercase">
-                            per piece
+                            — FLAT PRICE
                           </p>
                         </div>
                       </div>
