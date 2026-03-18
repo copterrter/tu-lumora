@@ -469,6 +469,11 @@ export default function ProductPage() {
             </div>
 
             <div className="space-y-2">
+              {!isClosed && phase === "flash2" && (
+                <p className="text-[10px] text-emerald-200 uppercase tracking-[0.2em]">
+                  รอบสุดท้ายก่อนปิดพรีออเดอร์ — ปิด 20 มี.ค. 23:59 (เวลาไทย)
+                </p>
+              )}
               <button
                 onClick={addToCart}
                 disabled={isClosed}
