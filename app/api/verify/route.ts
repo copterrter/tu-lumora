@@ -36,7 +36,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const QUOTA: Record<number, number> = { 50: 2, 15: 20, 10: 50 };
+    const QUOTA: Record<number, number> = { 50: 4, 15: 20, 10: 50, 5: 80 };
     if (phase === "normal" && totalQty === 1 && promoCode) {
       const { data: promo } = await supabase
         .from("promo_codes")
@@ -52,7 +52,8 @@ export async function POST(request: Request) {
             .from("promo_codes")
             .select("id", { count: "exact", head: true })
             .eq("discount_percent", tier)
-            .eq("is_used", true);
+            .eq("is_used", true)
+            .gte("created_at", NORMAL_EVENT_START);
           if ((count ?? 0) >= quota) {
             return NextResponse.json(
               { success: false, message: "โควต้าส่วนลดนี้เต็มแล้ว ไม่สามารถใช้โค้ดนี้ได้" },

@@ -6,7 +6,7 @@ const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PU
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // ต้อง sync กับ QUOTA ใน /api/booth/spin
-const QUOTA: Record<number, number> = { 50: 3, 15: 20, 10: 50, 5: 80 };
+const QUOTA: Record<number, number> = { 50: 4, 15: 20, 10: 50, 5: 80 };
 const NORMAL_EVENT_START = new Date('2026-03-15T00:00:00+07:00').toISOString();
 
 export async function GET() {
