@@ -233,12 +233,39 @@ export default function ProductPage() {
           {/* Dynamic Promo / Pricing Box by Phase */}
           {!isClosed && (
             <div className="relative">
-              <div className="absolute -inset-[2px] bg-gradient-to-r from-red-600 via-red-400 to-red-600 rounded-sm opacity-70 blur-[3px] animate-pulse pointer-events-none" />
-              <div className="absolute -inset-[1px] bg-gradient-to-br from-red-500/40 to-transparent rounded-sm pointer-events-none" />
+              <div
+                className={
+                  "absolute -inset-[2px] rounded-sm opacity-70 blur-[3px] animate-pulse pointer-events-none " +
+                  (phase === "flash2"
+                    ? "bg-gradient-to-r from-emerald-500 via-emerald-400 to-emerald-500"
+                    : "bg-gradient-to-r from-red-600 via-red-400 to-red-600")
+                }
+              />
+              <div
+                className={
+                  "absolute -inset-[1px] rounded-sm pointer-events-none " +
+                  (phase === "flash2" ? "bg-gradient-to-br from-emerald-500/40 to-transparent" : "bg-gradient-to-br from-red-500/40 to-transparent")
+                }
+              />
 
-              <div className="relative overflow-hidden bg-[#060606] border border-red-500/30 rounded-sm shadow-[0_0_40px_rgba(239,68,68,0.2)]">
-                <div className="absolute -top-16 -right-16 w-56 h-56 bg-red-600/25 blur-[80px] animate-pulse pointer-events-none" />
-                <div className="absolute -bottom-16 -left-16 w-56 h-56 bg-red-900/25 blur-[80px] pointer-events-none" />
+              <div
+                className={
+                  "relative overflow-hidden bg-[#060606] rounded-sm " +
+                  (phase === "flash2" ? "border-emerald-500/30 shadow-[0_0_40px_rgba(16,185,129,0.2)]" : "border-red-500/30 shadow-[0_0_40px_rgba(239,68,68,0.2)]")
+                }
+              >
+                <div
+                  className={
+                    "absolute -top-16 -right-16 w-56 h-56 blur-[80px] animate-pulse pointer-events-none " +
+                    (phase === "flash2" ? "bg-emerald-600/25" : "bg-red-600/25")
+                  }
+                />
+                <div
+                  className={
+                    "absolute -bottom-16 -left-16 w-56 h-56 blur-[80px] pointer-events-none " +
+                    (phase === "flash2" ? "bg-emerald-900/25" : "bg-red-900/25")
+                  }
+                />
 
                 {/* Top badge by phase */}
                 <div
