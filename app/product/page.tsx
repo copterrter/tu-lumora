@@ -270,7 +270,7 @@ export default function ProductPage() {
                 {/* Top badge by phase */}
                 <div
                   className={
-                    "flex flex-col sm:flex-row sm:items-center justify-between px-3 sm:px-5 py-2 sm:py-3 gap-1 sm:gap-4 " +
+                    "flex flex-row items-center justify-between px-3 sm:px-5 py-2 sm:py-3 gap-1 sm:gap-4 " +
                     (phase === "flash2"
                       ? "bg-gradient-to-r from-emerald-500 to-emerald-700"
                       : phase === "normal"
@@ -414,7 +414,7 @@ export default function ProductPage() {
                   {/* Flash 2: 289 flat */}
                   {phase === "flash2" && (
                     <div className="space-y-4">
-                      <div className="flex flex-col sm:flex-row items-center justify-between border border-emerald-400/40 bg-emerald-500/10 px-4 py-4 gap-3 shadow-[0_0_25px_rgba(16,185,129,0.4)]">
+                      <div className="flex flex-row items-center justify-between border border-emerald-400/40 bg-emerald-500/10 px-4 py-4 gap-3 shadow-[0_0_25px_rgba(16,185,129,0.4)]">
                         <div className="text-left">
                           <p className="text-[9px] text-emerald-200 uppercase tracking-[0.25em]">
                             ANY STYLE / ANY SIZE
