@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { getCurrentPhase } from '@/lib/pricing';
-import { createHash } from 'crypto';
+import { createHash, randomBytes } from 'crypto';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -87,19 +87,19 @@ export async function POST(request: Request) {
       );
     }
 
-    const usedCounts: Record<number, number> = { 50: 0, 15: 0, 10: 0, 5: 0 };
+    // นับ "จำนวนโค้ดที่ออกแล้ว" ต่อ tier (รวมทั้ง used และ unused) เพื่อกันแจกเกิน QUOTA
+    const issuedCounts: Record<number, number> = { 50: 0, 15: 0, 10: 0, 5: 0 };
     for (const tier of [50, 15, 10, 5]) {
       const { count } = await supabase
         .from('promo_codes')
         .select('id', { count: 'exact', head: true })
         .eq('discount_percent', tier)
-        .eq('is_used', true);
-      usedCounts[tier] = count ?? 0;
+      issuedCounts[tier] = count ?? 0;
     }
 
     const available = PROBABILITY.filter(({ tier }) => {
       const quota = QUOTA[tier];
-      return quota != null && (usedCounts[tier] ?? 0) < quota;
+      return quota != null && (issuedCounts[tier] ?? 0) < quota;
     });
 
     if (available.length === 0) {
@@ -117,7 +117,7 @@ export async function POST(request: Request) {
     // - ถ้า spin ถัดไปเป็นเลขหาร 50 ลงตัว และ quota 50 ยังเหลือ -> บังคับ tier = 50
     // - สปินอื่น ๆ ใน block 50 นั้น ตัด tier 50 ออกจาก PROBABILITY เพื่อไม่ให้เกิน 1 ใบต่อ 50 สปิน
     let tier: 50 | 15 | 10 | 5;
-    const quota50Left = (QUOTA[50] ?? 0) - (usedCounts[50] ?? 0);
+    const quota50Left = (QUOTA[50] ?? 0) - (issuedCounts[50] ?? 0);
 
     if (quota50Left > 0) {
       const { count: totalSpins } = await supabase
@@ -151,17 +151,38 @@ export async function POST(request: Request) {
       await supabase.from('booth_spin_log').insert({ ip_hash: ipHash });
     };
 
-    const { data: codeName, error: rpcError } = await supabase.rpc('claim_booth_promo_code', { p_tier: tier });
+    const makeCode = () => {
+      const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      const bytes = randomBytes(8);
+      let out = '';
+      for (let i = 0; i < 8; i++) out += alphabet[bytes[i] % alphabet.length];
+      return `LUMO-${out}`;
+    };
 
-    if (rpcError) {
-      console.error('Booth spin RPC error:', rpcError);
-      await logSpin();
-      return NextResponse.json({ success: false, type: 'error', code: null, message: 'สร้างโค้ดไม่สำเร็จ ลองใหม่' }, { status: 500 });
+    // สร้างโค้ด + insert ลง promo_codes (กันชน unique ด้วยการ retry)
+    let codeName: string | null = null;
+    let lastErr: unknown = null;
+    for (let attempt = 0; attempt < 6; attempt++) {
+      const candidate = makeCode();
+      const { error } = await supabase.from('promo_codes').insert({
+        code_name: candidate,
+        discount_percent: tier,
+        is_used: false,
+      });
+      if (!error) {
+        codeName = candidate;
+        break;
+      }
+      // 23505 = unique violation (ชน code_name) -> ลองใหม่
+      if ((error as { code?: string }).code === '23505') continue;
+      lastErr = error;
+      break;
     }
 
-    if (codeName == null || codeName === '') {
+    if (!codeName) {
+      console.error('Booth spin code insert error:', lastErr);
       await logSpin();
-      return NextResponse.json({ success: false, type: 'error', code: null, message: 'สร้างโค้ดไม่สำเร็จ ลองสุ่มใหม่ได้เลย' }, { status: 500 });
+      return NextResponse.json({ success: false, type: 'error', code: null, message: 'สร้างโค้ดไม่สำเร็จ ลองใหม่' }, { status: 500 });
     }
 
     await logSpin();

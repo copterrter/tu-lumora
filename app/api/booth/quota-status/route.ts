@@ -11,24 +11,42 @@ const QUOTA: Record<number, number> = { 50: 3, 15: 20, 10: 50, 5: 80 };
 export async function GET() {
   try {
     const usedCounts: Record<number, number> = { 50: 0, 15: 0, 10: 0, 5: 0 };
+    const issuedCounts: Record<number, number> = { 50: 0, 15: 0, 10: 0, 5: 0 };
+    const availableCounts: Record<number, number> = { 50: 0, 15: 0, 10: 0, 5: 0 };
     for (const tier of [50, 15, 10, 5]) {
+      const { count: issued } = await supabase
+        .from("promo_codes")
+        .select("id", { count: "exact", head: true })
+        .eq("discount_percent", tier);
+      issuedCounts[tier] = issued ?? 0;
+
       const { count } = await supabase
         .from("promo_codes")
         .select("id", { count: "exact", head: true })
         .eq("discount_percent", tier)
         .eq("is_used", true);
       usedCounts[tier] = count ?? 0;
+
+      const { count: available } = await supabase
+        .from("promo_codes")
+        .select("id", { count: "exact", head: true })
+        .eq("discount_percent", tier)
+        .eq("is_used", false);
+      availableCounts[tier] = available ?? 0;
     }
 
     const remaining: Record<number, number> = {};
     for (const tier of [50, 15, 10, 5]) {
-      remaining[tier] = Math.max(0, (QUOTA[tier] ?? 0) - (usedCounts[tier] ?? 0));
+      // เหลือโควต้า "ที่ยังออกโค้ดได้อีก" (อิงจำนวนโค้ดที่ออกไปแล้ว ไม่ใช่ used)
+      remaining[tier] = Math.max(0, (QUOTA[tier] ?? 0) - (issuedCounts[tier] ?? 0));
     }
 
     return NextResponse.json({
       success: true,
       quota: QUOTA,
+      issued: issuedCounts,
       used: usedCounts,
+      available: availableCounts,
       remaining,
     });
   } catch (err: unknown) {

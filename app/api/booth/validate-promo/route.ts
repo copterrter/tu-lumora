@@ -6,7 +6,7 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-const QUOTA: Record<number, number> = { 50: 2, 15: 20, 10: 50 };
+// โควต้าถูกคุมตอน "ออกโค้ด" แล้ว จึงไม่ต้อง re-check ที่ validate
 
 export async function POST(request: Request) {
   try {
@@ -36,19 +36,6 @@ export async function POST(request: Request) {
 
     if (error || !row) {
       return NextResponse.json({ success: false, message: 'โค้ดไม่ถูกต้องหรือถูกใช้ไปแล้ว' }, { status: 400 });
-    }
-
-    const tier = row.discount_percent as number;
-    const quota = QUOTA[tier];
-    if (quota != null) {
-      const { count } = await supabase
-        .from('promo_codes')
-        .select('id', { count: 'exact', head: true })
-        .eq('discount_percent', tier)
-        .eq('is_used', true);
-      if ((count ?? 0) >= quota) {
-        return NextResponse.json({ success: false, message: 'โควต้าส่วนลดนี้เต็มแล้ว ไม่สามารถใช้โค้ดนี้ได้' }, { status: 400 });
-      }
     }
 
     return NextResponse.json({
