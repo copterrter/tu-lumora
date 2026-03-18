@@ -42,7 +42,7 @@ export async function POST(request: Request) {
 
     // คุมโควต้าที่ "ใช้จริง" ต่อ tier
     const tier = row.discount_percent as number;
-    const QUOTA: Record<number, number> = { 50: 3, 15: 20, 10: 50, 5: 80 };
+    const QUOTA: Record<number, number> = { 50: 4, 15: 20, 10: 50, 5: 80 };
     const quota = QUOTA[tier];
     if (quota != null) {
       const { count } = await supabase
