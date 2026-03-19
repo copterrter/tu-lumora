@@ -5,6 +5,7 @@ import { sendOrderReceipt } from '@/lib/email';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const supabase = createClient(supabaseUrl, supabaseKey);
+const DEV_EDIT_PIN = process.env.DEV_EDIT_AMOUNT_PASSWORD || "dev101";
 
 /** Parse product_name "1x T-SHIRT (S), 2x CROP (M)" into items for receipt email */
 function parseOrderItems(order: { product_name?: string; style?: string; size?: string; quantity?: number }): { style: string; size: string; quantity: number }[] {
@@ -39,6 +40,11 @@ function parseOrderItems(order: { product_name?: string; style?: string; size?: 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+    const devPassword = body.devPassword as string | undefined;
+    if (devPassword !== DEV_EDIT_PIN) {
+      return NextResponse.json({ success: false, message: "รหัส Dev ไม่ถูกต้อง" }, { status: 403 });
+    }
+
     const orderId = body.orderId;
 
     if (!orderId) {

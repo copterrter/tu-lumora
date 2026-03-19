@@ -33,16 +33,20 @@ export default function AdminDashboard() {
   const [updatingAmountId, setUpdatingAmountId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  // 🔒 รหัสผ่านเข้าหลังบ้าน (เปลี่ยนตรงนี้ได้ตามใจชอบ)
-  const ADMIN_PIN = "LUMORA2026"; 
-
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password.toUpperCase() === ADMIN_PIN) {
+    try {
+      const res = await fetch("/api/admin/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pin: password }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.message || "ACCESS DENIED: รหัสผ่านไม่ถูกต้อง");
       setIsAuthenticated(true);
       fetchOrders();
-    } else {
-      alert("ACCESS DENIED: รหัสผ่านไม่ถูกต้อง");
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "ACCESS DENIED: รหัสผ่านไม่ถูกต้อง");
       setPassword("");
     }
   };
@@ -118,10 +122,6 @@ export default function AdminDashboard() {
   const handleEditAmount = async (order: OrderRow) => {
     const devPin = window.prompt("รหัส Dev (แก้ยอด):");
     if (devPin === null) return;
-    if (devPin.trim() !== "dev101") {
-      alert("รหัส Dev ไม่ถูกต้อง");
-      return;
-    }
     const raw = window.prompt("แก้ยอด (บาท):", String(order.total_amount));
     if (raw === null || raw.trim() === "") return;
     const value = Number(raw.trim());
@@ -149,10 +149,6 @@ export default function AdminDashboard() {
   const handleDeleteOrder = async (order: OrderRow) => {
     const devPin = window.prompt("รหัส Dev (ลบออเดอร์):");
     if (devPin === null) return;
-    if (devPin.trim() !== "dev101") {
-      alert("รหัส Dev ไม่ถูกต้อง");
-      return;
-    }
     if (!window.confirm(`ยืนยันลบออเดอร์นี้?\n${order.firstName} ${order.lastName} — ฿${order.total_amount}`)) return;
     setDeletingId(order.id);
     try {
@@ -174,10 +170,6 @@ export default function AdminDashboard() {
   const handleResendReceipt = async (order: OrderRow) => {
     const devPin = window.prompt("รหัส Dev (ส่งเมลใบเสร็จอีกครั้ง):");
     if (devPin === null) return;
-    if (devPin.trim() !== "dev101") {
-      alert("รหัส Dev ไม่ถูกต้อง");
-      return;
-    }
     if (!order.email) {
       alert("ออเดอร์นี้ไม่มีอีเมลในระบบ");
       return;
@@ -199,6 +191,8 @@ export default function AdminDashboard() {
   };
 
   const handleApproveOrder = async (orderId: string) => {
+    const devPin = window.prompt("รหัส Dev (อนุมัติออเดอร์):");
+    if (devPin === null) return;
     if (!confirm("ยืนยันการอนุมัติสลิปนี้และเปลี่ยนสถานะออเดอร์เป็นชำระเงินสำเร็จ?")) {
       return;
     }
@@ -207,7 +201,7 @@ export default function AdminDashboard() {
       const res = await fetch("/api/orders/approve", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId }),
+        body: JSON.stringify({ orderId, devPassword: devPin.trim() }),
       });
       const data = await res.json();
       if (!res.ok || !data.success) {

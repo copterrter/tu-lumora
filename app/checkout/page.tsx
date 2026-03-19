@@ -5,7 +5,6 @@ import Link from "next/link";
 import { getCurrentPhase } from "@/lib/pricing";
 
 type OrderData = { items: { quantity: number; style?: string; size?: string }[]; total: number };
-const STAFF_TOKEN = "workharddiefast";
 const STAFF_REGULAR_PRICE = 145;
 const STAFF_CROP_PRICE = 135;
 
@@ -49,7 +48,7 @@ export default function CheckoutPage() {
   const [staffToken, setStaffToken] = useState("");
 
   const [timeLeft, setTimeLeft] = useState(600);
-  const isStaffCheckout = staffToken === STAFF_TOKEN;
+  const isStaffCheckout = staffToken.length > 0;
 
   const paymentSectionRef = useRef<HTMLDivElement | null>(null);
 

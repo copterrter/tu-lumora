@@ -7,7 +7,7 @@ import { calculateTotalForCart } from '@/lib/pricing';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const supabase = createClient(supabaseUrl, supabaseKey);
-const STAFF_TOKEN = "workharddiefast";
+const STAFF_TOKEN = (process.env.STAFF_CHECKOUT_TOKEN || "workharddiefast").trim();
 const STAFF_REGULAR_PRICE = 145;
 const STAFF_CROP_PRICE = 135;
 
@@ -44,13 +44,18 @@ export async function POST(request: Request) {
     let promoCodeUsed: string | null = null;
     const promoCode = typeof formData.promoCode === "string" ? formData.promoCode.trim().toUpperCase() : "";
     const staffToken = typeof formData.staffToken === "string" ? formData.staffToken.trim() : "";
-    const isStaffCheckout = staffToken === STAFF_TOKEN;
+    const hasStaffToken = Boolean(staffToken);
+    const isStaffCheckout = hasStaffToken && staffToken === STAFF_TOKEN;
 
     if (phase === "closed") {
       return NextResponse.json(
         { success: false, message: "รอบพรีออเดอร์สิ้นสุดแล้ว" },
         { status: 400 }
       );
+    }
+
+    if (hasStaffToken && !isStaffCheckout) {
+      return NextResponse.json({ success: false, message: "ลิงก์ staff ไม่ถูกต้อง" }, { status: 403 });
     }
 
     if (isStaffCheckout) {
