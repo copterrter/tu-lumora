@@ -51,6 +51,7 @@ type CartItem = { id: string; title: string; style: string; size: string; quanti
 
 export default function ProductPage() {
   const router = useRouter();
+  const [staffToken, setStaffToken] = useState("");
   const [selectedStyle, setSelectedStyle] = useState("T-SHIRT");
   const [selectedSize, setSelectedSize] = useState("L");
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -113,6 +114,11 @@ export default function ProductPage() {
   }, []);
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setStaffToken(params.get("staff") ?? "");
+  }, []);
+
+  useEffect(() => {
     if (!currentSizes.includes(selectedSize)) {
       const id = requestAnimationFrame(() => setSelectedSize("L"));
       return () => cancelAnimationFrame(id);
@@ -156,6 +162,10 @@ export default function ProductPage() {
   const proceedToCheckout = () => {
     const finalData = { items: cart, total: calculateCartTotal(cart) };
     localStorage.setItem('lumora_order', JSON.stringify(finalData));
+    if (staffToken) {
+      router.push(`/checkout?staff=${encodeURIComponent(staffToken)}`);
+      return;
+    }
     router.push('/checkout');
   };
 
