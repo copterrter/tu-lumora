@@ -140,7 +140,11 @@ export async function POST(request: Request) {
         total_amount: finalTotal,
         status
       };
-      if (promoCodeUsed) baseOrder.promo_code_used = promoCodeUsed;
+      if (isStaffCheckout) {
+        baseOrder.promo_code_used = "STAFF_COST";
+      } else if (promoCodeUsed) {
+        baseOrder.promo_code_used = promoCodeUsed;
+      }
 
       if (slipTransRef) {
         baseOrder.slip_trans_ref = slipTransRef;
@@ -281,7 +285,7 @@ export async function POST(request: Request) {
         items: orderData.items,
         total: finalTotal,
         discount: discount > 0 ? discount : 0,
-        discountLabel: promoCodeUsed ? "ส่วนลดจากโค้ด" : undefined,
+        discountLabel: isStaffCheckout ? "Staff Cost" : promoCodeUsed ? "ส่วนลดจากโค้ด" : undefined,
       }).catch((e: unknown) => console.warn('Email send failed (non-blocking):', e));
     }
 

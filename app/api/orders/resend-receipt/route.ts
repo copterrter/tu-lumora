@@ -78,7 +78,12 @@ export async function POST(request: Request) {
       items,
       total,
       discount,
-      discountLabel: order.promo_code_used ? 'ส่วนลดจากโค้ด' : undefined,
+      discountLabel:
+        order.promo_code_used === 'STAFF_COST'
+          ? 'Staff Cost'
+          : order.promo_code_used
+            ? 'ส่วนลดจากโค้ด'
+            : undefined,
     });
 
     if (!result.success) {

@@ -18,6 +18,7 @@ type OrderRow = {
   product_name?: string;
   total_amount: number;
   status?: string;
+  promo_code_used?: string;
   tracking_number?: string;
   slip_image_url?: string;
 };
@@ -588,6 +589,11 @@ export default function AdminDashboard() {
                     </td>
                     <td className="p-4">
                       <div className="flex flex-col gap-2 items-start">
+                        {order.promo_code_used === "STAFF_COST" && (
+                          <span className="px-2 py-1 text-[9px] uppercase tracking-[0.22em] font-black border rounded-full bg-purple-500/15 text-purple-200 border-purple-400">
+                            STAFF
+                          </span>
+                        )}
                         <span
                           className={`px-2 py-1 text-[9px] uppercase tracking-[0.22em] font-black border rounded-full ${
                             order.status === 'SHIPPED' 
