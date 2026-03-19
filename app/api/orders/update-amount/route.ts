@@ -5,10 +5,13 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-const DEV_EDIT_PIN = process.env.DEV_EDIT_AMOUNT_PASSWORD || "dev101";
+const DEV_EDIT_PIN = process.env.DEV_EDIT_AMOUNT_PASSWORD?.trim();
 
 export async function PATCH(request: Request) {
   try {
+    if (!DEV_EDIT_PIN) {
+      return NextResponse.json({ success: false, message: 'Server env missing: DEV_EDIT_AMOUNT_PASSWORD' }, { status: 500 });
+    }
     const body = await request.json();
     const devPassword = body.devPassword as string | undefined;
     if (devPassword !== DEV_EDIT_PIN) {

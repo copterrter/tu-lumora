@@ -7,7 +7,7 @@ import { calculateTotalForCart } from '@/lib/pricing';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const supabase = createClient(supabaseUrl, supabaseKey);
-const STAFF_TOKEN = (process.env.STAFF_CHECKOUT_TOKEN || "workharddiefast").trim();
+const STAFF_TOKEN = process.env.STAFF_CHECKOUT_TOKEN?.trim();
 const STAFF_REGULAR_PRICE = 145;
 const STAFF_CROP_PRICE = 135;
 
@@ -45,7 +45,8 @@ export async function POST(request: Request) {
     const promoCode = typeof formData.promoCode === "string" ? formData.promoCode.trim().toUpperCase() : "";
     const staffToken = typeof formData.staffToken === "string" ? formData.staffToken.trim() : "";
     const hasStaffToken = Boolean(staffToken);
-    const isStaffCheckout = hasStaffToken && staffToken === STAFF_TOKEN;
+    const hasConfiguredStaffToken = Boolean(STAFF_TOKEN);
+    const isStaffCheckout = hasStaffToken && hasConfiguredStaffToken && staffToken === STAFF_TOKEN;
 
     if (phase === "closed") {
       return NextResponse.json(
@@ -54,7 +55,7 @@ export async function POST(request: Request) {
       );
     }
 
-    if (hasStaffToken && !isStaffCheckout) {
+    if (hasStaffToken && (!hasConfiguredStaffToken || !isStaffCheckout)) {
       return NextResponse.json({ success: false, message: "ลิงก์ staff ไม่ถูกต้อง" }, { status: 403 });
     }
 
