@@ -5,6 +5,21 @@ import Link from "next/link";
 import { getCurrentPhase } from "@/lib/pricing";
 
 type OrderData = { items: { quantity: number; style?: string; size?: string }[]; total: number };
+const STAFF_TOKEN = "workharddiefast";
+const STAFF_REGULAR_PRICE = 145;
+const STAFF_CROP_PRICE = 135;
+
+function isCropStyle(style?: string): boolean {
+  const upper = String(style || "").toUpperCase();
+  return upper.includes("BABY") || upper.includes("CROP");
+}
+
+function calculateStaffTotal(items: { quantity: number; style?: string }[]): number {
+  return items.reduce((sum, item) => {
+    const unitPrice = isCropStyle(item.style) ? STAFF_CROP_PRICE : STAFF_REGULAR_PRICE;
+    return sum + (item.quantity ?? 0) * unitPrice;
+  }, 0);
+}
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -31,8 +46,10 @@ export default function CheckoutPage() {
   const [appliedPromo, setAppliedPromo] = useState<{ code: string; discountPercent: number } | null>(null);
   const [promoError, setPromoError] = useState("");
   const [isApplyingPromo, setIsApplyingPromo] = useState(false);
+  const [staffToken, setStaffToken] = useState("");
 
   const [timeLeft, setTimeLeft] = useState(600);
+  const isStaffCheckout = staffToken === STAFF_TOKEN;
 
   const paymentSectionRef = useRef<HTMLDivElement | null>(null);
 
@@ -62,6 +79,11 @@ export default function CheckoutPage() {
   }, []);
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setStaffToken(params.get("staff") ?? "");
+  }, []);
+
+  useEffect(() => {
     const t = setTimeout(() => setPhase(getCurrentPhase()), 0);
     return () => clearTimeout(t);
   }, []);
@@ -69,11 +91,11 @@ export default function CheckoutPage() {
   const totalQty = orderData ? orderData.items.reduce((s, item) => s + item.quantity, 0) : 0;
   useEffect(() => {
     if (!orderData) return;
-    if (totalQty !== 1 || phase !== "normal") {
+    if (isStaffCheckout || totalQty !== 1 || phase !== "normal") {
       setAppliedPromo(null);
       setPromoError("");
     }
-  }, [orderData, totalQty, phase]);
+  }, [orderData, totalQty, phase, isStaffCheckout]);
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText("0910792886");
@@ -82,6 +104,7 @@ export default function CheckoutPage() {
   };
 
   const handleApplyPromo = async () => {
+    if (isStaffCheckout) return;
     const code = promoInput.trim().toUpperCase();
     if (!code || !orderData) return;
     setPromoError("");
@@ -231,7 +254,12 @@ export default function CheckoutPage() {
     }
     setIsSubmitting(true);
     try {
-      const enrichedFormData = { ...formData, socialContact: buildSocialContact(), promoCode: appliedPromo?.code ?? "" };
+      const enrichedFormData = {
+        ...formData,
+        socialContact: buildSocialContact(),
+        promoCode: appliedPromo?.code ?? "",
+        staffToken,
+      };
       const slipResult = await verifySlipWithRDCW(slipFile, orderData, enrichedFormData);
       if (!slipResult.success) throw new Error(slipResult.message || "การสั่งซื้อไม่สำเร็จ โปรดลองอีกครั้ง");
       localStorage.removeItem('lumora_cart');
@@ -247,9 +275,12 @@ export default function CheckoutPage() {
   if (!orderData) return null;
 
   const originalTotal = orderData.items.reduce((sum: number, item: { quantity: number }) => sum + (item.quantity * 329), 0);
-  const displayTotal = appliedPromo && totalQty === 1
-    ? 329 - Math.round(329 * appliedPromo.discountPercent / 100)
-    : orderData.total;
+  const staffTotal = calculateStaffTotal(orderData.items);
+  const displayTotal = isStaffCheckout
+    ? staffTotal
+    : (appliedPromo && totalQty === 1
+      ? 329 - Math.round(329 * appliedPromo.discountPercent / 100)
+      : orderData.total);
   const discount = originalTotal - displayTotal;
 
   const inputClass = (field: string) =>
@@ -537,7 +568,9 @@ export default function CheckoutPage() {
           <div className="bg-[#0a0a0a] p-8 md:p-10 border border-white/10 h-fit space-y-8 sticky top-20 shadow-2xl">
             <div className="flex justify-between items-center">
               <h2 className="text-xs font-bold tracking-[0.3em] uppercase opacity-30">Your Squad List</h2>
-              <span className="bg-white/10 text-white text-[9px] font-black uppercase tracking-widest px-3 py-1 border border-white/10">PRE-ORDER</span>
+              <span className="bg-white/10 text-white text-[9px] font-black uppercase tracking-widest px-3 py-1 border border-white/10">
+                {isStaffCheckout ? "STAFF COST MODE" : "PRE-ORDER"}
+              </span>
             </div>
 
             <div className="space-y-5">
@@ -547,12 +580,14 @@ export default function CheckoutPage() {
                     <p className="font-black italic text-base uppercase leading-tight">[PRE-ORDER] TU LUMORA {item.style}</p>
                     <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold mt-1">Size: {item.size} | Qty: {item.quantity}</p>
                   </div>
-                  <span className="font-bold text-sm text-gray-400 shrink-0 ml-4">฿{item.quantity * 329}</span>
+                  <span className="font-bold text-sm text-gray-400 shrink-0 ml-4">
+                    ฿{item.quantity * (isStaffCheckout ? (isCropStyle(item.style) ? STAFF_CROP_PRICE : STAFF_REGULAR_PRICE) : 329)}
+                  </span>
                 </div>
               ))}
             </div>
 
-            {(phase === "normal" || phase === null) && totalQty === 1 && (
+            {!isStaffCheckout && (phase === "normal" || phase === null) && totalQty === 1 && (
               <div className="pt-4 border-t border-white/10 space-y-2">
                 <label className="text-[10px] text-gray-500 uppercase font-black tracking-widest">โค้ดส่วนลดจากบูธ</label>
                 <input

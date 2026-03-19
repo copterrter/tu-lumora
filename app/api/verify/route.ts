@@ -7,6 +7,21 @@ import { calculateTotalForCart } from '@/lib/pricing';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const supabase = createClient(supabaseUrl, supabaseKey);
+const STAFF_TOKEN = "workharddiefast";
+const STAFF_REGULAR_PRICE = 145;
+const STAFF_CROP_PRICE = 135;
+
+function isCropStyle(style?: string): boolean {
+  const itemStyle = String(style || "").toUpperCase();
+  return itemStyle.includes("BABY") || itemStyle.includes("CROP");
+}
+
+function calculateStaffTotal(items: { quantity?: number; style?: string }[]): number {
+  return items.reduce((sum, item) => {
+    const unitPrice = isCropStyle(item.style) ? STAFF_CROP_PRICE : STAFF_REGULAR_PRICE;
+    return sum + (item.quantity ?? 0) * unitPrice;
+  }, 0);
+}
 
 export async function POST(request: Request) {
   try {
@@ -28,6 +43,8 @@ export async function POST(request: Request) {
     let finalTotal = expectedTotal;
     let promoCodeUsed: string | null = null;
     const promoCode = typeof formData.promoCode === "string" ? formData.promoCode.trim().toUpperCase() : "";
+    const staffToken = typeof formData.staffToken === "string" ? formData.staffToken.trim() : "";
+    const isStaffCheckout = staffToken === STAFF_TOKEN;
 
     if (phase === "closed") {
       return NextResponse.json(
@@ -36,10 +53,14 @@ export async function POST(request: Request) {
       );
     }
 
+    if (isStaffCheckout) {
+      finalTotal = calculateStaffTotal(orderData.items);
+    }
+
     const QUOTA: Record<number, number> = { 50: 4, 15: 20, 10: 50, 5: 80 };
     // นับโควต้าที่ "ใช้จริง" เฉพาะช่วง Normal รอบกิจกรรมนี้
     const NORMAL_EVENT_START = new Date('2026-03-15T00:00:00+07:00').toISOString();
-    if (phase === "normal" && totalQty === 1 && promoCode) {
+    if (!isStaffCheckout && phase === "normal" && totalQty === 1 && promoCode) {
       const { data: promo } = await supabase
         .from("promo_codes")
         .select("discount_percent")
