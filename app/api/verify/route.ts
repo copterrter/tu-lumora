@@ -9,6 +9,7 @@ const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PU
 const supabase = createClient(supabaseUrl, supabaseKey);
 const STAFF_TOKEN = process.env.STAFF_CHECKOUT_TOKEN?.trim();
 const STAFF_PURCHASE_PASSWORD = (process.env.STAFF_PURCHASE_PASSWORD || "makesomenoise").trim();
+const IS_STAFF_ONLY_MODE = process.env.NEXT_PUBLIC_STAFF_ONLY_MODE === "true";
 const STAFF_UNIT_PRICE = 150;
 
 function calculateStaffTotal(items: { quantity?: number; style?: string }[]): number {
@@ -52,6 +53,10 @@ export async function POST(request: Request) {
 
     if (hasStaffToken && (!hasConfiguredStaffToken || !isStaffCheckout)) {
       return NextResponse.json({ success: false, message: "ลิงก์ staff ไม่ถูกต้อง" }, { status: 403 });
+    }
+
+    if (IS_STAFF_ONLY_MODE && !isStaffCheckout) {
+      return NextResponse.json({ success: false, message: "ขณะนี้เปิดรับเฉพาะ staff เท่านั้น" }, { status: 403 });
     }
 
     if (isStaffCheckout && staffPassword !== STAFF_PURCHASE_PASSWORD) {

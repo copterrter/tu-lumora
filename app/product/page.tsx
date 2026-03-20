@@ -51,6 +51,7 @@ type CartItem = { id: string; title: string; style: string; size: string; quanti
 
 export default function ProductPage() {
   const router = useRouter();
+  const isStaffOnlyMode = process.env.NEXT_PUBLIC_STAFF_ONLY_MODE === "true";
   const [staffToken, setStaffToken] = useState("");
   const [selectedStyle, setSelectedStyle] = useState("T-SHIRT");
   const [selectedSize, setSelectedSize] = useState("L");
@@ -117,6 +118,13 @@ export default function ProductPage() {
     const params = new URLSearchParams(window.location.search);
     setStaffToken(params.get("staff") ?? "");
   }, []);
+
+  useEffect(() => {
+    if (!isStaffOnlyMode) return;
+    if (!staffToken) {
+      router.replace("/closed");
+    }
+  }, [isStaffOnlyMode, staffToken, router]);
 
   useEffect(() => {
     if (!currentSizes.includes(selectedSize)) {

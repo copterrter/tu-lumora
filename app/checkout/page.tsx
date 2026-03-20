@@ -15,6 +15,7 @@ function calculateStaffTotal(items: { quantity: number; style?: string }[]): num
 
 export default function CheckoutPage() {
   const router = useRouter();
+  const isStaffOnlyMode = process.env.NEXT_PUBLIC_STAFF_ONLY_MODE === "true";
   const [orderData, setOrderData] = useState<OrderData | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [pdpaChecked, setPdpaChecked] = useState(false);
@@ -79,13 +80,20 @@ export default function CheckoutPage() {
   }, []);
 
   useEffect(() => {
+    if (!isStaffOnlyMode) return;
+    if (!hasStaffToken) {
+      router.replace("/closed");
+    }
+  }, [isStaffOnlyMode, hasStaffToken, router]);
+
+  useEffect(() => {
     const verifyOnEnter = async () => {
       if (!hasStaffToken || isStaffVerified) return;
 
       const input = window.prompt("กรอกรหัส staff เพื่อเข้าโหมดสั่งซื้อพิเศษ");
       if (!input || !input.trim()) {
         alert("ไม่ได้กรอกรหัส staff");
-        router.push("/product");
+        router.push("/closed");
         return;
       }
 
@@ -98,14 +106,14 @@ export default function CheckoutPage() {
         const data = await res.json();
         if (!res.ok || !data.success) {
           alert(data.message || "รหัส staff ไม่ถูกต้อง");
-          router.push("/product");
+          router.push("/closed");
           return;
         }
         setStaffPassword(input.trim());
         setIsStaffVerified(true);
       } catch {
         alert("ตรวจสอบรหัส staff ไม่สำเร็จ");
-        router.push("/product");
+        router.push("/closed");
       }
     };
     verifyOnEnter();
