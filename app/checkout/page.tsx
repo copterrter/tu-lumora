@@ -40,6 +40,7 @@ export default function CheckoutPage() {
   const [promoError, setPromoError] = useState("");
   const [isApplyingPromo, setIsApplyingPromo] = useState(false);
   const [staffToken, setStaffToken] = useState("");
+  const [staffTokenReady, setStaffTokenReady] = useState(false);
   const [staffPassword, setStaffPassword] = useState("");
   const [isStaffVerified, setIsStaffVerified] = useState(false);
 
@@ -77,14 +78,16 @@ export default function CheckoutPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     setStaffToken(params.get("staff") ?? "");
+    setStaffTokenReady(true);
   }, []);
 
   useEffect(() => {
     if (!isStaffOnlyMode) return;
+    if (!staffTokenReady) return;
     if (!hasStaffToken) {
       router.replace("/closed");
     }
-  }, [isStaffOnlyMode, hasStaffToken, router]);
+  }, [isStaffOnlyMode, staffTokenReady, hasStaffToken, router]);
 
   useEffect(() => {
     const verifyOnEnter = async () => {

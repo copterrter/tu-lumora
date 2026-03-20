@@ -53,6 +53,7 @@ export default function ProductPage() {
   const router = useRouter();
   const isStaffOnlyMode = process.env.NEXT_PUBLIC_STAFF_ONLY_MODE === "true";
   const [staffToken, setStaffToken] = useState("");
+  const [staffTokenReady, setStaffTokenReady] = useState(false);
   const [selectedStyle, setSelectedStyle] = useState("T-SHIRT");
   const [selectedSize, setSelectedSize] = useState("L");
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -117,14 +118,16 @@ export default function ProductPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     setStaffToken(params.get("staff") ?? "");
+    setStaffTokenReady(true);
   }, []);
 
   useEffect(() => {
     if (!isStaffOnlyMode) return;
+    if (!staffTokenReady) return;
     if (!staffToken) {
       router.replace("/closed");
     }
-  }, [isStaffOnlyMode, staffToken, router]);
+  }, [isStaffOnlyMode, staffTokenReady, staffToken, router]);
 
   useEffect(() => {
     if (!currentSizes.includes(selectedSize)) {
