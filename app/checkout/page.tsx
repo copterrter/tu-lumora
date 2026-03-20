@@ -43,7 +43,8 @@ export default function CheckoutPage() {
   const [isStaffVerified, setIsStaffVerified] = useState(false);
 
   const [timeLeft, setTimeLeft] = useState(600);
-  const isStaffCheckout = staffToken.length > 0;
+  const hasStaffToken = staffToken.length > 0;
+  const isStaffCheckout = hasStaffToken && isStaffVerified;
 
   const paymentSectionRef = useRef<HTMLDivElement | null>(null);
 
@@ -76,6 +77,39 @@ export default function CheckoutPage() {
     const params = new URLSearchParams(window.location.search);
     setStaffToken(params.get("staff") ?? "");
   }, []);
+
+  useEffect(() => {
+    const verifyOnEnter = async () => {
+      if (!hasStaffToken || isStaffVerified) return;
+
+      const input = window.prompt("กรอกรหัส staff เพื่อเข้าโหมดสั่งซื้อพิเศษ");
+      if (!input || !input.trim()) {
+        alert("ไม่ได้กรอกรหัส staff");
+        router.push("/product");
+        return;
+      }
+
+      try {
+        const res = await fetch("/api/staff/auth", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password: input.trim() }),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          alert(data.message || "รหัส staff ไม่ถูกต้อง");
+          router.push("/product");
+          return;
+        }
+        setStaffPassword(input.trim());
+        setIsStaffVerified(true);
+      } catch {
+        alert("ตรวจสอบรหัส staff ไม่สำเร็จ");
+        router.push("/product");
+      }
+    };
+    verifyOnEnter();
+  }, [hasStaffToken, isStaffVerified, router]);
 
   useEffect(() => {
     const t = setTimeout(() => setPhase(getCurrentPhase()), 0);
@@ -224,34 +258,6 @@ export default function CheckoutPage() {
     return await response.json();
   };
 
-  const verifyStaffPassword = async (): Promise<string | null> => {
-    if (!isStaffCheckout) return "";
-    if (isStaffVerified && staffPassword) return staffPassword;
-
-    const input = window.prompt("กรอกรหัส staff ก่อนสั่งซื้อ");
-    if (!input || !input.trim()) return null;
-
-    try {
-      const res = await fetch("/api/staff/auth", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password: input.trim() }),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        alert(data.message || "รหัส staff ไม่ถูกต้อง");
-        return null;
-      }
-      const trimmed = input.trim();
-      setStaffPassword(trimmed);
-      setIsStaffVerified(true);
-      return trimmed;
-    } catch {
-      alert("ตรวจสอบรหัส staff ไม่สำเร็จ");
-      return null;
-    }
-  };
-
   const handleConfirmOrder = async () => {
     setSubmitAttempted(true);
     const errors = validateForm();
@@ -275,9 +281,6 @@ export default function CheckoutPage() {
       return;
     }
 
-    const verifiedStaffPassword = await verifyStaffPassword();
-    if (isStaffCheckout && !verifiedStaffPassword) return;
-
     setIsSubmitting(true);
     try {
       const enrichedFormData = {
@@ -285,7 +288,7 @@ export default function CheckoutPage() {
         socialContact: buildSocialContact(),
         promoCode: appliedPromo?.code ?? "",
         staffToken,
-        staffPassword: verifiedStaffPassword ?? "",
+        staffPassword,
       };
       const slipResult = await verifySlipWithRDCW(slipFile, orderData, enrichedFormData);
       if (!slipResult.success) throw new Error(slipResult.message || "การสั่งซื้อไม่สำเร็จ โปรดลองอีกครั้ง");
