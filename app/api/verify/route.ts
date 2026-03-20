@@ -8,6 +8,7 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const supabase = createClient(supabaseUrl, supabaseKey);
 const STAFF_TOKEN = process.env.STAFF_CHECKOUT_TOKEN?.trim();
+const STAFF_PURCHASE_PASSWORD = (process.env.STAFF_PURCHASE_PASSWORD || "makesomenoise").trim();
 const STAFF_UNIT_PRICE = 150;
 
 function calculateStaffTotal(items: { quantity?: number; style?: string }[]): number {
@@ -37,6 +38,7 @@ export async function POST(request: Request) {
     let promoCodeUsed: string | null = null;
     const promoCode = typeof formData.promoCode === "string" ? formData.promoCode.trim().toUpperCase() : "";
     const staffToken = typeof formData.staffToken === "string" ? formData.staffToken.trim() : "";
+    const staffPassword = typeof formData.staffPassword === "string" ? formData.staffPassword.trim() : "";
     const hasStaffToken = Boolean(staffToken);
     const hasConfiguredStaffToken = Boolean(STAFF_TOKEN);
     const isStaffCheckout = hasStaffToken && hasConfiguredStaffToken && staffToken === STAFF_TOKEN;
@@ -50,6 +52,10 @@ export async function POST(request: Request) {
 
     if (hasStaffToken && (!hasConfiguredStaffToken || !isStaffCheckout)) {
       return NextResponse.json({ success: false, message: "ลิงก์ staff ไม่ถูกต้อง" }, { status: 403 });
+    }
+
+    if (isStaffCheckout && staffPassword !== STAFF_PURCHASE_PASSWORD) {
+      return NextResponse.json({ success: false, message: "รหัส staff ไม่ถูกต้อง" }, { status: 403 });
     }
 
     if (isStaffCheckout) {
