@@ -8,18 +8,11 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const supabase = createClient(supabaseUrl, supabaseKey);
 const STAFF_TOKEN = process.env.STAFF_CHECKOUT_TOKEN?.trim();
-const STAFF_REGULAR_PRICE = 145;
-const STAFF_CROP_PRICE = 135;
-
-function isCropStyle(style?: string): boolean {
-  const itemStyle = String(style || "").toUpperCase();
-  return itemStyle.includes("BABY") || itemStyle.includes("CROP");
-}
+const STAFF_UNIT_PRICE = 150;
 
 function calculateStaffTotal(items: { quantity?: number; style?: string }[]): number {
   return items.reduce((sum, item) => {
-    const unitPrice = isCropStyle(item.style) ? STAFF_CROP_PRICE : STAFF_REGULAR_PRICE;
-    return sum + (item.quantity ?? 0) * unitPrice;
+    return sum + (item.quantity ?? 0) * STAFF_UNIT_PRICE;
   }, 0);
 }
 

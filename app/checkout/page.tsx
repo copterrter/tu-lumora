@@ -5,18 +5,11 @@ import Link from "next/link";
 import { getCurrentPhase } from "@/lib/pricing";
 
 type OrderData = { items: { quantity: number; style?: string; size?: string }[]; total: number };
-const STAFF_REGULAR_PRICE = 145;
-const STAFF_CROP_PRICE = 135;
-
-function isCropStyle(style?: string): boolean {
-  const upper = String(style || "").toUpperCase();
-  return upper.includes("BABY") || upper.includes("CROP");
-}
+const STAFF_UNIT_PRICE = 150;
 
 function calculateStaffTotal(items: { quantity: number; style?: string }[]): number {
   return items.reduce((sum, item) => {
-    const unitPrice = isCropStyle(item.style) ? STAFF_CROP_PRICE : STAFF_REGULAR_PRICE;
-    return sum + (item.quantity ?? 0) * unitPrice;
+    return sum + (item.quantity ?? 0) * STAFF_UNIT_PRICE;
   }, 0);
 }
 
@@ -580,7 +573,7 @@ export default function CheckoutPage() {
                     <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold mt-1">Size: {item.size} | Qty: {item.quantity}</p>
                   </div>
                   <span className="font-bold text-sm text-gray-400 shrink-0 ml-4">
-                    ฿{item.quantity * (isStaffCheckout ? (isCropStyle(item.style) ? STAFF_CROP_PRICE : STAFF_REGULAR_PRICE) : 329)}
+                    ฿{item.quantity * (isStaffCheckout ? STAFF_UNIT_PRICE : 329)}
                   </span>
                 </div>
               ))}
