@@ -44,7 +44,7 @@ export async function POST(request: Request) {
     const hasConfiguredStaffToken = Boolean(STAFF_TOKEN);
     const isStaffCheckout = hasStaffToken && hasConfiguredStaffToken && staffToken === STAFF_TOKEN;
 
-    if (phase === "closed") {
+    if (phase === "closed" && !isStaffCheckout) {
       return NextResponse.json(
         { success: false, message: "รอบพรีออเดอร์สิ้นสุดแล้ว" },
         { status: 400 }

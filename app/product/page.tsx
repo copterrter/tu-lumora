@@ -137,7 +137,8 @@ export default function ProductPage() {
   }, [selectedStyle, currentSizes, selectedSize]);
 
   const phase = getCurrentPhase();
-  const isClosed = phase === "closed";
+  const isStaffEntry = staffToken.length > 0;
+  const isClosed = phase === "closed" && !isStaffEntry;
 
   const calculateCartTotal = (currentCart: { quantity: number }[]) => {
     const { total } = calculateTotalForCart(currentCart);
