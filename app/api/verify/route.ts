@@ -256,14 +256,24 @@ export async function POST(request: Request) {
       });
     }
     
-    const transRef = slipResult.data.transRef;
-    
+    const transRef = String(slipResult?.data?.transRef || "").trim();
+
     // 6. Duplicate Slip Check (Anti Double Spend)
-    // Note: This requires the 'slip_trans_ref' column in the 'orders' table.
+    // ตรวจเฉพาะออเดอร์ที่ยืนยันจ่ายแล้วจริง เพื่อลด false positive จากสถานะอื่น
+    if (!transRef) {
+      await insertOrder('pending_manual_verify', undefined, slipImageUrl);
+      return NextResponse.json({
+        success: true,
+        manualFallback: true,
+        message: "ระบบอ่านเลขอ้างอิงสลิปไม่ครบถ้วน จึงส่งให้แอดมินตรวจสอบด้วยมือ"
+      });
+    }
+
     const { data: existingOrder, error: checkError } = await supabase
       .from('orders')
       .select('id')
       .eq('slip_trans_ref', transRef)
+      .eq('status', 'paid_and_verified')
       .single();
 
     if (existingOrder) {
