@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getCurrentPhase } from "@/lib/pricing";
+import { isStaffOrderingEnabled } from "@/lib/staff-ordering";
 
 type OrderData = { items: { quantity: number; style?: string; size?: string }[]; total: number };
 const STAFF_UNIT_PRICE = 150;
@@ -16,6 +17,7 @@ function calculateStaffTotal(items: { quantity: number; style?: string }[]): num
 export default function CheckoutPage() {
   const router = useRouter();
   const isStaffOnlyMode = process.env.NEXT_PUBLIC_STAFF_ONLY_MODE === "true";
+  const staffOrderingEnabled = isStaffOrderingEnabled();
   const [orderData, setOrderData] = useState<OrderData | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [pdpaChecked, setPdpaChecked] = useState(false);
@@ -82,15 +84,20 @@ export default function CheckoutPage() {
   }, []);
 
   useEffect(() => {
-    if (!isStaffOnlyMode) return;
     if (!staffTokenReady) return;
+    if (hasStaffToken && !staffOrderingEnabled) {
+      router.replace("/closed");
+      return;
+    }
+    if (!isStaffOnlyMode) return;
     if (!hasStaffToken) {
       router.replace("/closed");
     }
-  }, [isStaffOnlyMode, staffTokenReady, hasStaffToken, router]);
+  }, [isStaffOnlyMode, staffTokenReady, hasStaffToken, staffOrderingEnabled, router]);
 
   useEffect(() => {
     const verifyOnEnter = async () => {
+      if (!staffOrderingEnabled) return;
       if (!hasStaffToken || isStaffVerified) return;
 
       const input = window.prompt("กรอกรหัส staff เพื่อเข้าโหมดสั่งซื้อพิเศษ");
@@ -120,7 +127,7 @@ export default function CheckoutPage() {
       }
     };
     verifyOnEnter();
-  }, [hasStaffToken, isStaffVerified, router]);
+  }, [staffOrderingEnabled, hasStaffToken, isStaffVerified, router]);
 
   useEffect(() => {
     const t = setTimeout(() => setPhase(getCurrentPhase()), 0);

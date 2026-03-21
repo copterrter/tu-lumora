@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { sendOrderReceipt } from '@/lib/email';
 import { calculateTotalForCart } from '@/lib/pricing';
+import { isStaffOrderingEnabled } from '@/lib/staff-ordering';
 
 // Initialize Supabase client (Prefer Service Role Key for server-side inserts bypassing RLS)
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -43,6 +44,13 @@ export async function POST(request: Request) {
     const hasStaffToken = Boolean(staffToken);
     const hasConfiguredStaffToken = Boolean(STAFF_TOKEN);
     const isStaffCheckout = hasStaffToken && hasConfiguredStaffToken && staffToken === STAFF_TOKEN;
+
+    if (isStaffCheckout && !isStaffOrderingEnabled()) {
+      return NextResponse.json(
+        { success: false, message: "ระบบรับสั่งซื้อ staff ปิดแล้ว" },
+        { status: 403 }
+      );
+    }
 
     if (phase === "closed" && !isStaffCheckout) {
       return NextResponse.json(

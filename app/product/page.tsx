@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { calculateTotalForCart, getCurrentPhase } from "@/lib/pricing";
+import { isStaffOrderingEnabled } from "@/lib/staff-ordering";
 
 const FAQ_ITEMS = [
   { q: "Size เสื้อเป็นยังไง?", a: "Regular (T-SHIRT): S, M, L, XL, 2XL, 3XL | Crop: S, M, L, XL กดปุ่ม Size Guide ด้านบนเพื่อดูตาราง size ครับ" },
@@ -52,6 +53,7 @@ type CartItem = { id: string; title: string; style: string; size: string; quanti
 export default function ProductPage() {
   const router = useRouter();
   const isStaffOnlyMode = process.env.NEXT_PUBLIC_STAFF_ONLY_MODE === "true";
+  const staffOrderingEnabled = isStaffOrderingEnabled();
   const [staffToken, setStaffToken] = useState("");
   const [staffTokenReady, setStaffTokenReady] = useState(false);
   const [selectedStyle, setSelectedStyle] = useState("T-SHIRT");
@@ -122,12 +124,16 @@ export default function ProductPage() {
   }, []);
 
   useEffect(() => {
-    if (!isStaffOnlyMode) return;
     if (!staffTokenReady) return;
+    if (staffToken && !staffOrderingEnabled) {
+      router.replace("/closed");
+      return;
+    }
+    if (!isStaffOnlyMode) return;
     if (!staffToken) {
       router.replace("/closed");
     }
-  }, [isStaffOnlyMode, staffTokenReady, staffToken, router]);
+  }, [isStaffOnlyMode, staffTokenReady, staffToken, staffOrderingEnabled, router]);
 
   useEffect(() => {
     if (!currentSizes.includes(selectedSize)) {
@@ -137,8 +143,10 @@ export default function ProductPage() {
   }, [selectedStyle, currentSizes, selectedSize]);
 
   const phase = getCurrentPhase();
-  const isStaffEntry = staffToken.length > 0;
-  const isClosed = phase === "closed" && !isStaffEntry;
+  const isStaffEntry = staffToken.length > 0 && staffOrderingEnabled;
+  const isClosed =
+    (phase === "closed" && !isStaffEntry) ||
+    (staffToken.length > 0 && !staffOrderingEnabled);
 
   const calculateCartTotal = (currentCart: { quantity: number }[]) => {
     const { total } = calculateTotalForCart(currentCart);
@@ -174,7 +182,7 @@ export default function ProductPage() {
   const proceedToCheckout = () => {
     const finalData = { items: cart, total: calculateCartTotal(cart) };
     localStorage.setItem('lumora_order', JSON.stringify(finalData));
-    if (staffToken) {
+    if (staffToken && staffOrderingEnabled) {
       router.push(`/checkout?staff=${encodeURIComponent(staffToken)}`);
       return;
     }
