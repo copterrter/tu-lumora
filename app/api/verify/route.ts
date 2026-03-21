@@ -277,7 +277,14 @@ export async function POST(request: Request) {
       .single();
 
     if (existingOrder) {
-      return NextResponse.json({ success: false, message: "สลิปนี้ถูกใช้งานไปแล้ว! (Duplicate Slip)" });
+      // ผู้ให้บริการบางครั้งอาจคืน transRef ซ้ำในคนละสลิป
+      // เลี่ยงการ reject ทันทีเพื่อลด false positive และส่งให้แอดมินตรวจมือแทน
+      await insertOrder('pending_manual_verify', undefined, slipImageUrl);
+      return NextResponse.json({
+        success: true,
+        manualFallback: true,
+        message: "ตรวจพบเลขอ้างอิงสลิปซ้ำ ระบบส่งให้แอดมินตรวจสอบด้วยมือแล้ว"
+      });
     }
 
     // Ignore checkError if it's just "not found" (PGRST116), but catch missing column errors
