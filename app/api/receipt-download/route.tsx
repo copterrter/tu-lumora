@@ -47,6 +47,11 @@ export async function GET(request: Request) {
   const totalNumber = Number(total) || 0;
   const totalQty = items.reduce((sum, item) => sum + (item.quantity || 0), 0);
   const unitPrice = totalQty > 0 ? Math.round(totalNumber / totalQty) : 0;
+  const safeFileName =
+    name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "") || "customer";
 
   return new ImageResponse(
     (
@@ -321,7 +326,7 @@ export async function GET(request: Request) {
     {
       width: 600,
       headers: {
-        'Content-Disposition': `attachment; filename="TU-LUMORA-Receipt-${name.replace(/\s+/g, '-')}.png"`,
+        'Content-Disposition': `attachment; filename="TU-LUMORA-Receipt-${safeFileName}.png"`,
         'Cache-Control': 'no-store',
       },
     }
