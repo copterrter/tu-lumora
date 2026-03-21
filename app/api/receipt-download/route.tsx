@@ -1,24 +1,79 @@
 import { ImageResponse } from 'next/og';
+import { createClient } from '@supabase/supabase-js';
 
 export const runtime = 'edge';
 
+type ReceiptItem = { style: string; size: string; quantity: number };
+
+function parseOrderItems(order: { product_name?: string; style?: string; size?: string; quantity?: number }): ReceiptItem[] {
+  const name = String(order.product_name || '').trim();
+  if (!name) {
+    const qty = Math.max(1, Number(order.quantity) || 1);
+    const styles = (order.style || 'regular').toString().split(',').map((s: string) => s.trim() || 'regular');
+    const sizes = (order.size || 'M').toString().split(',').map((s: string) => s.trim() || 'M');
+    const items: ReceiptItem[] = [];
+    for (let i = 0; i < qty; i++) {
+      items.push({ style: styles[i % styles.length], size: sizes[i % sizes.length], quantity: 1 });
+    }
+    return items;
+  }
+  const items: ReceiptItem[] = [];
+  const re = /(\d+)\s*x\s*([^(]+)\(([^)]+)\)/gi;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(name)) !== null) {
+    const qty = parseInt(m[1], 10) || 1;
+    const label = (m[2] || '').trim().toUpperCase();
+    const size = (m[3] || '').trim() || 'M';
+    const style = label.includes('CROP') ? 'crop' : 'regular';
+    items.push({ style, size, quantity: qty });
+  }
+  if (items.length === 0) {
+    const qty = Math.max(1, Number(order.quantity) || 1);
+    items.push({ style: 'regular', size: 'M', quantity: qty });
+  }
+  return items;
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const fullName = searchParams.get('name') || 'Customer';
-  const name = fullName.split(' ')[0];
-  const total = searchParams.get('total') || '0';
-  const itemsRaw = searchParams.get('items') || '';
+  let name = (searchParams.get('name') || 'Customer').split(' ')[0];
+  let total = searchParams.get('total') || '0';
+  let items: ReceiptItem[] = [];
 
-  const items = itemsRaw
-    ? itemsRaw.split(',').map((s) => {
-        const [style, size, qty] = s.split('|');
-        return {
-          style: style || '',
-          size: size || '',
-          quantity: parseInt(qty || '1'),
-        };
-      })
-    : [];
+  const orderId = searchParams.get('orderId');
+  if (orderId) {
+    try {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+      const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+      const supabase = createClient(supabaseUrl, supabaseKey);
+      const { data: order } = await supabase
+        .from('orders')
+        .select('firstName,total_amount,product_name,style,size,quantity')
+        .eq('id', orderId)
+        .single();
+      if (order) {
+        name = String(order.firstName || name).split(' ')[0];
+        total = String(order.total_amount ?? total);
+        items = parseOrderItems(order);
+      }
+    } catch {
+      // Fallback to query-string payload below
+    }
+  }
+
+  if (items.length === 0) {
+    const itemsRaw = searchParams.get('items') || '';
+    items = itemsRaw
+      ? itemsRaw.split(',').map((s) => {
+          const [style, size, qty] = s.split('|');
+          return {
+            style: style || '',
+            size: size || '',
+            quantity: parseInt(qty || '1', 10) || 1,
+          };
+        })
+      : [];
+  }
 
   const now = new Date();
   const dateStr = (() => {

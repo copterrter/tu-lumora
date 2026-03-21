@@ -314,6 +314,7 @@ export async function POST(request: Request) {
     if (formData.email) {
       const discount = originalTotal - finalTotal;
       await sendOrderReceipt({
+        orderId: orderId ?? undefined,
         email: formData.email,
         firstName: formData.firstName,
         lastName: formData.lastName,

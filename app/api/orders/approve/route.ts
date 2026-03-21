@@ -84,6 +84,7 @@ export async function POST(request: Request) {
       const originalTotal = totalQty * 329;
       const discount = Math.max(0, originalTotal - total);
       await sendOrderReceipt({
+        orderId: order.id,
         email: order.email,
         firstName: order.firstName || 'Customer',
         lastName: order.lastName || '',

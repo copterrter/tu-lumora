@@ -8,6 +8,7 @@ interface OrderItem {
 }
 
 interface SendEmailParams {
+  orderId?: string;
   email: string;
   firstName: string;
   lastName: string;
@@ -19,6 +20,7 @@ interface SendEmailParams {
 }
 
 export async function sendOrderReceipt({
+  orderId,
   email,
   firstName,
   items,
@@ -43,7 +45,9 @@ export async function sendOrderReceipt({
   ).trim();
   const BASE_URL = configuredBaseUrl.replace(/\/+$/, "");
   const itemsParam = (items || []).map((i: OrderItem) => `${i.style || 'regular'}|${i.size || 'M'}|${i.quantity || 1}`).join(',');
-  const downloadUrl = `${BASE_URL}/api/receipt-download?name=${encodeURIComponent(firstName || 'Customer')}&total=${total}&items=${encodeURIComponent(itemsParam)}`;
+  const downloadUrl = orderId
+    ? `${BASE_URL}/api/receipt-download?orderId=${encodeURIComponent(orderId)}`
+    : `${BASE_URL}/api/receipt-download?name=${encodeURIComponent(firstName || 'Customer')}&total=${total}&items=${encodeURIComponent(itemsParam)}`;
 
   const itemsHtml = (items || []).map((item: OrderItem) => {
     const title = item.style || item.title || 'T-SHIRT';
