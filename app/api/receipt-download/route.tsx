@@ -78,24 +78,14 @@ export async function GET(request: Request) {
   const now = new Date();
   const dateStr = (() => {
     try {
-      return new Intl.DateTimeFormat("th-TH", {
+      return new Intl.DateTimeFormat("en-GB", {
         year: "numeric",
         month: "long",
         day: "numeric",
         timeZone: "Asia/Bangkok",
       }).format(now);
     } catch {
-      try {
-        return new Intl.DateTimeFormat("en-GB", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-          timeZone: "Asia/Bangkok",
-        }).format(now);
-      } catch {
-        // Last resort for runtimes with limited Intl locale data
-        return now.toISOString().slice(0, 10);
-      }
+      return now.toISOString().slice(0, 10);
     }
   })();
 
