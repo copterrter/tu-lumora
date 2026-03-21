@@ -31,7 +31,8 @@ export async function sendOrderReceipt({
   // Initialize resend inside the function to ensure process.env is ready in all runtimes
   const resend = new Resend(process.env.RESEND_API_KEY);
 
-  const BASE_URL = 'https://www.tulumora.com';
+  const configuredBaseUrl = (process.env.APP_BASE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://www.tulumora.com').trim();
+  const BASE_URL = configuredBaseUrl.replace(/\/+$/, '');
   const itemsParam = (items || []).map((i: OrderItem) => `${i.style || 'regular'}|${i.size || 'M'}|${i.quantity || 1}`).join(',');
   const downloadUrl = `${BASE_URL}/api/receipt-download?name=${encodeURIComponent(firstName || 'Customer')}&total=${total}&items=${encodeURIComponent(itemsParam)}`;
 
